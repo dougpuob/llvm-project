@@ -42,7 +42,9 @@ OptionEnumMapping<
           {readability::IdentifierNamingCheck::CT_CamelSnakeCase,
            "Camel_Snake_Case"},
           {readability::IdentifierNamingCheck::CT_CamelSnakeBack,
-           "camel_Snake_Back"}};
+           "camel_Snake_Back"},
+           {readability::IdentifierNamingCheck::CT_HungarainNotion,
+           "szHungarainNotion"}};
   return llvm::makeArrayRef(Mapping);
 }
 
@@ -101,6 +103,7 @@ namespace readability {
     m(TypeAlias) \
     m(MacroDefinition) \
     m(ObjcIvar) \
+    m(HungarainNotion) \
 
 enum StyleKind {
 #define ENUMERATE(v) SK_ ## v,
@@ -198,7 +201,9 @@ static bool matchesStyle(StringRef Name,
   if (Name.startswith("_") || Name.endswith("_"))
     return false;
 
-  if (Style.Case && !Matchers[static_cast<size_t>(*Style.Case)].match(Name))
+  size_t MatcherIndex = static_cast<size_t>(*Style.Case);
+  auto MatcherResult = Matchers[MatcherIndex].match(Name);
+  if (Style.Case && !MatcherResult)
     return false;
 
   return true;
