@@ -103,7 +103,6 @@ namespace readability {
     m(TypeAlias) \
     m(MacroDefinition) \
     m(ObjcIvar) \
-    m(HungarainNotion) \
 
 enum StyleKind {
 #define ENUMERATE(v) SK_ ## v,
@@ -116,6 +115,40 @@ enum StyleKind {
 static StringRef const StyleNames[] = {
 #define STRINGIZE(v) #v,
   NAMING_KEYS(STRINGIZE)
+#undef STRINGIZE
+};
+
+#define HUNGARAIN_TYPES(m) \
+    m(char_array) \
+    m(char_cstr) \
+    m(char_cstr_ptr) \
+    m(wchar_t_cstr) \
+    m(wchar_t_array) \
+    m(wchar_t_cstr_ptr) \
+    m(size_t) \
+    m(int8_t) \
+    m(int16_t) \
+    m(int32_t) \
+    m(int64_t) \
+    m(uint8_t) \
+    m(uint16_t) \
+    m(uint32_t) \
+    m(uint64_t) \
+    m(char) \
+    m(_Bool) \
+    m(bool) \
+    m(wchar_t) \
+    m(signed_char) \
+    m(unsigned_char) \
+    m(short) \
+    m(long_long) \
+    m(float) \
+    m(double) \
+    m(unsigned_long_long) \
+
+static StringRef const HungarainTypes[] = {
+#define STRINGIZE(v) #v,
+  HUNGARAIN_TYPES(STRINGIZE)
 #undef STRINGIZE
 };
 
@@ -144,9 +177,19 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
 
     auto prefix = Options.get((Name + "Prefix").str(), "");
     auto postfix = Options.get((Name + "Suffix").str(), "");
+    auto maplist = Options.get((Name + "MapList").str(), "");
 
-    if (CaseOptional || !prefix.empty() || !postfix.empty()) {
-      NamingStyles.push_back(NamingStyle(CaseOptional, prefix, postfix));
+    if (CaseOptional || !prefix.empty() || !postfix.empty() || !maplist.empty()) {
+      NamingStyles.push_back(NamingStyle(CaseOptional, prefix, postfix, maplist));
+    } else {
+      NamingStyles.push_back(llvm::None);
+    }
+  }
+
+  for (auto const &Type : HungarainTypes) {
+    auto type = Options.get(("HungarainType-" + Type).str(), "");
+    if (!type.empty()) {
+      NamingStyles.push_back(NamingStyle(CT_HungarainNotion, "", "", type));
     } else {
       NamingStyles.push_back(llvm::None);
     }

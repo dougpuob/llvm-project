@@ -5,7 +5,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Ubuntu",
-            "program": "${workspaceFolder}/build/bin/clang-tidy",
+            "program": "${workspaceFolder}/build-debug/bin/clang-tidy",
             "args": ["../sample.cpp"],
             "cwd": "${workspaceFolder}",
             "stopOnEntry": false,
