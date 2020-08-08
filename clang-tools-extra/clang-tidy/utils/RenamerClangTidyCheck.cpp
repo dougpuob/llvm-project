@@ -111,7 +111,8 @@ void RenamerClangTidyCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
 }
 
 void RenamerClangTidyCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(type().bind("decl"), this);
+  //Finder->addMatcher(type().bind("decl"), this);
+  Finder->addMatcher(varDecl().bind("var"),this);
   Finder->addMatcher(namedDecl().bind("decl"), this);
   Finder->addMatcher(usingDecl().bind("using"), this);
   Finder->addMatcher(declRefExpr().bind("declRef"), this);
@@ -374,16 +375,23 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
     return;
   }
 
-  if (const auto *Decl = Result.Nodes.getNodeAs<TypeDecl>("decl")) {
-      // Fix using namespace declarations.
-      StringRef Name = Decl->getName();
-      StringRef Name1 = Decl->getName();
-  }
+  // if (const auto *Decl = Result.Nodes.getNodeAs<TypeDecl>("decl")) {
+  //     // Fix using namespace declarations.
+  //     StringRef Name = Decl->getName();
+  //     StringRef Name1 = Decl->getName();
+  // }
 
-  if (const auto *Decl = Result.Nodes.getNodeAs<Type>("decl")) {
-      // Fix using namespace declarations.
-      const char* szName = Decl->getTypeClassName();
-      const char* szName1 = Decl->getTypeClassName();
+  // if (const auto *Decl = Result.Nodes.getNodeAs<Type>("decl")) {
+  //     // Fix using namespace declarations.
+  //     const char* szName = Decl->getTypeClassName();
+  //     const char* szName1 = Decl->getTypeClassName();
+  // }
+
+  if (const auto *MatchedDecl = Result.Nodes.getNodeAs<VarDecl>("var")) {
+    auto MatchedType = MatchedDecl->getType();
+    auto MatchedIdentifier = MatchedType.getBaseTypeIdentifier();
+    auto Name = MatchedIdentifier->getNameStart();
+    auto VarType = MatchedIdentifier->getName();
   }
 
   if (const auto *Decl = Result.Nodes.getNodeAs<NamedDecl>("decl")) {
@@ -394,6 +402,16 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
 
     if (!Decl->getIdentifier() || Decl->getName().empty() || Decl->isImplicit())
       return;
+    
+    SourceLocation MyBeginLoc = Decl->getBeginLoc();
+    SourceLocation MyCurrLoc  = Decl->getLocation();
+    const char *szBegin       = Decl->getASTContext().getSourceManager().getCharacterData(MyBeginLoc);
+    const char *szCurr        = Decl->getASTContext().getSourceManager().getCharacterData(MyCurrLoc);
+    const intptr_t iPtrLen    = szCurr - szBegin;
+    
+    auto VarType = std::string(szBegin, iPtrLen);
+    
+
 
     const auto *Canonical = cast<NamedDecl>(Decl->getCanonicalDecl());
     if (Canonical != Decl) {
