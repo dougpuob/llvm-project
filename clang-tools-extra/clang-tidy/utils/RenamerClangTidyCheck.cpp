@@ -111,6 +111,7 @@ void RenamerClangTidyCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
 }
 
 void RenamerClangTidyCheck::registerMatchers(MatchFinder *Finder) {
+  Finder->addMatcher(type().bind("decl"), this);
   Finder->addMatcher(namedDecl().bind("decl"), this);
   Finder->addMatcher(usingDecl().bind("using"), this);
   Finder->addMatcher(declRefExpr().bind("declRef"), this);
@@ -371,6 +372,18 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
                  Result.SourceManager);
     }
     return;
+  }
+
+  if (const auto *Decl = Result.Nodes.getNodeAs<TypeDecl>("decl")) {
+      // Fix using namespace declarations.
+      StringRef Name = Decl->getName();
+      StringRef Name1 = Decl->getName();
+  }
+
+  if (const auto *Decl = Result.Nodes.getNodeAs<Type>("decl")) {
+      // Fix using namespace declarations.
+      const char* szName = Decl->getTypeClassName();
+      const char* szName1 = Decl->getTypeClassName();
   }
 
   if (const auto *Decl = Result.Nodes.getNodeAs<NamedDecl>("decl")) {
