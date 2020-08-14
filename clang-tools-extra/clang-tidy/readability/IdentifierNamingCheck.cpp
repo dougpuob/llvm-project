@@ -196,9 +196,34 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
   }
 }
 
-static const llvm::StringMap<std::string>& getHungarainNotionTable() {
-  const static llvm::StringMap<std::string> HungarainNotionTable = {
-        {"",          ""}, 
+// static const llvm::StringMap<std::string>& getHungarainNotionTable() {
+//   const static llvm::StringMap<std::string> HungarainNotionTable = {
+//         {"",          ""}, 
+//         {"int8_t",    "i8"},     
+//         {"int16_t",   "i16"},
+//         {"int32_t",   "i32"},   
+//         {"int64_t",   "i64"},
+//         {"uint8_t",   "u8"},   
+//         {"uint16_t",  "u16"},
+//         {"uint32_t",  "u32"}, 
+//         {"uint64_t",  "u64"},
+//         {"float",     "f"},
+//         {"double",    "d"},
+//         {"char",      "c"},
+//         {"bool",      "b"},
+//         {"_Bool",     "b"},
+//         {"int",       "i"},
+//         {"wchar_t",   "wc"},
+//         {"short",     "s"},
+//         {"signed",    "s"},
+//         {"long",      "long"},
+//         {"long long", "ll"},
+//         {"ulong",     "ul"}};
+//       return HungarainNotionTable;
+// }
+
+static const std::string getHungarationNotionTypePrefix(const std::string& TypeName) {
+  const static llvm::StringMap<StringRef> HungarainNotionTable = {
         {"int8_t",    "i8"},     
         {"int16_t",   "i16"},
         {"int32_t",   "i32"},   
@@ -218,17 +243,19 @@ static const llvm::StringMap<std::string>& getHungarainNotionTable() {
         {"signed",    "s"},
         {"long",      "long"},
         {"long long", "ll"},
-        {"ulong",     "ul"}};
-      return HungarainNotionTable;
-}
-
-static bool matchHungarationNotion(const std::string& TypeName,
-                                              std::string& ValName) {
-    for (auto &Type : getHungarainNotionTable())
+        {"ulong",     "ul"},
+        {"char*",     "sz"},
+        {"wchar_t*",  "wsz"}};
+  
+    for (auto &Type : HungarainNotionTable)
     {
-      std::string asdf = "";
+      const auto& Key = Type.getKey();
+      if (TypeName == Key) {
+        const auto Val = Type.getValue().str();
+        return Val;
+      }
     }
-    return false;
+    return "";
 }
 
 IdentifierNamingCheck::~IdentifierNamingCheck() = default;
@@ -252,8 +279,10 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
   Options.store(Opts, "IgnoreMainLikeFunctions", IgnoreMainLikeFunctions);
 }
 
-static bool matchesStyle(StringRef Name,
-                         IdentifierNamingCheck::NamingStyle Style) {
+static bool matchesStyle(StringRef Type,
+                         StringRef Name,                         
+                         IdentifierNamingCheck::NamingStyle Style,
+                         const NamedDecl* Decl) {
   static llvm::Regex Matchers[] = {
       llvm::Regex("^.*$"),
       llvm::Regex("^[a-z][a-z0-9_]*$"),
@@ -262,7 +291,7 @@ static bool matchesStyle(StringRef Name,
       llvm::Regex("^[A-Z][a-zA-Z0-9]*$"),
       llvm::Regex("^[A-Z]([a-z0-9]*(_[A-Z])?)*"),
       llvm::Regex("^[a-z]([a-z0-9]*(_[A-Z])?)*"),
-      llvm::Regex("^[a-zA-Z0-9]*$"),
+      llvm::Regex("^[A-Z][a-zA-Z0-9]*$"),
   };
 
   if (Name.startswith(Style.Prefix))
@@ -280,16 +309,27 @@ static bool matchesStyle(StringRef Name,
   if (Name.startswith("_") || Name.endswith("_"))
     return false;
 
-  std::string TypeName = "uint8_t";
-  std::string ValueName = "u8Value";
-  bool bIsHN = matchHungarationNotion(TypeName, ValueName);
+  if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarainNotion) {
+    // const auto TypeName = "uint8_t";
+    // const auto ValueName = "u8Value";
+    const auto TypePrefix = getHungarationNotionTypePrefix(Type.str());
+    if (Name.startswith(TypePrefix)) {
+      Name.drop_front(TypePrefix.size());
+    }
+  }
 
   size_t MatcherIndex = static_cast<size_t>(*Style.Case);
   auto MatcherResult = Matchers[MatcherIndex].match(Name);
+
   if (Style.Case && !MatcherResult)
     return false;
 
   return true;
+}
+
+static bool matchesStyle(StringRef Name,                         
+                         IdentifierNamingCheck::NamingStyle Style) {
+  return matchesStyle("", Name, Style, NULL);
 }
 
 static std::string fixupWithCase(StringRef Name,
@@ -753,7 +793,7 @@ IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
 
   const NamingStyle &Style = *NamingStyles[SK];
   StringRef Name = Decl->getName();
-  if (matchesStyle(Name, Style))
+  if (matchesStyle(TypeName, Name, Style, Decl))
     return None;
 
   std::string KindName = fixupWithCase(StyleNames[SK], CT_LowerCase);

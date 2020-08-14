@@ -385,16 +385,6 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
     if (!Decl->getIdentifier() || Decl->getName().empty() || Decl->isImplicit())
       return;
     
-    SourceLocation MyBeginLoc = Decl->getBeginLoc();
-    SourceLocation MyCurrLoc  = Decl->getLocation();
-    const char *szBegin       = Decl->getASTContext().getSourceManager().getCharacterData(MyBeginLoc);
-    const char *szCurr        = Decl->getASTContext().getSourceManager().getCharacterData(MyCurrLoc);
-    const intptr_t iPtrLen    = szCurr - szBegin;
-    
-    auto VarType = std::string(szBegin, iPtrLen);
-    
-
-
     const auto *Canonical = cast<NamedDecl>(Decl->getCanonicalDecl());
     if (Canonical != Decl) {
       addUsage(Canonical, Decl->getLocation(), Result.SourceManager);
@@ -409,13 +399,13 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       const char *szCurr = SrcMgr.getCharacterData(Decl->getLocation());
       const intptr_t iPtrLen = szCurr - szBegin;   
       if (iPtrLen > 0) {
-        std::string Type = std::string(szBegin, iPtrLen);
+        auto Type = std::string(szBegin, iPtrLen);
         const StringRef Qualifiers[] = {"const", "volatile", "restrict", "__unaligned","_Atomic"};
         for (const auto& Q:Qualifiers)
         {
           std::size_t nPos = Type.find(Q);;
           if (nPos != std::string::npos) {
-            Type.replace(nPos, Type.length(), "");
+            Type.replace(nPos, Q.size(), "");
             break;
           }
         }
@@ -425,7 +415,7 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
 
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
         if (const auto *Typedef = TypePtr->getAs<TypedefType>()){
-          auto Name = Typedef->getDecl()->getPreviousDecl()->getNameAsString();;
+          auto Name = Typedef->getDecl()->getPreviousDecl()->getNameAsString();
           addUsage(Typedef->getDecl(), Value->getSourceRange(),
                    Result.SourceManager);
         }
