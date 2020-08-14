@@ -124,7 +124,7 @@ protected:
   /// Overridden by derived classes, returns information about if and how a Decl
   /// failed the check. A 'None' result means the Decl did not fail the check.
   virtual llvm::Optional<FailureInfo>
-  GetDeclFailureInfo(const NamedDecl *Decl, const SourceManager &SM) const = 0;
+  GetDeclFailureInfo(const NamedDecl *Decl, const StringRef& TypeName, const SourceManager &SM) const = 0;
 
   /// Overridden by derived classes, returns information about if and how a
   /// macro failed the check. A 'None' result means the macro did not fail the

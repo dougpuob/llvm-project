@@ -35,6 +35,8 @@ public:
   IdentifierNamingCheck(StringRef Name, ClangTidyContext *Context);
   ~IdentifierNamingCheck();
 
+  const llvm::StringMap<std::string>& getHungarainNotionTable();
+  bool matchHungarationNotion(const std::string& TypeName, std::string& ValName);
   void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
   enum CaseType {
@@ -68,6 +70,7 @@ public:
 private:
   llvm::Optional<FailureInfo>
   GetDeclFailureInfo(const NamedDecl *Decl,
+                     const StringRef& TypeName,
                      const SourceManager &SM) const override;
   llvm::Optional<FailureInfo>
   GetMacroFailureInfo(const Token &MacroNameTok,

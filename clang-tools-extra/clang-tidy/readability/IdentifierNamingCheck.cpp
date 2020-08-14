@@ -196,6 +196,41 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
   }
 }
 
+static const llvm::StringMap<std::string>& getHungarainNotionTable() {
+  const static llvm::StringMap<std::string> HungarainNotionTable = {
+        {"",          ""}, 
+        {"int8_t",    "i8"},     
+        {"int16_t",   "i16"},
+        {"int32_t",   "i32"},   
+        {"int64_t",   "i64"},
+        {"uint8_t",   "u8"},   
+        {"uint16_t",  "u16"},
+        {"uint32_t",  "u32"}, 
+        {"uint64_t",  "u64"},
+        {"float",     "f"},
+        {"double",    "d"},
+        {"char",      "c"},
+        {"bool",      "b"},
+        {"_Bool",     "b"},
+        {"int",       "i"},
+        {"wchar_t",   "wc"},
+        {"short",     "s"},
+        {"signed",    "s"},
+        {"long",      "long"},
+        {"long long", "ll"},
+        {"ulong",     "ul"}};
+      return HungarainNotionTable;
+}
+
+static bool matchHungarationNotion(const std::string& TypeName,
+                                              std::string& ValName) {
+    for (auto &Type : getHungarainNotionTable())
+    {
+      std::string asdf = "";
+    }
+    return false;
+}
+
 IdentifierNamingCheck::~IdentifierNamingCheck() = default;
 
 void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
@@ -227,6 +262,7 @@ static bool matchesStyle(StringRef Name,
       llvm::Regex("^[A-Z][a-zA-Z0-9]*$"),
       llvm::Regex("^[A-Z]([a-z0-9]*(_[A-Z])?)*"),
       llvm::Regex("^[a-z]([a-z0-9]*(_[A-Z])?)*"),
+      llvm::Regex("^[a-zA-Z0-9]*$"),
   };
 
   if (Name.startswith(Style.Prefix))
@@ -243,6 +279,10 @@ static bool matchesStyle(StringRef Name,
   // in the prefix and suffix.
   if (Name.startswith("_") || Name.endswith("_"))
     return false;
+
+  std::string TypeName = "uint8_t";
+  std::string ValueName = "u8Value";
+  bool bIsHN = matchHungarationNotion(TypeName, ValueName);
 
   size_t MatcherIndex = static_cast<size_t>(*Style.Case);
   auto MatcherResult = Matchers[MatcherIndex].match(Name);
@@ -702,6 +742,7 @@ static StyleKind findStyleKind(
 
 llvm::Optional<RenamerClangTidyCheck::FailureInfo>
 IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
+                                          const StringRef& TypeName,
                                           const SourceManager &SM) const {
   StyleKind SK = findStyleKind(Decl, NamingStyles, IgnoreMainLikeFunctions);
   if (SK == SK_Invalid)

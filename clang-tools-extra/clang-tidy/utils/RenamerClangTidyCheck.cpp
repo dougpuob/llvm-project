@@ -13,6 +13,7 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Lex/PPCallbacks.h"
 #include "clang/Lex/Preprocessor.h"
+#include "clang/Sema/DeclSpec.h"
 #include "llvm/ADT/DenseMapInfo.h"
 #include "llvm/ADT/PointerIntPair.h"
 
@@ -111,8 +112,7 @@ void RenamerClangTidyCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
 }
 
 void RenamerClangTidyCheck::registerMatchers(MatchFinder *Finder) {
-  //Finder->addMatcher(type().bind("decl"), this);
-  Finder->addMatcher(varDecl().bind("var"),this);
+  Finder->addMatcher(type().bind("decl"), this);
   Finder->addMatcher(namedDecl().bind("decl"), this);
   Finder->addMatcher(usingDecl().bind("using"), this);
   Finder->addMatcher(declRefExpr().bind("declRef"), this);
@@ -375,24 +375,6 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
     return;
   }
 
-  // if (const auto *Decl = Result.Nodes.getNodeAs<TypeDecl>("decl")) {
-  //     // Fix using namespace declarations.
-  //     StringRef Name = Decl->getName();
-  //     StringRef Name1 = Decl->getName();
-  // }
-
-  // if (const auto *Decl = Result.Nodes.getNodeAs<Type>("decl")) {
-  //     // Fix using namespace declarations.
-  //     const char* szName = Decl->getTypeClassName();
-  //     const char* szName1 = Decl->getTypeClassName();
-  // }
-
-  if (const auto *MatchedDecl = Result.Nodes.getNodeAs<VarDecl>("var")) {
-    auto MatchedType = MatchedDecl->getType();
-    auto MatchedIdentifier = MatchedType.getBaseTypeIdentifier();
-    auto Name = MatchedIdentifier->getNameStart();
-    auto VarType = MatchedIdentifier->getName();
-  }
 
   if (const auto *Decl = Result.Nodes.getNodeAs<NamedDecl>("decl")) {
     // Fix using namespace declarations.
@@ -420,11 +402,33 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
     }
 
     // Fix type aliases in value declarations.
+    StringRef TypeName;
     if (const auto *Value = Result.Nodes.getNodeAs<ValueDecl>("decl")) {
+      const auto& SrcMgr = Decl->getASTContext().getSourceManager();
+      const char *szBegin = SrcMgr.getCharacterData(Decl->getBeginLoc());
+      const char *szCurr = SrcMgr.getCharacterData(Decl->getLocation());
+      const intptr_t iPtrLen = szCurr - szBegin;   
+      if (iPtrLen > 0) {
+        std::string Type = std::string(szBegin, iPtrLen);
+        const StringRef Qualifiers[] = {"const", "volatile", "restrict", "__unaligned","_Atomic"};
+        for (const auto& Q:Qualifiers)
+        {
+          std::size_t nPos = Type.find(Q);;
+          if (nPos != std::string::npos) {
+            Type.replace(nPos, Type.length(), "");
+            break;
+          }
+        }
+        TypeName = Type;
+        TypeName = TypeName.trim();
+      }
+
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
-        if (const auto *Typedef = TypePtr->getAs<TypedefType>())
+        if (const auto *Typedef = TypePtr->getAs<TypedefType>()){
+          auto Name = Typedef->getDecl()->getPreviousDecl()->getNameAsString();;
           addUsage(Typedef->getDecl(), Value->getSourceRange(),
                    Result.SourceManager);
+        }
       }
     }
 
@@ -448,7 +452,7 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       return;
 
     Optional<FailureInfo> MaybeFailure =
-        GetDeclFailureInfo(Decl, *Result.SourceManager);
+        GetDeclFailureInfo(Decl, TypeName, *Result.SourceManager);
     if (!MaybeFailure)
       return;
     FailureInfo &Info = *MaybeFailure;
