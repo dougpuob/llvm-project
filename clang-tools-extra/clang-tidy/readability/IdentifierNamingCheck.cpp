@@ -18,6 +18,9 @@
 #include "llvm/Support/Format.h"
 #include "llvm/Support/Regex.h"
 
+#include <regex>
+
+
 #define DEBUG_TYPE "clang-tidy"
 
 // FixItHint
@@ -223,6 +226,7 @@ static const std::string getHungarationNotionTypePrefix(const std::string& TypeN
   std::string ClonedTypeName = TypeName;
   remove_if(ClonedTypeName.begin(), ClonedTypeName.end(), isspace);  
     
+  // Handle null string
   std::string PrefixStr;  
   if (const auto *TD = dyn_cast<ValueDecl>(Decl)) {
     auto QT = TD->getType();
@@ -230,43 +234,70 @@ static const std::string getHungarationNotionTypePrefix(const std::string& TypeN
       // Null string with pointer.
       const static llvm::StringMap<StringRef> NullString = {
         {"char*",     "sz"},
-        {"wchar_t*",  "wsz"},
-        };
+        {"wchar_t*",  "wsz"}};
       for (auto &Type : NullString) {
         const auto& Key = Type.getKey();
-        if (ClonedTypeName == Key) {
+        if (ClonedTypeName.find(Key.str()) == 0) {
           PrefixStr = Type.getValue().str();
-          ClonedTypeName = ClonedTypeName.substr(PrefixStr.length(), ClonedTypeName.length() - ClonedTypeName.length());
+          ClonedTypeName = ClonedTypeName.substr(Key.size(), ClonedTypeName.size() - Key.size());
+          break;
         }
       }      
     } // Null string with array.  
     else if (QT->isArrayType()) {
     const static llvm::StringMap<StringRef> NullString = {
         {"char",     "sz"},
-        {"wchar_t",  "wsz"},
-        };
+        {"wchar_t",  "wsz"}};
       for (auto &Type : NullString) {
         const auto& Key = Type.getKey();
-        if (ClonedTypeName == Key) {
+        if (ClonedTypeName.find(Key.str()) == 0) {
           PrefixStr = Type.getValue().str();
-          ClonedTypeName = ClonedTypeName.substr(PrefixStr.length(), ClonedTypeName.length() - ClonedTypeName.length());
+          ClonedTypeName = ClonedTypeName.substr(Key.size(), ClonedTypeName.size() - Key.size());
+          break;
         }
       }  
     }
   }
 
-  
+  // Handle pointers
+  size_t nPtrCount = [&](std::string TypeName)->size_t { 
+      size_t nPos = TypeName.find('*');
+      size_t nCnt = 0;
+      for(nPos; nPos < TypeName.length(); nPos++, nCnt++) {
+          if ('*' != TypeName[nPos])
+            break;
+      }
+      return nCnt;
+  }(ClonedTypeName);
+  if (nPtrCount > 0) {
+    ClonedTypeName = [&](std::string str, const std::string & from, const std::string & to) {
+		size_t start_pos = 0;
+		while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+			str.replace(start_pos, from.length(), to);
+			start_pos += to.length();
+		}
+		return str;
+	}(ClonedTypeName, "*", "");
+  }
 
-  printf("TypeName=%s\n", TypeName.c_str());
+  //printf("TypeName=%s\n", ClonedTypeName.c_str());
   for (auto &Type : HungarainNotionTable)
   {
     const auto& Key = Type.getKey();
-    if (TypeName == Key) {
-      const auto Val = Type.getValue().str();
-      return Val;
+    if (ClonedTypeName == Key) {
+      PrefixStr = Type.getValue().str();
+      break;
     }
-  }
-  return "";
+  }  
+
+  if (nPtrCount > 0) {
+      for(size_t nIdx = 0; nIdx < nPtrCount; nIdx++) {
+        PrefixStr.insert(PrefixStr.begin(), 'p');
+      }
+    //ClonedTypeName = ClonedTypeName.substr(0, ClonedTypeName.length() - nPtrCount);
+  }  
+
+  return PrefixStr;
 }
 
 IdentifierNamingCheck::~IdentifierNamingCheck() = default;
@@ -321,12 +352,11 @@ static bool matchesStyle(StringRef Type,
     return false;
 
   if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarainNotion) {
-    // const auto TypeName = "uint8_t";
-    // const auto ValueName = "u8Value";
     const auto TypePrefix = getHungarationNotionTypePrefix(Type.str(),Decl);
-    if (TypePrefix.length() > 0 && Name.startswith(TypePrefix)) {
-      size_t nLen = TypePrefix.size();
-      Name = Name.drop_front(nLen);
+    if (TypePrefix.length() > 0) {
+      if (!Name.startswith(TypePrefix))
+          return false;
+      Name = Name.drop_front(TypePrefix.size());
     }
   }
 

@@ -399,18 +399,17 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       const char *szCurr = SrcMgr.getCharacterData(Decl->getLocation());
       const intptr_t iPtrLen = szCurr - szBegin;   
       if (iPtrLen > 0) {
-        auto Type = std::string(szBegin, iPtrLen);
+        StringRef Type(szBegin, iPtrLen);
         const StringRef Qualifiers[] = {"const", "volatile", "restrict", "__unaligned","_Atomic"};
         for (const auto& Q:Qualifiers)
         {
-          std::size_t nPos = Type.find(Q);;
-          if (nPos != std::string::npos) {
-            Type.replace(nPos, Q.size(), "");
+          std::size_t nPos = Type.find(Q);          
+          if (nPos != StringRef::npos) {
+            Type = Type.substr(nPos, Type.size() - nPos);
             break;
           }
         }
-        TypeName = Type;
-        TypeName = TypeName.trim();
+        TypeName = Type.trim();
       }
 
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
