@@ -35,7 +35,7 @@ public:
   IdentifierNamingCheck(StringRef Name, ClangTidyContext *Context);
   ~IdentifierNamingCheck();
 
-  static const std::string getHungarationNotionTypePrefix(const std::string& TypeName);
+  static const std::string getHungarationNotionTypePrefix(const std::string& TypeName,const NamedDecl* Decl);
   void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
   enum CaseType {

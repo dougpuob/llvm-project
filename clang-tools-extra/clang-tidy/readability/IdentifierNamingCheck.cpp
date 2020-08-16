@@ -196,33 +196,7 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
   }
 }
 
-// static const llvm::StringMap<std::string>& getHungarainNotionTable() {
-//   const static llvm::StringMap<std::string> HungarainNotionTable = {
-//         {"",          ""}, 
-//         {"int8_t",    "i8"},     
-//         {"int16_t",   "i16"},
-//         {"int32_t",   "i32"},   
-//         {"int64_t",   "i64"},
-//         {"uint8_t",   "u8"},   
-//         {"uint16_t",  "u16"},
-//         {"uint32_t",  "u32"}, 
-//         {"uint64_t",  "u64"},
-//         {"float",     "f"},
-//         {"double",    "d"},
-//         {"char",      "c"},
-//         {"bool",      "b"},
-//         {"_Bool",     "b"},
-//         {"int",       "i"},
-//         {"wchar_t",   "wc"},
-//         {"short",     "s"},
-//         {"signed",    "s"},
-//         {"long",      "long"},
-//         {"long long", "ll"},
-//         {"ulong",     "ul"}};
-//       return HungarainNotionTable;
-// }
-
-static const std::string getHungarationNotionTypePrefix(const std::string& TypeName) {
+static const std::string getHungarationNotionTypePrefix(const std::string& TypeName,const NamedDecl* Decl) {
   const static llvm::StringMap<StringRef> HungarainNotionTable = {
         {"int8_t",    "i8"},     
         {"int16_t",   "i16"},
@@ -238,24 +212,61 @@ static const std::string getHungarationNotionTypePrefix(const std::string& TypeN
         {"bool",      "b"},
         {"_Bool",     "b"},
         {"int",       "i"},
+        {"size_t",    "n"},
         {"wchar_t",   "wc"},
         {"short",     "s"},
         {"signed",    "s"},
         {"long",      "long"},
         {"long long", "ll"},
-        {"ulong",     "ul"},
+        {"ulong",     "ul"}};
+
+  std::string ClonedTypeName = TypeName;
+  remove_if(ClonedTypeName.begin(), ClonedTypeName.end(), isspace);  
+    
+  std::string PrefixStr;  
+  if (const auto *TD = dyn_cast<ValueDecl>(Decl)) {
+    auto QT = TD->getType();
+    if (QT->isPointerType()) {
+      // Null string with pointer.
+      const static llvm::StringMap<StringRef> NullString = {
         {"char*",     "sz"},
-        {"wchar_t*",  "wsz"}};
-  
-    for (auto &Type : HungarainNotionTable)
-    {
-      const auto& Key = Type.getKey();
-      if (TypeName == Key) {
-        const auto Val = Type.getValue().str();
-        return Val;
-      }
+        {"wchar_t*",  "wsz"},
+        };
+      for (auto &Type : NullString) {
+        const auto& Key = Type.getKey();
+        if (ClonedTypeName == Key) {
+          PrefixStr = Type.getValue().str();
+          ClonedTypeName = ClonedTypeName.substr(PrefixStr.length(), ClonedTypeName.length() - ClonedTypeName.length());
+        }
+      }      
+    } // Null string with array.  
+    else if (QT->isArrayType()) {
+    const static llvm::StringMap<StringRef> NullString = {
+        {"char",     "sz"},
+        {"wchar_t",  "wsz"},
+        };
+      for (auto &Type : NullString) {
+        const auto& Key = Type.getKey();
+        if (ClonedTypeName == Key) {
+          PrefixStr = Type.getValue().str();
+          ClonedTypeName = ClonedTypeName.substr(PrefixStr.length(), ClonedTypeName.length() - ClonedTypeName.length());
+        }
+      }  
     }
-    return "";
+  }
+
+  
+
+  printf("TypeName=%s\n", TypeName.c_str());
+  for (auto &Type : HungarainNotionTable)
+  {
+    const auto& Key = Type.getKey();
+    if (TypeName == Key) {
+      const auto Val = Type.getValue().str();
+      return Val;
+    }
+  }
+  return "";
 }
 
 IdentifierNamingCheck::~IdentifierNamingCheck() = default;
@@ -312,9 +323,10 @@ static bool matchesStyle(StringRef Type,
   if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarainNotion) {
     // const auto TypeName = "uint8_t";
     // const auto ValueName = "u8Value";
-    const auto TypePrefix = getHungarationNotionTypePrefix(Type.str());
-    if (Name.startswith(TypePrefix)) {
-      Name.drop_front(TypePrefix.size());
+    const auto TypePrefix = getHungarationNotionTypePrefix(Type.str(),Decl);
+    if (TypePrefix.length() > 0 && Name.startswith(TypePrefix)) {
+      size_t nLen = TypePrefix.size();
+      Name = Name.drop_front(nLen);
     }
   }
 

@@ -415,7 +415,6 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
 
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
         if (const auto *Typedef = TypePtr->getAs<TypedefType>()){
-          auto Name = Typedef->getDecl()->getPreviousDecl()->getNameAsString();
           addUsage(Typedef->getDecl(), Value->getSourceRange(),
                    Result.SourceManager);
         }
