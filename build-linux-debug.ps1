@@ -12,7 +12,7 @@ cmake -DLLVM_ENABLE_ABI_BREAKING_CHECKS=0       `
       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"  `
       -DCMAKE_BUILD_TYPE=Debug                  `
       -DCMAKE_CXX_STANDARD=17                   `
-      -DCMAKE_VERBOSE_MAKEFILE=ON               `
+      -DCMAKE_VERBOSE_MAKEFILE=OFF              `
       -G "Ninja"                                `
       ..\llvm                                   `
       | tee ..\build-cmake-linux-clang-config.log
