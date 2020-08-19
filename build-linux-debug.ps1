@@ -8,6 +8,7 @@ cmake -DLLVM_ENABLE_ABI_BREAKING_CHECKS=0       `
       -DLLVM_BUILD_TOOLS=ON                     `
       -DLLVM_BUILD_EXAMPLES=ON                  `
       -DLLVM_INCLUDE_TESTS=ON                   `
+      -DLLVM_USE_LINKER=lld                     `
       -DLLVM_TARGETS_TO_BUILD="X86"             `
       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"  `
       -DCMAKE_BUILD_TYPE=Debug                  `
