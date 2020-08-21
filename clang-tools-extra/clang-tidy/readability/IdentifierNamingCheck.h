@@ -35,6 +35,7 @@ public:
   IdentifierNamingCheck(StringRef Name, ClangTidyContext *Context);
   ~IdentifierNamingCheck();
 
+  static const std::string getHungarationNotionTypePrefix(const std::string& TypeName,const NamedDecl* Decl);
   void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
   enum CaseType {
@@ -44,7 +45,8 @@ public:
     CT_UpperCase,
     CT_CamelCase,
     CT_CamelSnakeCase,
-    CT_CamelSnakeBack
+    CT_CamelSnakeBack,
+    CT_HungarianNotion
   };
 
   struct NamingStyle {
@@ -54,14 +56,20 @@ public:
                 const std::string &Suffix)
         : Case(Case), Prefix(Prefix), Suffix(Suffix) {}
 
+    NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
+                const std::string &Suffix, const std::string &HungarainNotion)
+        : Case(Case), Prefix(Prefix), Suffix(Suffix) , HungarainNotion(HungarainNotion){}
+
     llvm::Optional<CaseType> Case;
     std::string Prefix;
     std::string Suffix;
+    std::string HungarainNotion;
   };
 
 private:
   llvm::Optional<FailureInfo>
-  GetDeclFailureInfo(const NamedDecl *Decl,
+  GetDeclFailureInfo(const StringRef& Type, 
+                     const NamedDecl *Decl,
                      const SourceManager &SM) const override;
   llvm::Optional<FailureInfo>
   GetMacroFailureInfo(const Token &MacroNameTok,
