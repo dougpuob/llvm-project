@@ -37,21 +37,14 @@ OptionEnumMapping<
   static constexpr std::pair<readability::IdentifierNamingCheck::CaseType,
                              StringRef>
       Mapping[] = {
-          {readability::IdentifierNamingCheck::CT_AnyCase, "aNy_CasE"},
-          {readability::IdentifierNamingCheck::CT_LowerCase, "lower_case"},
-          {readability::IdentifierNamingCheck::CT_UpperCase, "UPPER_CASE"},
-          {readability::IdentifierNamingCheck::CT_CamelBack, "camelBack"},
-          {readability::IdentifierNamingCheck::CT_CamelCase, "CamelCase"},
-          {readability::IdentifierNamingCheck::CT_CamelSnakeCase,
-           "Camel_Snake_Case"},
-          {readability::IdentifierNamingCheck::CT_CamelSnakeBack,
-           "camel_Snake_Back"},
-<<<<<<< HEAD
-          {readability::IdentifierNamingCheck::CT_HungarainNotion,
-=======
-           {readability::IdentifierNamingCheck::CT_HungarainNotion,
->>>>>>> Update
-           "szHungarainNotion"}};
+          {readability::IdentifierNamingCheck::CT_AnyCase,          "aNy_CasE"},
+          {readability::IdentifierNamingCheck::CT_LowerCase,        "lower_case"},
+          {readability::IdentifierNamingCheck::CT_UpperCase,        "UPPER_CASE"},
+          {readability::IdentifierNamingCheck::CT_CamelBack,        "camelBack"},
+          {readability::IdentifierNamingCheck::CT_CamelCase,        "CamelCase"},
+          {readability::IdentifierNamingCheck::CT_CamelSnakeCase,   "Camel_Snake_Case"},
+          {readability::IdentifierNamingCheck::CT_CamelSnakeBack,   "camel_Snake_Back"},
+          {readability::IdentifierNamingCheck::CT_HungarainNotion,  "szHungarainNotion"}};
   return llvm::makeArrayRef(Mapping);
 }
 
