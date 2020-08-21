@@ -42,7 +42,9 @@ OptionEnumMapping<
           {readability::IdentifierNamingCheck::CT_CamelSnakeCase,
            "Camel_Snake_Case"},
           {readability::IdentifierNamingCheck::CT_CamelSnakeBack,
-           "camel_Snake_Back"}};
+           "camel_Snake_Back"},
+          {readability::IdentifierNamingCheck::CT_HungarainNotion,
+           "szHungarainNotion"}};
   return llvm::makeArrayRef(Mapping);
 }
 
