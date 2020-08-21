@@ -18,6 +18,9 @@
 #include "llvm/Support/Format.h"
 #include "llvm/Support/Regex.h"
 
+#include <regex>
+
+
 #define DEBUG_TYPE "clang-tidy"
 
 // FixItHint
@@ -43,7 +46,11 @@ OptionEnumMapping<
            "Camel_Snake_Case"},
           {readability::IdentifierNamingCheck::CT_CamelSnakeBack,
            "camel_Snake_Back"},
+<<<<<<< HEAD
           {readability::IdentifierNamingCheck::CT_HungarainNotion,
+=======
+           {readability::IdentifierNamingCheck::CT_HungarainNotion,
+>>>>>>> Update
            "szHungarainNotion"}};
   return llvm::makeArrayRef(Mapping);
 }
@@ -118,6 +125,40 @@ static StringRef const StyleNames[] = {
 #undef STRINGIZE
 };
 
+#define HUNGARAIN_TYPES(m) \
+    m(char_array) \
+    m(char_cstr) \
+    m(char_cstr_ptr) \
+    m(wchar_t_cstr) \
+    m(wchar_t_array) \
+    m(wchar_t_cstr_ptr) \
+    m(size_t) \
+    m(int8_t) \
+    m(int16_t) \
+    m(int32_t) \
+    m(int64_t) \
+    m(uint8_t) \
+    m(uint16_t) \
+    m(uint32_t) \
+    m(uint64_t) \
+    m(char) \
+    m(_Bool) \
+    m(bool) \
+    m(wchar_t) \
+    m(signed_char) \
+    m(unsigned_char) \
+    m(short) \
+    m(long_long) \
+    m(float) \
+    m(double) \
+    m(unsigned_long_long) \
+
+static StringRef const HungarainTypes[] = {
+#define STRINGIZE(v) #v,
+  HUNGARAIN_TYPES(STRINGIZE)
+#undef STRINGIZE
+};
+
 #undef NAMING_KEYS
 // clang-format on
 
@@ -152,6 +193,105 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
   }
 }
 
+static const std::string getHungarationNotionTypePrefix(const std::string& TypeName,const NamedDecl* Decl) {
+  const static llvm::StringMap<StringRef> HungarainNotionTable = {
+        {"int8_t",    "i8"},     
+        {"int16_t",   "i16"},
+        {"int32_t",   "i32"},   
+        {"int64_t",   "i64"},
+        {"uint8_t",   "u8"},   
+        {"uint16_t",  "u16"},
+        {"uint32_t",  "u32"}, 
+        {"uint64_t",  "u64"},
+        {"float",     "f"},
+        {"double",    "d"},
+        {"char",      "c"},
+        {"bool",      "b"},
+        {"_Bool",     "b"},
+        {"int",       "i"},
+        {"size_t",    "n"},
+        {"wchar_t",   "wc"},
+        {"short",     "s"},
+        {"signed",    "s"},
+        {"long",      "long"},
+        {"long long", "ll"},
+        {"ulong",     "ul"}};
+
+  std::string ClonedTypeName = TypeName;
+  remove_if(ClonedTypeName.begin(), ClonedTypeName.end(), isspace);  
+    
+  // Handle null string
+  std::string PrefixStr;  
+  if (const auto *TD = dyn_cast<ValueDecl>(Decl)) {
+    auto QT = TD->getType();
+    if (QT->isPointerType()) {
+      // Null string with pointer.
+      const static llvm::StringMap<StringRef> NullString = {
+        {"char*",     "sz"},
+        {"wchar_t*",  "wsz"}};
+      for (auto &Type : NullString) {
+        const auto& Key = Type.getKey();
+        if (ClonedTypeName.find(Key.str()) == 0) {
+          PrefixStr = Type.getValue().str();
+          ClonedTypeName = ClonedTypeName.substr(Key.size(), ClonedTypeName.size() - Key.size());
+          break;
+        }
+      }      
+    } // Null string with array.  
+    else if (QT->isArrayType()) {
+    const static llvm::StringMap<StringRef> NullString = {
+        {"char",     "sz"},
+        {"wchar_t",  "wsz"}};
+      for (auto &Type : NullString) {
+        const auto& Key = Type.getKey();
+        if (ClonedTypeName.find(Key.str()) == 0) {
+          PrefixStr = Type.getValue().str();
+          ClonedTypeName = ClonedTypeName.substr(Key.size(), ClonedTypeName.size() - Key.size());
+          break;
+        }
+      }  
+    }
+  }
+
+  // Handle pointers
+  size_t nPtrCount = [&](std::string TypeName)->size_t { 
+      size_t nPos = TypeName.find('*');
+      size_t nCnt = 0;
+      for(nPos; nPos < TypeName.length(); nPos++, nCnt++) {
+          if ('*' != TypeName[nPos])
+            break;
+      }
+      return nCnt;
+  }(ClonedTypeName);
+  if (nPtrCount > 0) {
+    ClonedTypeName = [&](std::string str, const std::string & from, const std::string & to) {
+		size_t start_pos = 0;
+		while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+			str.replace(start_pos, from.length(), to);
+			start_pos += to.length();
+		}
+		return str;
+	}(ClonedTypeName, "*", "");
+  }
+
+  for (auto &Type : HungarainNotionTable)
+  {
+    const auto& Key = Type.getKey();
+    if (ClonedTypeName == Key) {
+      PrefixStr = Type.getValue().str();
+      break;
+    }
+  }  
+
+  if (nPtrCount > 0) {
+      for(size_t nIdx = 0; nIdx < nPtrCount; nIdx++) {
+        PrefixStr.insert(PrefixStr.begin(), 'p');
+      }
+  }  
+
+  return PrefixStr;
+}
+
 IdentifierNamingCheck::~IdentifierNamingCheck() = default;
 
 void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
@@ -173,8 +313,10 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
   Options.store(Opts, "IgnoreMainLikeFunctions", IgnoreMainLikeFunctions);
 }
 
-static bool matchesStyle(StringRef Name,
-                         IdentifierNamingCheck::NamingStyle Style) {
+static bool matchesStyle(StringRef Type,
+                         StringRef Name,                         
+                         IdentifierNamingCheck::NamingStyle Style,
+                         const NamedDecl* Decl) {
   static llvm::Regex Matchers[] = {
       llvm::Regex("^.*$"),
       llvm::Regex("^[a-z][a-z0-9_]*$"),
@@ -183,6 +325,7 @@ static bool matchesStyle(StringRef Name,
       llvm::Regex("^[A-Z][a-zA-Z0-9]*$"),
       llvm::Regex("^[A-Z]([a-z0-9]*(_[A-Z])?)*"),
       llvm::Regex("^[a-z]([a-z0-9]*(_[A-Z])?)*"),
+      llvm::Regex("^[A-Z][a-zA-Z0-9]*$"),
   };
 
   if (Name.startswith(Style.Prefix))
@@ -200,10 +343,27 @@ static bool matchesStyle(StringRef Name,
   if (Name.startswith("_") || Name.endswith("_"))
     return false;
 
-  if (Style.Case && !Matchers[static_cast<size_t>(*Style.Case)].match(Name))
+  if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarainNotion) {
+    const auto TypePrefix = getHungarationNotionTypePrefix(Type.str(),Decl);
+    if (TypePrefix.length() > 0) {
+      if (!Name.startswith(TypePrefix))
+          return false;
+      Name = Name.drop_front(TypePrefix.size());
+    }
+  }
+
+  size_t MatcherIndex = static_cast<size_t>(*Style.Case);
+  auto MatcherResult = Matchers[MatcherIndex].match(Name);
+
+  if (Style.Case && !MatcherResult)
     return false;
 
   return true;
+}
+
+static bool matchesStyle(StringRef Name,                         
+                         IdentifierNamingCheck::NamingStyle Style) {
+  return matchesStyle("", Name, Style, NULL);
 }
 
 static std::string fixupWithCase(StringRef Name,
@@ -656,6 +816,7 @@ static StyleKind findStyleKind(
 
 llvm::Optional<RenamerClangTidyCheck::FailureInfo>
 IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
+                                          const StringRef& TypeName,
                                           const SourceManager &SM) const {
   StyleKind SK = findStyleKind(Decl, NamingStyles, IgnoreMainLikeFunctions);
   if (SK == SK_Invalid)
@@ -666,7 +827,7 @@ IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
 
   const NamingStyle &Style = *NamingStyles[SK];
   StringRef Name = Decl->getName();
-  if (matchesStyle(Name, Style))
+  if (matchesStyle(TypeName, Name, Style, Decl))
     return None;
 
   std::string KindName = fixupWithCase(StyleNames[SK], CT_LowerCase);

@@ -153,6 +153,7 @@ getFailureInfoImpl(StringRef Name, bool IsInGlobalNamespace,
 
 Optional<RenamerClangTidyCheck::FailureInfo>
 ReservedIdentifierCheck::GetDeclFailureInfo(const NamedDecl *Decl,
+                                            const StringRef& TypeName,
                                             const SourceManager &) const {
   assert(Decl && Decl->getIdentifier() && !Decl->getName().empty() &&
          !Decl->isImplicit() &&
