@@ -13,9 +13,9 @@ cmake -DLLVM_ENABLE_ABI_BREAKING_CHECKS=0       `
       -DCMAKE_BUILD_TYPE=RelWithDebInfo         `
       -G "Visual Studio 16 2019"                `
       ..\llvm                                   `
-      | tee ..\build-cmake-msvc2019-config.log
+      | tee ..\build-cmake-msvc2019-config-relwithdebinfo.log
 
 
-#cmake --build . --config RelWithDebInfo  | tee ..\build-cmake-msvc2019-make.log
+#cmake --build . --config RelWithDebInfo  | tee ..\build-cmake-msvc2019-make-relwithdebinfo.log
 
 Pop-Location

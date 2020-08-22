@@ -449,9 +449,16 @@ static std::string fixupWithCase(StringRef Name,
       }
       Fixup += Word.substr(1).lower();
     }
+    break;  
+
+  case IdentifierNamingCheck::CT_HungarainNotion:
+    for (auto const &Word : Words) {      
+      auto aaa = "";
+      aaa;
+      Word;      
+    }
     break;
   }
-
   return Fixup;
 }
 

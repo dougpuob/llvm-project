@@ -13,9 +13,9 @@ cmake -DLLVM_ENABLE_ABI_BREAKING_CHECKS=0       `
       -DCMAKE_BUILD_TYPE=Debug                  `
       -G "Visual Studio 16 2019"                `
       ..\llvm                                   `
-      | tee ..\build-cmake-msvc2019-config.log
+      | tee ..\build-cmake-msvc2019-config-debug.log
 
 
-cmake --build . --config Debug  | tee ..\build-cmake-msvc2019-make.log
+#cmake --build . --config Debug  | tee ..\build-cmake-msvc2019-make-debug.log
 
 Pop-Location
