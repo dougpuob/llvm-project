@@ -436,7 +436,7 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       return;
 
     Optional<FailureInfo> MaybeFailure =
-        GetDeclFailureInfo(Decl, TypeName, *Result.SourceManager);
+        GetDeclFailureInfo(TypeName, Decl ,* Result.SourceManager);
     if (!MaybeFailure)
       return;
     FailureInfo &Info = *MaybeFailure;

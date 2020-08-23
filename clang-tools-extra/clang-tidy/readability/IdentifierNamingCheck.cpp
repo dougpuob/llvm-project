@@ -359,7 +359,9 @@ static bool matchesStyle(StringRef Name,
   return matchesStyle("", Name, Style, NULL);
 }
 
-static std::string fixupWithCase(StringRef Name,
+static std::string fixupWithCase(const StringRef& Type,
+                                 const StringRef& Name,     
+                                 const Decl *pDecl,
                                  IdentifierNamingCheck::CaseType Case) {
   static llvm::Regex Splitter(
       "([a-z0-9A-Z]*)(_+)|([A-Z]?[a-z0-9]+)([A-Z]|$)|([A-Z]+)([A-Z]|$)");
@@ -451,12 +453,19 @@ static std::string fixupWithCase(StringRef Name,
     }
     break;  
 
-  case IdentifierNamingCheck::CT_HungarainNotion:
-    for (auto const &Word : Words) {      
-      auto aaa = "";
-      aaa;
-      Word;      
-    }
+  case IdentifierNamingCheck::CT_HungarainNotion: {
+    const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(pDecl);
+    const auto TypePrefix =
+        getHungarationNotionTypePrefix(Type.str(), pNamedDecl);
+    if (Words.size() > 0 && TypePrefix.size() > 0)
+      Fixup = TypePrefix + Words[Words.size() - 1].str();
+    // for (auto const &Word : Words) {
+    //  auto aaa = "";
+    //  aaa;
+    //  Word;
+    //}
+  }
+    
     break;
   }
   return Fixup;
@@ -524,10 +533,13 @@ static bool isParamInMainLikeFunction(const ParmVarDecl &ParmDecl,
 }
 
 static std::string
-fixupWithStyle(StringRef Name,
-               const IdentifierNamingCheck::NamingStyle &Style) {
+fixupWithStyle(const StringRef& Type, 
+               const StringRef& Name,
+               const IdentifierNamingCheck::NamingStyle &Style,
+               const Decl* pDecl) {
   const std::string Fixed = fixupWithCase(
-      Name, Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
+      Type,
+      Name, pDecl, Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
   StringRef Mid = StringRef(Fixed).trim("_");
   if (Mid.empty())
     Mid = "_";
@@ -815,8 +827,8 @@ static StyleKind findStyleKind(
 }
 
 llvm::Optional<RenamerClangTidyCheck::FailureInfo>
-IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
-                                          const StringRef& TypeName,
+IdentifierNamingCheck::GetDeclFailureInfo(const StringRef& Type,
+                                          const NamedDecl *Decl,
                                           const SourceManager &SM) const {
   StyleKind SK = findStyleKind(Decl, NamingStyles, IgnoreMainLikeFunctions);
   if (SK == SK_Invalid)
@@ -827,13 +839,13 @@ IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
 
   const NamingStyle &Style = *NamingStyles[SK];
   StringRef Name = Decl->getName();
-  if (matchesStyle(TypeName, Name, Style, Decl))
+  if (matchesStyle(Type, Name, Style, Decl))
     return None;
 
-  std::string KindName = fixupWithCase(StyleNames[SK], CT_LowerCase);
+  std::string KindName = fixupWithCase(Type, StyleNames[SK], Decl, CT_LowerCase);
   std::replace(KindName.begin(), KindName.end(), '_', ' ');
 
-  std::string Fixup = fixupWithStyle(Name, Style);
+  std::string Fixup = fixupWithStyle(Type, Name, Style, Decl);
   if (StringRef(Fixup).equals(Name)) {
     if (!IgnoreFailedSplit) {
       LLVM_DEBUG(llvm::dbgs()
@@ -858,10 +870,10 @@ IdentifierNamingCheck::GetMacroFailureInfo(const Token &MacroNameTok,
     return None;
 
   std::string KindName =
-      fixupWithCase(StyleNames[SK_MacroDefinition], CT_LowerCase);
+      fixupWithCase("", StyleNames[SK_MacroDefinition], NULL, CT_LowerCase);
   std::replace(KindName.begin(), KindName.end(), '_', ' ');
 
-  std::string Fixup = fixupWithStyle(Name, Style);
+  std::string Fixup = fixupWithStyle("", Name, Style, NULL);
   if (StringRef(Fixup).equals(Name)) {
     if (!IgnoreFailedSplit) {
       LLVM_DEBUG(llvm::dbgs()
