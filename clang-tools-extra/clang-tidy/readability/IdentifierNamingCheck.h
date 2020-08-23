@@ -46,7 +46,7 @@ public:
     CT_CamelCase,
     CT_CamelSnakeCase,
     CT_CamelSnakeBack,
-    CT_HungarainNotion
+    CT_HungarianNotion
   };
 
   struct NamingStyle {

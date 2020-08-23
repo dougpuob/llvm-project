@@ -44,7 +44,7 @@ OptionEnumMapping<
           {readability::IdentifierNamingCheck::CT_CamelCase,        "CamelCase"},
           {readability::IdentifierNamingCheck::CT_CamelSnakeCase,   "Camel_Snake_Case"},
           {readability::IdentifierNamingCheck::CT_CamelSnakeBack,   "camel_Snake_Back"},
-          {readability::IdentifierNamingCheck::CT_HungarainNotion,  "szHungarainNotion"}};
+          {readability::IdentifierNamingCheck::CT_HungarianNotion,  "szHungarianNotion"}};
   return llvm::makeArrayRef(Mapping);
 }
 
@@ -115,40 +115,6 @@ enum StyleKind {
 static StringRef const StyleNames[] = {
 #define STRINGIZE(v) #v,
   NAMING_KEYS(STRINGIZE)
-#undef STRINGIZE
-};
-
-#define HUNGARAIN_TYPES(m) \
-    m(char_array) \
-    m(char_cstr) \
-    m(char_cstr_ptr) \
-    m(wchar_t_cstr) \
-    m(wchar_t_array) \
-    m(wchar_t_cstr_ptr) \
-    m(size_t) \
-    m(int8_t) \
-    m(int16_t) \
-    m(int32_t) \
-    m(int64_t) \
-    m(uint8_t) \
-    m(uint16_t) \
-    m(uint32_t) \
-    m(uint64_t) \
-    m(char) \
-    m(_Bool) \
-    m(bool) \
-    m(wchar_t) \
-    m(signed_char) \
-    m(unsigned_char) \
-    m(short) \
-    m(long_long) \
-    m(float) \
-    m(double) \
-    m(unsigned_long_long) \
-
-static StringRef const HungarainTypes[] = {
-#define STRINGIZE(v) #v,
-  HUNGARAIN_TYPES(STRINGIZE)
 #undef STRINGIZE
 };
 
@@ -250,7 +216,7 @@ static const std::string getHungarationNotionTypePrefix(const std::string& TypeN
   size_t nPtrCount = [&](std::string TypeName)->size_t { 
       size_t nPos = TypeName.find('*');
       size_t nCnt = 0;
-      for(nPos; nPos < TypeName.length(); nPos++, nCnt++) {
+      for(; nPos < TypeName.length(); nPos++, nCnt++) {
           if ('*' != TypeName[nPos])
             break;
       }
@@ -336,7 +302,7 @@ static bool matchesStyle(StringRef Type,
   if (Name.startswith("_") || Name.endswith("_"))
     return false;
 
-  if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarainNotion) {
+  if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarianNotion) {
     const auto TypePrefix = getHungarationNotionTypePrefix(Type.str(),Decl);
     if (TypePrefix.length() > 0) {
       if (!Name.startswith(TypePrefix))
@@ -453,7 +419,7 @@ static std::string fixupWithCase(const StringRef& Type,
     }
     break;  
 
-  case IdentifierNamingCheck::CT_HungarainNotion: {
+  case IdentifierNamingCheck::CT_HungarianNotion: {
     const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(pDecl);
     const auto TypePrefix =
         getHungarationNotionTypePrefix(Type.str(), pNamedDecl);
