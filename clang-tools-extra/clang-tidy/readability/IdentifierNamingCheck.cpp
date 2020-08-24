@@ -423,13 +423,13 @@ static std::string fixupWithCase(const StringRef& Type,
     const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(pDecl);
     const auto TypePrefix =
         getHungarationNotionTypePrefix(Type.str(), pNamedDecl);
-    if (Words.size() > 0 && TypePrefix.size() > 0)
-      Fixup = TypePrefix + Words[Words.size() - 1].str();
-    // for (auto const &Word : Words) {
-    //  auto aaa = "";
-    //  aaa;
-    //  Word;
-    //}
+    if (TypePrefix.size() > 0) {
+      for (size_t nIdx = 0; nIdx < Words.size(); nIdx++) {
+          if (nIdx == 0 && std::find_if(Words[nIdx].begin(), Words[nIdx].end(), ::islower) == Words[nIdx].end())
+            continue;
+          Fixup += Words[nIdx];
+      }
+    }
   }
     
     break;
