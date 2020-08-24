@@ -422,18 +422,15 @@ static std::string fixupWithCase(const StringRef& Type,
   case IdentifierNamingCheck::CT_HungarianNotion: {
     const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(pDecl);
     const auto TypePrefix =
-        getHungarationNotionTypePrefix(Type.str(), pNamedDecl);
-    if (TypePrefix.size() > 0) {
+        getHungarationNotionTypePrefix(Type.str(), pNamedDecl);    
+      Fixup = TypePrefix;
       for (size_t nIdx = 0; nIdx < Words.size(); nIdx++) {
           if (nIdx == 0 && std::find_if(Words[nIdx].begin(), Words[nIdx].end(), ::islower) == Words[nIdx].end())
             continue;
           Fixup += Words[nIdx];
       }
-    }
-  }
-    
-    break;
-  }
+      break;
+  }}
   return Fixup;
 }
 
