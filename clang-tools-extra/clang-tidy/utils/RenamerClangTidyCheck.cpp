@@ -405,7 +405,7 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
         if (nNameStart != StringRef::npos) {
           Type = Type.substr(nNameStart, Type.size() - nNameStart);
         }
-        TypeName = Type;
+        TypeName = Type.trim();
       }
 
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
