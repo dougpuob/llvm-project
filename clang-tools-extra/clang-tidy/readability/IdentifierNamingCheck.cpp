@@ -173,9 +173,7 @@ static const std::string getHungarationNotionTypePrefix(const std::string& TypeN
         {"short",           "s"},
         {"signed",          "i"},
         {"unsigned",        "u"},
-        {"long",            "l"},
-        {"long long",       "ll"},
-        {"unsigned long",   "ul"}};
+        {"long",            "l"}};
 
   std::string ClonedTypeName = TypeName;
   remove_if(ClonedTypeName.begin(), ClonedTypeName.end(), isspace);  

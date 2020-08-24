@@ -89,11 +89,3 @@ signed ValueSigned = 0;
 long ValueLong = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for variable 'ValueLong' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}long lValueLong = 0;
-
-long long ValueLlong = 0;
-// CHECK-MESSAGES: :[[@LINE-1]]:11: warning: invalid case style for variable 'ValueLlong' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}long long llValueLlong = 0;
-
-unsigned long ValueUlong = 0;
-// CHECK-MESSAGES: :[[@LINE-1]]:15: warning: invalid case style for variable 'ValueUlong' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}unsigned long ulValueUlong = 0;
