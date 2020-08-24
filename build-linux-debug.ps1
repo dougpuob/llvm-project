@@ -11,6 +11,7 @@ cmake -DLLVM_ENABLE_ABI_BREAKING_CHECKS=0       `
       -DLLVM_USE_LINKER=lld                     `
       -DLLVM_TARGETS_TO_BUILD="X86"             `
       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"  `
+      -DCMAKE_CXX_FLAGS="-O0"                   `
       -DCMAKE_BUILD_TYPE=Debug                  `
       -DCMAKE_CXX_STANDARD=17                   `
       -DCMAKE_VERBOSE_MAKEFILE=OFF              `
@@ -19,6 +20,6 @@ cmake -DLLVM_ENABLE_ABI_BREAKING_CHECKS=0       `
       | tee ..\build-cmake-linux-clang-config.log
 
 
-cmake --build . --config Debug   | tee ..\build-cmake-linux-clang-make.log
+#cmake --build . --config Debug   | tee ..\build-cmake-linux-clang-make.log
 
 Pop-Location
