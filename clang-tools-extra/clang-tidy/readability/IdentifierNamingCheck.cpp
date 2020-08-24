@@ -37,14 +37,17 @@ OptionEnumMapping<
   static constexpr std::pair<readability::IdentifierNamingCheck::CaseType,
                              StringRef>
       Mapping[] = {
-          {readability::IdentifierNamingCheck::CT_AnyCase,          "aNy_CasE"},
-          {readability::IdentifierNamingCheck::CT_LowerCase,        "lower_case"},
-          {readability::IdentifierNamingCheck::CT_UpperCase,        "UPPER_CASE"},
-          {readability::IdentifierNamingCheck::CT_CamelBack,        "camelBack"},
-          {readability::IdentifierNamingCheck::CT_CamelCase,        "CamelCase"},
-          {readability::IdentifierNamingCheck::CT_CamelSnakeCase,   "Camel_Snake_Case"},
-          {readability::IdentifierNamingCheck::CT_CamelSnakeBack,   "camel_Snake_Back"},
-          {readability::IdentifierNamingCheck::CT_HungarianNotion,  "szHungarianNotion"}};
+          {readability::IdentifierNamingCheck::CT_AnyCase, "aNy_CasE"},
+          {readability::IdentifierNamingCheck::CT_LowerCase, "lower_case"},
+          {readability::IdentifierNamingCheck::CT_UpperCase, "UPPER_CASE"},
+          {readability::IdentifierNamingCheck::CT_CamelBack, "camelBack"},
+          {readability::IdentifierNamingCheck::CT_CamelCase, "CamelCase"},
+          {readability::IdentifierNamingCheck::CT_CamelSnakeCase,
+           "Camel_Snake_Case"},
+          {readability::IdentifierNamingCheck::CT_CamelSnakeBack,
+           "camel_Snake_Back"},
+          {readability::IdentifierNamingCheck::CT_HungarianNotion,
+           "szHungarianNotion"}};
   return llvm::makeArrayRef(Mapping);
 }
 
@@ -152,15 +155,18 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
   }
 }
 
-static const std::string getHungarationNotionTypePrefix(const std::string& TypeName,const NamedDecl* Decl) {
+static const std::string
+getHungarationNotionTypePrefix(const std::string &TypeName,
+                               const NamedDecl *Decl) {
+  // clang-format off
   const static llvm::StringMap<StringRef> HungarainNotionTable = {
-        {"int8_t",          "i8"},     
+        {"int8_t",          "i8"},
         {"int16_t",         "i16"},
-        {"int32_t",         "i32"},   
+        {"int32_t",         "i32"},
         {"int64_t",         "i64"},
-        {"uint8_t",         "u8"},   
+        {"uint8_t",         "u8"},
         {"uint16_t",        "u16"},
-        {"uint32_t",        "u32"}, 
+        {"uint32_t",        "u32"},
         {"uint64_t",        "u64"},
         {"float",           "f"},
         {"double",          "d"},
@@ -174,78 +180,83 @@ static const std::string getHungarationNotionTypePrefix(const std::string& TypeN
         {"signed",          "i"},
         {"unsigned",        "u"},
         {"long",            "l"}};
-
+  // clang-format on
+  
   std::string ClonedTypeName = TypeName;
-  remove_if(ClonedTypeName.begin(), ClonedTypeName.end(), isspace);  
-    
+  remove_if(ClonedTypeName.begin(), ClonedTypeName.end(), isspace);
+
   // Handle null string
-  std::string PrefixStr;  
+  std::string PrefixStr;
   if (const auto *TD = dyn_cast<ValueDecl>(Decl)) {
     auto QT = TD->getType();
     if (QT->isPointerType()) {
-      // Null string with pointer.
+      // clang-format off
       const static llvm::StringMap<StringRef> NullString = {
         {"char*",     "sz"},
         {"wchar_t*",  "wsz"}};
+      // clang-format on
       for (auto &Type : NullString) {
-        const auto& Key = Type.getKey();
+        const auto &Key = Type.getKey();
         if (ClonedTypeName.find(Key.str()) == 0) {
           PrefixStr = Type.getValue().str();
-          ClonedTypeName = ClonedTypeName.substr(Key.size(), ClonedTypeName.size() - Key.size());
+          ClonedTypeName = ClonedTypeName.substr(
+              Key.size(), ClonedTypeName.size() - Key.size());
           break;
         }
-      }      
-    } // Null string with array.  
-    else if (QT->isArrayType()) {
-    const static llvm::StringMap<StringRef> NullString = {
+      }
+    } else if (QT->isArrayType()) {
+      // clang-format off
+      const static llvm::StringMap<StringRef> NullString = {
         {"char",     "sz"},
         {"wchar_t",  "wsz"}};
+      // clang-format on
       for (auto &Type : NullString) {
-        const auto& Key = Type.getKey();
+        const auto &Key = Type.getKey();
         if (ClonedTypeName.find(Key.str()) == 0) {
           PrefixStr = Type.getValue().str();
-          ClonedTypeName = ClonedTypeName.substr(Key.size(), ClonedTypeName.size() - Key.size());
+          ClonedTypeName = ClonedTypeName.substr(
+              Key.size(), ClonedTypeName.size() - Key.size());
           break;
         }
-      }  
+      }
     }
   }
 
   // Handle pointers
-  size_t nPtrCount = [&](std::string TypeName)->size_t { 
-      size_t nPos = TypeName.find('*');
-      size_t nCnt = 0;
-      for(; nPos < TypeName.length(); nPos++, nCnt++) {
-          if ('*' != TypeName[nPos])
-            break;
-      }
-      return nCnt;
+  size_t nPtrCount = [&](std::string TypeName) -> size_t {
+    size_t nPos = TypeName.find('*');
+    size_t nCnt = 0;
+    for (; nPos < TypeName.length(); nPos++, nCnt++) {
+      if ('*' != TypeName[nPos])
+        break;
+    }
+    return nCnt;
   }(ClonedTypeName);
   if (nPtrCount > 0) {
-    ClonedTypeName = [&](std::string str, const std::string & from, const std::string & to) {
-		size_t start_pos = 0;
-		while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-			str.replace(start_pos, from.length(), to);
-			start_pos += to.length();
-		}
-		return str;
-	}(ClonedTypeName, "*", "");
+    ClonedTypeName = [&](std::string str, const std::string &from,
+                         const std::string &to) {
+      size_t start_pos = 0;
+      while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+      }
+      return str;
+    }(ClonedTypeName, "*", "");
   }
 
-  for (auto &Type : HungarainNotionTable)
-  {
-    const auto& Key = Type.getKey();
+  for (auto &Type : HungarainNotionTable) {
+    const auto &Key = Type.getKey();
     if (ClonedTypeName == Key) {
       PrefixStr = Type.getValue().str();
       break;
     }
-  }  
+  }
 
   if (nPtrCount > 0) {
-      for(size_t nIdx = 0; nIdx < nPtrCount; nIdx++) {
-        PrefixStr.insert(PrefixStr.begin(), 'p');
-      }
-  }  
+    for (size_t nIdx = 0; nIdx < nPtrCount; nIdx++) {
+      PrefixStr.insert(PrefixStr.begin(), 'p');
+    }
+  }
 
   return PrefixStr;
 }
@@ -271,10 +282,9 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
   Options.store(Opts, "IgnoreMainLikeFunctions", IgnoreMainLikeFunctions);
 }
 
-static bool matchesStyle(StringRef Type,
-                         StringRef Name,                         
+static bool matchesStyle(StringRef Type, StringRef Name,
                          IdentifierNamingCheck::NamingStyle Style,
-                         const NamedDecl* Decl) {
+                         const NamedDecl *Decl) {
   static llvm::Regex Matchers[] = {
       llvm::Regex("^.*$"),
       llvm::Regex("^[a-z][a-z0-9_]*$"),
@@ -302,10 +312,10 @@ static bool matchesStyle(StringRef Type,
     return false;
 
   if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarianNotion) {
-    const auto TypePrefix = getHungarationNotionTypePrefix(Type.str(),Decl);
+    const auto TypePrefix = getHungarationNotionTypePrefix(Type.str(), Decl);
     if (TypePrefix.length() > 0) {
       if (!Name.startswith(TypePrefix))
-          return false;
+        return false;
       Name = Name.drop_front(TypePrefix.size());
     }
   }
@@ -319,13 +329,12 @@ static bool matchesStyle(StringRef Type,
   return true;
 }
 
-static bool matchesStyle(StringRef Name,                         
+static bool matchesStyle(StringRef Name,
                          IdentifierNamingCheck::NamingStyle Style) {
   return matchesStyle("", Name, Style, NULL);
 }
 
-static std::string fixupWithCase(const StringRef& Type,
-                                 const StringRef& Name,     
+static std::string fixupWithCase(const StringRef &Type, const StringRef &Name,
                                  const Decl *pDecl,
                                  IdentifierNamingCheck::CaseType Case) {
   static llvm::Regex Splitter(
@@ -416,20 +425,22 @@ static std::string fixupWithCase(const StringRef& Type,
       }
       Fixup += Word.substr(1).lower();
     }
-    break;  
+    break;
 
   case IdentifierNamingCheck::CT_HungarianNotion: {
     const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(pDecl);
     const auto TypePrefix =
-        getHungarationNotionTypePrefix(Type.str(), pNamedDecl);    
-      Fixup = TypePrefix;
-      for (size_t nIdx = 0; nIdx < Words.size(); nIdx++) {
-          if (nIdx == 0 && std::find_if(Words[nIdx].begin(), Words[nIdx].end(), ::islower) == Words[nIdx].end())
-            continue;
-          Fixup += Words[nIdx];
-      }
-      break;
-  }}
+        getHungarationNotionTypePrefix(Type.str(), pNamedDecl);
+    Fixup = TypePrefix;
+    for (size_t nIdx = 0; nIdx < Words.size(); nIdx++) {
+      if (nIdx == 0 && std::find_if(Words[nIdx].begin(), Words[nIdx].end(),
+                                    ::islower) == Words[nIdx].end())
+        continue;
+      Fixup += Words[nIdx];
+    }
+    break;
+  }
+  }
   return Fixup;
 }
 
@@ -495,13 +506,12 @@ static bool isParamInMainLikeFunction(const ParmVarDecl &ParmDecl,
 }
 
 static std::string
-fixupWithStyle(const StringRef& Type, 
-               const StringRef& Name,
+fixupWithStyle(const StringRef &Type, const StringRef &Name,
                const IdentifierNamingCheck::NamingStyle &Style,
-               const Decl* pDecl) {
+               const Decl *pDecl) {
   const std::string Fixed = fixupWithCase(
-      Type,
-      Name, pDecl, Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
+      Type, Name, pDecl,
+      Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
   StringRef Mid = StringRef(Fixed).trim("_");
   if (Mid.empty())
     Mid = "_";
@@ -518,7 +528,7 @@ static StyleKind findStyleKind(
 
   if (isa<ObjCIvarDecl>(D) && NamingStyles[SK_ObjcIvar])
     return SK_ObjcIvar;
-  
+
   if (isa<TypedefDecl>(D) && NamingStyles[SK_Typedef])
     return SK_Typedef;
 
@@ -616,7 +626,8 @@ static StyleKind findStyleKind(
       return SK_ConstexprVariable;
 
     if (!Type.isNull() && Type.isConstQualified()) {
-      if (Type.getTypePtr()->isAnyPointerType() && NamingStyles[SK_ConstantPointerParameter])
+      if (Type.getTypePtr()->isAnyPointerType() &&
+          NamingStyles[SK_ConstantPointerParameter])
         return SK_ConstantPointerParameter;
 
       if (NamingStyles[SK_ConstantParameter])
@@ -789,7 +800,7 @@ static StyleKind findStyleKind(
 }
 
 llvm::Optional<RenamerClangTidyCheck::FailureInfo>
-IdentifierNamingCheck::GetDeclFailureInfo(const StringRef& Type,
+IdentifierNamingCheck::GetDeclFailureInfo(const StringRef &Type,
                                           const NamedDecl *Decl,
                                           const SourceManager &SM) const {
   StyleKind SK = findStyleKind(Decl, NamingStyles, IgnoreMainLikeFunctions);
@@ -804,7 +815,8 @@ IdentifierNamingCheck::GetDeclFailureInfo(const StringRef& Type,
   if (matchesStyle(Type, Name, Style, Decl))
     return None;
 
-  std::string KindName = fixupWithCase(Type, StyleNames[SK], Decl, CT_LowerCase);
+  std::string KindName =
+      fixupWithCase(Type, StyleNames[SK], Decl, CT_LowerCase);
   std::replace(KindName.begin(), KindName.end(), '_', ' ');
 
   std::string Fixup = fixupWithStyle(Type, Name, Style, Decl);
