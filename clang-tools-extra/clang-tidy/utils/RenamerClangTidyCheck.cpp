@@ -388,28 +388,53 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       return;
     }
 
-    // Fix type aliases in value declarations.
     StringRef TypeName;
     if (const auto *Value = Result.Nodes.getNodeAs<ValueDecl>("decl")) {
-      const auto &SrcMgr = Decl->getASTContext().getSourceManager();
-      const char *szBegin = SrcMgr.getCharacterData(Decl->getBeginLoc());
-      const char *szCurr = SrcMgr.getCharacterData(Decl->getLocation());
-      const intptr_t iPtrLen = szCurr - szBegin;
-      if (iPtrLen > 0) {
-        StringRef Type(szBegin, iPtrLen);
-        Type = Type.trim();
-        std::size_t nNameStart = Type.find_last_of(' ');
-        if (nNameStart != StringRef::npos) {
-          Type = Type.substr(nNameStart, Type.size() - nNameStart);
-        }
-        TypeName = Type.trim();
-      }
-
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
         if (const auto *Typedef = TypePtr->getAs<TypedefType>()) {
           addUsage(Typedef->getDecl(), Value->getSourceRange(),
                    Result.SourceManager);
         }
+      }
+
+      // Get type text of variable declarations.
+      const auto &SrcMgr = Decl->getASTContext().getSourceManager();
+      const char *szBegin = SrcMgr.getCharacterData(Decl->getBeginLoc());
+      const char *szCurr = SrcMgr.getCharacterData(Decl->getLocation());
+      const intptr_t iPtrLen = szCurr - szBegin;
+      if (iPtrLen > 0) {
+        std::string Type(szBegin, iPtrLen);
+
+        const static std::list<std::string> Keywords = {
+            // Qualifier
+            "const", "volatile",
+            // Storage class specifiers
+            "auto", "register","static", "extern", "thread_local",
+            // Others specifiers
+            "constexpr",  "constinit", "const_cast", "consteval",
+            "static_assert", "static_cast", "alignas", "alignof"};
+
+        // Remove keywords
+        for (const auto& kw : Keywords) {
+            for (size_t pos = 0; (pos = Type.find(kw, pos)) != std::string::npos;) {
+			    Type.replace(pos, kw.length(), "");
+            }
+        }
+
+        // Replace spaces with single space
+		for (size_t pos = 0; (pos = Type.find("  ", pos)) != std::string::npos;
+			pos += strlen(" ")) {
+			Type.replace(pos, strlen("  "), " ");
+		}
+
+        // Replace " *" with "*"
+		for (size_t pos = 0; (pos = Type.find(" *", pos)) != std::string::npos;
+			pos += strlen("*")) {
+			Type.replace(pos, strlen(" *"), "*");
+		}
+
+        TypeName = Type;
+        TypeName = TypeName.trim();
       }
     }
 
