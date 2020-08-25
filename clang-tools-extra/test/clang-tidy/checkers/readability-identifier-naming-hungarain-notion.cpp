@@ -14,9 +14,13 @@ const char NameArray[] = "Name";
 // CHECK-MESSAGES: :[[@LINE-1]]:12: warning: invalid case style for variable 'NameArray' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}const char szNameArray[] = "Name";
 
-void* BufferPtr = NULL;
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for variable 'BufferPtr' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}void* pBufferPtr = NULL;
+void* BufferPtr1 = NULL;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for variable 'BufferPtr1' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}void* pBufferPtr1 = NULL;
+
+void** BufferPtr2 = NULL;
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for variable 'BufferPtr2' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}void** ppBufferPtr2 = NULL;
 
 int8_t ValueI8 = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for variable 'ValueI8' [readability-identifier-naming]
