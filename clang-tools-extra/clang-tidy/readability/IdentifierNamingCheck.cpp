@@ -18,8 +18,6 @@
 #include "llvm/Support/Format.h"
 #include "llvm/Support/Regex.h"
 
-#include <regex>
-
 
 #define DEBUG_TYPE "clang-tidy"
 
@@ -626,8 +624,7 @@ static StyleKind findStyleKind(
       return SK_ConstexprVariable;
 
     if (!Type.isNull() && Type.isConstQualified()) {
-      if (Type.getTypePtr()->isAnyPointerType() &&
-          NamingStyles[SK_ConstantPointerParameter])
+      if (Type.getTypePtr()->isAnyPointerType() && NamingStyles[SK_ConstantPointerParameter])
         return SK_ConstantPointerParameter;
 
       if (NamingStyles[SK_ConstantParameter])
