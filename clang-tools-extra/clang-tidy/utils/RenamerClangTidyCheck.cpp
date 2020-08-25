@@ -388,7 +388,7 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       return;
     }
 
-    StringRef TypeName;
+    std::string TypeName;
     if (const auto *Value = Result.Nodes.getNodeAs<ValueDecl>("decl")) {
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
         if (const auto *Typedef = TypePtr->getAs<TypedefType>()) {
@@ -409,32 +409,32 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
             // Qualifier
             "const", "volatile",
             // Storage class specifiers
-            "auto", "register","static", "extern", "thread_local",
+            "auto", "register", "static", "extern", "thread_local",
             // Others specifiers
-            "constexpr",  "constinit", "const_cast", "consteval",
+            "constexpr", "constinit", "const_cast", "consteval",
             "static_assert", "static_cast", "alignas", "alignof"};
 
         // Remove keywords
-        for (const auto& kw : Keywords) {
-            for (size_t pos = 0; (pos = Type.find(kw, pos)) != std::string::npos;) {
-			    Type.replace(pos, kw.length(), "");
-            }
+        for (const auto &kw : Keywords) {
+          for (size_t pos = 0;
+               (pos = Type.find(kw, pos)) != std::string::npos;) {
+            Type.replace(pos, kw.length(), "");
+          }
         }
 
         // Replace spaces with single space
-		for (size_t pos = 0; (pos = Type.find("  ", pos)) != std::string::npos;
-			pos += strlen(" ")) {
-			Type.replace(pos, strlen("  "), " ");
-		}
+        for (size_t pos = 0; (pos = Type.find("  ", pos)) != std::string::npos;
+             pos += strlen(" ")) {
+          Type.replace(pos, strlen("  "), " ");
+        }
 
         // Replace " *" with "*"
-		for (size_t pos = 0; (pos = Type.find(" *", pos)) != std::string::npos;
-			pos += strlen("*")) {
-			Type.replace(pos, strlen(" *"), "*");
-		}
+        for (size_t pos = 0; (pos = Type.find(" *", pos)) != std::string::npos;
+             pos += strlen("*")) {
+          Type.replace(pos, strlen(" *"), "*");
+        }
 
-        TypeName = Type;
-        TypeName = TypeName.trim();
+        TypeName = Type.erase(Type.find_last_not_of(" ") + 1);
       }
     }
 
