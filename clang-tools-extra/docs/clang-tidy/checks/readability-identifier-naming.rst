@@ -18,6 +18,7 @@ Casing types include:
  - ``camel_Snake_Back``,
  - ``Camel_Snake_Case``,
  - ``aNy_CasE``.
+ - ``szHungarianNotation``.
 
 It also supports a fixed prefix and suffix that will be prepended or appended
 to the identifiers, regardless of the casing.

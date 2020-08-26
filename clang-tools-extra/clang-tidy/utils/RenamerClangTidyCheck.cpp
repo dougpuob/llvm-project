@@ -389,12 +389,54 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       return;
     }
 
-    // Fix type aliases in value declarations.
+    std::string TypeName;
     if (const auto *Value = Result.Nodes.getNodeAs<ValueDecl>("decl")) {
+      // Fix type aliases in value declarations.
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
         if (const auto *Typedef = TypePtr->getAs<TypedefType>())
           addUsage(Typedef->getDecl(), Value->getSourceRange(),
                    Result.SourceManager);
+      }
+
+      // Get type text of variable declarations.
+      const auto &SrcMgr = Decl->getASTContext().getSourceManager();
+      const char *szBegin = SrcMgr.getCharacterData(Decl->getBeginLoc());
+      const char *szCurr = SrcMgr.getCharacterData(Decl->getLocation());
+      const intptr_t iPtrLen = szCurr - szBegin;
+      if (iPtrLen > 0) {
+        std::string Type(szBegin, iPtrLen);
+
+        const static std::list<std::string> Keywords = {
+            // Qualifier
+            "const", "volatile",
+            // Storage class specifiers
+            "auto", "register", "static", "extern", "thread_local",
+            // Constexpr specifiers
+            "constexpr", "constinit", "const_cast", "consteval"};
+
+        // Remove keywords
+        for (const auto &kw : Keywords) {
+          for (size_t pos = 0;
+               (pos = Type.find(kw, pos)) != std::string::npos;) {
+            Type.replace(pos, kw.length(), "");
+          }
+        }
+
+        // Replace spaces with single space
+        for (size_t pos = 0; (pos = Type.find("  ", pos)) != std::string::npos;
+             pos += strlen(" ")) {
+          Type.replace(pos, strlen("  "), " ");
+        }
+
+        // Replace " *" with "*"
+        for (size_t pos = 0; (pos = Type.find(" *", pos)) != std::string::npos;
+             pos += strlen("*")) {
+          Type.replace(pos, strlen(" *"), "*");
+        }
+
+        Type = Type.erase(Type.find_last_not_of(" ") + 1);
+        Type = Type.erase(0, Type.find_first_not_of(" "));
+        TypeName = Type;
       }
     }
 
@@ -418,7 +460,7 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       return;
 
     Optional<FailureInfo> MaybeFailure =
-        GetDeclFailureInfo(Decl, *Result.SourceManager);
+        GetDeclFailureInfo(TypeName, Decl, *Result.SourceManager);
     if (!MaybeFailure)
       return;
     FailureInfo &Info = *MaybeFailure;
