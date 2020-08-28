@@ -67,10 +67,13 @@ The improvements are...
 Improvements to clang-tidy
 --------------------------
 
+* Added: Add IdentifierNamingCheck::CaseType, CT_HungarianNotation, supporting naming check with Hungarian notation.
+
+
 Changes in existing checks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Improved :doc:`readability-identifier-naming
+- Improved: doc:`readability-identifier-naming
   <clang-tidy/checks/readability-identifier-naming>` check.
 
   Added an option `GetConfigPerFile` to support including files which use

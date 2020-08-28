@@ -400,11 +400,11 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
 
       // Get type text of variable declarations.
       const auto &SrcMgr = Decl->getASTContext().getSourceManager();
-      const char *szBegin = SrcMgr.getCharacterData(Decl->getBeginLoc());
-      const char *szCurr = SrcMgr.getCharacterData(Decl->getLocation());
-      const intptr_t iPtrLen = szCurr - szBegin;
-      if (iPtrLen > 0) {
-        std::string Type(szBegin, iPtrLen);
+      const char *Begin = SrcMgr.getCharacterData(Decl->getBeginLoc());
+      const char *Curr = SrcMgr.getCharacterData(Decl->getLocation());
+      const intptr_t StrLen = Curr - Begin;
+      if (StrLen > 0) {
+        std::string Type(Begin, StrLen);
 
         const static std::list<std::string> Keywords = {
             // Qualifier
@@ -415,23 +415,23 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
             "constexpr", "constinit", "const_cast", "consteval"};
 
         // Remove keywords
-        for (const auto &kw : Keywords) {
-          for (size_t pos = 0;
-               (pos = Type.find(kw, pos)) != std::string::npos;) {
-            Type.replace(pos, kw.length(), "");
+        for (const auto &Kw : Keywords) {
+          for (size_t Pos = 0;
+               (Pos = Type.find(Kw, Pos)) != std::string::npos;) {
+            Type.replace(Pos, Kw.length(), "");
           }
         }
 
         // Replace spaces with single space
-        for (size_t pos = 0; (pos = Type.find("  ", pos)) != std::string::npos;
-             pos += strlen(" ")) {
-          Type.replace(pos, strlen("  "), " ");
+        for (size_t Pos = 0; (Pos = Type.find("  ", Pos)) != std::string::npos;
+             Pos += strlen(" ")) {
+          Type.replace(Pos, strlen("  "), " ");
         }
 
         // Replace " *" with "*"
-        for (size_t pos = 0; (pos = Type.find(" *", pos)) != std::string::npos;
-             pos += strlen("*")) {
-          Type.replace(pos, strlen(" *"), "*");
+        for (size_t Pos = 0; (Pos = Type.find(" *", Pos)) != std::string::npos;
+             Pos += strlen("*")) {
+          Type.replace(Pos, strlen(" *"), "*");
         }
 
         Type = Type.erase(Type.find_last_not_of(" ") + 1);
@@ -460,7 +460,7 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       return;
 
     Optional<FailureInfo> MaybeFailure =
-        GetDeclFailureInfo(TypeName, Decl, *Result.SourceManager);
+        getDeclFailureInfo(TypeName, Decl, *Result.SourceManager);
     if (!MaybeFailure)
       return;
     FailureInfo &Info = *MaybeFailure;

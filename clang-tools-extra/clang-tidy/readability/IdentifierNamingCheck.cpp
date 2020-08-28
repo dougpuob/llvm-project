@@ -223,7 +223,7 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"char*",     "sz"},
         {"wchar_t*",  "wsz"}};
       // clang-format on
-      for (auto &Type : NullString) {
+      for (const auto &Type : NullString) {
         const auto &Key = Type.getKey();
         if (ClonedTypeName.find(Key.str()) == 0) {
           PrefixStr = Type.getValue().str();
@@ -238,7 +238,7 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"char",     "sz"},
         {"wchar_t",  "wsz"}};
       // clang-format on
-      for (auto &Type : NullString) {
+      for (const auto &Type : NullString) {
         const auto &Key = Type.getKey();
         if (ClonedTypeName.find(Key.str()) == 0) {
           PrefixStr = Type.getValue().str();
@@ -251,28 +251,28 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
   }
 
   // Handle pointers
-  size_t nPtrCount = [&](std::string TypeName) -> size_t {
-    size_t nPos = TypeName.find('*');
-    size_t nCnt = 0;
-    for (; nPos < TypeName.length(); nPos++, nCnt++) {
-      if ('*' != TypeName[nPos])
+  size_t PtrCount = [&](std::string TypeName) -> size_t {
+    size_t Pos = TypeName.find('*');
+    size_t Count = 0;
+    for (; Pos < TypeName.length(); Pos++, Count++) {
+      if ('*' != TypeName[Pos])
         break;
     }
-    return nCnt;
+    return Count;
   }(ClonedTypeName);
-  if (nPtrCount > 0) {
-    ClonedTypeName = [&](std::string str, const std::string &from,
-                         const std::string &to) {
-      size_t start_pos = 0;
-      while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length();
+  if (PtrCount > 0) {
+    ClonedTypeName = [&](std::string Str, const std::string &From,
+                         const std::string &To) {
+      size_t StartPos = 0;
+      while ((StartPos = Str.find(From, StartPos)) != std::string::npos) {
+        Str.replace(StartPos, From.length(), To);
+        StartPos += To.length();
       }
-      return str;
+      return Str;
     }(ClonedTypeName, "*", "");
   }
 
-  for (auto &Type : HungarianNotationTable) {
+  for (const auto &Type : HungarianNotationTable) {
     const auto &Key = Type.getKey();
     if (ClonedTypeName == Key) {
       PrefixStr = Type.getValue().str();
@@ -280,8 +280,8 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
     }
   }
 
-  if (nPtrCount > 0) {
-    for (size_t nIdx = 0; nIdx < nPtrCount; nIdx++) {
+  if (PtrCount > 0) {
+    for (size_t Idx = 0; Idx < PtrCount; Idx++) {
       PrefixStr.insert(PrefixStr.begin(), 'p');
     }
   }
@@ -314,7 +314,8 @@ static bool matchesStyle(StringRef Type, StringRef Name,
     return false;
 
   if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarianNotation) {
-    const auto TypePrefix = getHungarianNotationTypePrefix(Type.str(), Decl);
+    const std::string TypePrefix =
+        getHungarianNotationTypePrefix(Type.str(), Decl);
     if (TypePrefix.length() > 0) {
       if (!Name.startswith(TypePrefix))
         return false;
@@ -322,10 +323,7 @@ static bool matchesStyle(StringRef Type, StringRef Name,
     }
   }
 
-  size_t MatcherIndex = static_cast<size_t>(*Style.Case);
-  auto MatcherResult = Matchers[MatcherIndex].match(Name);
-
-  if (Style.Case && !MatcherResult)
+  if (Style.Case && !Matchers[static_cast<size_t>(*Style.Case)].match(Name))
     return false;
 
   return true;
@@ -427,19 +425,19 @@ static std::string fixupWithCase(const StringRef &Type, const StringRef &Name,
 
   case IdentifierNamingCheck::CT_HungarianNotation: {
     const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(pDecl);
-    const auto TypePrefix =
+    const std::string TypePrefix =
         getHungarianNotationTypePrefix(Type.str(), pNamedDecl);
     Fixup = TypePrefix;
-    for (size_t nIdx = 0; nIdx < Words.size(); nIdx++) {
+    for (size_t Idx = 0; Idx < Words.size(); Idx++) {
       // Skip first part if it's a lowercase string
-      if (nIdx == 0) {
-        const bool bLowerAlnum =
-            std::all_of(Words[nIdx].begin(), Words[nIdx].end(),
+      if (Idx == 0) {
+        const bool LowerAlnum =
+            std::all_of(Words[Idx].begin(), Words[Idx].end(),
                         [](const char c) { return isdigit(c) || islower(c); });
-        if (bLowerAlnum)
+        if (LowerAlnum)
           continue;
       }
-      Fixup += Words[nIdx];
+      Fixup += Words[Idx];
     }
     break;
   }
@@ -511,9 +509,9 @@ static bool isParamInMainLikeFunction(const ParmVarDecl &ParmDecl,
 static std::string
 fixupWithStyle(const StringRef &Type, const StringRef &Name,
                const IdentifierNamingCheck::NamingStyle &Style,
-               const Decl *pDecl) {
+               const Decl *Decl) {
   const std::string Fixed = fixupWithCase(
-      Type, Name, pDecl,
+      Type, Name, Decl,
       Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
   StringRef Mid = StringRef(Fixed).trim("_");
   if (Mid.empty())
@@ -837,7 +835,7 @@ static llvm::Optional<RenamerClangTidyCheck::FailureInfo> getFailureInfo(
 }
 
 llvm::Optional<RenamerClangTidyCheck::FailureInfo>
-IdentifierNamingCheck::GetDeclFailureInfo(const StringRef &Type,
+IdentifierNamingCheck::getDeclFailureInfo(const StringRef &Type,
                                           const NamedDecl *Decl,
                                           const SourceManager &SM) const {
   SourceLocation Loc = Decl->getLocation();
