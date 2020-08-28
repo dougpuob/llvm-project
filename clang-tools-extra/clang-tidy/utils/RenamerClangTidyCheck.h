@@ -32,7 +32,7 @@ public:
 
   /// Derived classes should not implement any matching logic themselves; this
   /// class will do the matching and call the derived class'
-  /// GetDeclFailureInfo() and GetMacroFailureInfo() for determining whether a
+  /// getDeclFailureInfo() and GetMacroFailureInfo() for determining whether a
   /// given identifier passes or fails the check.
   void registerMatchers(ast_matchers::MatchFinder *Finder) override final;
   void
@@ -124,7 +124,8 @@ protected:
   /// Overridden by derived classes, returns information about if and how a Decl
   /// failed the check. A 'None' result means the Decl did not fail the check.
   virtual llvm::Optional<FailureInfo>
-  GetDeclFailureInfo(const NamedDecl *Decl, const SourceManager &SM) const = 0;
+  getDeclFailureInfo(const StringRef &Type, const NamedDecl *Decl,
+                     const SourceManager &SM) const = 0;
 
   /// Overridden by derived classes, returns information about if and how a
   /// macro failed the check. A 'None' result means the macro did not fail the

@@ -36,6 +36,9 @@ public:
   IdentifierNamingCheck(StringRef Name, ClangTidyContext *Context);
   ~IdentifierNamingCheck();
 
+  static const std::string
+  getHungarianNotationTypePrefix(const std::string &TypeName,
+                                 const NamedDecl *Decl);
   void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
   enum CaseType {
@@ -45,7 +48,8 @@ public:
     CT_UpperCase,
     CT_CamelCase,
     CT_CamelSnakeCase,
-    CT_CamelSnakeBack
+    CT_CamelSnakeBack,
+    CT_HungarianNotation
   };
 
   struct NamingStyle {
@@ -62,7 +66,7 @@ public:
 
 private:
   llvm::Optional<FailureInfo>
-  GetDeclFailureInfo(const NamedDecl *Decl,
+  getDeclFailureInfo(const StringRef &Type, const NamedDecl *Decl,
                      const SourceManager &SM) const override;
   llvm::Optional<FailureInfo>
   GetMacroFailureInfo(const Token &MacroNameTok,

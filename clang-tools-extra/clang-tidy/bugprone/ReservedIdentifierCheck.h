@@ -41,7 +41,7 @@ public:
 
 private:
   llvm::Optional<FailureInfo>
-  GetDeclFailureInfo(const NamedDecl *Decl,
+  getDeclFailureInfo(const StringRef &TypeName, const NamedDecl *Decl,
                      const SourceManager &SM) const override;
   llvm::Optional<FailureInfo>
   GetMacroFailureInfo(const Token &MacroNameTok,
