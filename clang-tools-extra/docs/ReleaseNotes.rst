@@ -76,6 +76,13 @@ Changes in existing checks
   Added an option `GetConfigPerFile` to support including files which use
   different naming styles.
 
+- Improved :doc:`readability-identifier-naming
+  <clang-tidy/checks/readability-identifier-naming>` check.  
+
+  Added a casing types `szHungarianNotation` to support variables could be
+  checked with Hungarian Notation which the prefix encodes the actual data type
+  of the variable.
+
 Improvements to include-fixer
 -----------------------------
 

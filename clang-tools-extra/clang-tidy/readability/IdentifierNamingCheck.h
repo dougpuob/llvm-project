@@ -36,6 +36,7 @@ public:
   IdentifierNamingCheck(StringRef Name, ClangTidyContext *Context);
   ~IdentifierNamingCheck();
 
+  std::string getDeclTypeName(const clang::NamedDecl *Decl) const;
   void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
   enum CaseType {
@@ -45,7 +46,8 @@ public:
     CT_UpperCase,
     CT_CamelCase,
     CT_CamelSnakeCase,
-    CT_CamelSnakeBack
+    CT_CamelSnakeBack,
+    CT_HungarianNotation
   };
 
   struct NamingStyle {

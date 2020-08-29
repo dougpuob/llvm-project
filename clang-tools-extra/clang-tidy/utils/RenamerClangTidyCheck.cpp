@@ -389,12 +389,54 @@ void RenamerClangTidyCheck::check(const MatchFinder::MatchResult &Result) {
       return;
     }
 
-    // Fix type aliases in value declarations.
+    std::string TypeName;
     if (const auto *Value = Result.Nodes.getNodeAs<ValueDecl>("decl")) {
+      // Fix type aliases in value declarations.
       if (const Type *TypePtr = Value->getType().getTypePtrOrNull()) {
         if (const auto *Typedef = TypePtr->getAs<TypedefType>())
           addUsage(Typedef->getDecl(), Value->getSourceRange(),
                    Result.SourceManager);
+      }
+
+      // Get type text of variable declarations.
+      const auto &SrcMgr = Decl->getASTContext().getSourceManager();
+      const char *Begin = SrcMgr.getCharacterData(Decl->getBeginLoc());
+      const char *Curr = SrcMgr.getCharacterData(Decl->getLocation());
+      const intptr_t StrLen = Curr - Begin;
+      if (StrLen > 0) {
+        std::string Type(Begin, StrLen);
+
+        const static std::list<std::string> Keywords = {
+            // Qualifier
+            "const", "volatile",
+            // Storage class specifiers
+            "auto", "register", "static", "extern", "thread_local",
+            // Constexpr specifiers
+            "constexpr", "constinit", "const_cast", "consteval"};
+
+        // Remove keywords
+        for (const auto &Kw : Keywords) {
+          for (size_t Pos = 0;
+               (Pos = Type.find(Kw, Pos)) != std::string::npos;) {
+            Type.replace(Pos, Kw.length(), "");
+          }
+        }
+
+        // Replace spaces with single space
+        for (size_t Pos = 0; (Pos = Type.find("  ", Pos)) != std::string::npos;
+             Pos += strlen(" ")) {
+          Type.replace(Pos, strlen("  "), " ");
+        }
+
+        // Replace " *" with "*"
+        for (size_t Pos = 0; (Pos = Type.find(" *", Pos)) != std::string::npos;
+             Pos += strlen("*")) {
+          Type.replace(Pos, strlen(" *"), "*");
+        }
+
+        Type = Type.erase(Type.find_last_not_of(" ") + 1);
+        Type = Type.erase(0, Type.find_first_not_of(" "));
+        TypeName = Type;
       }
     }
 
