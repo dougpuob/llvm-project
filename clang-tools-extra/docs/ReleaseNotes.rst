@@ -70,6 +70,9 @@ Improvements to clang-tidy
 Changes in existing checks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+- Added: Support variables could be checked with Hungarian Notation which the
+  prefix encodes the actual data type of the variable.
+
 - Improved :doc:`readability-identifier-naming
   <clang-tidy/checks/readability-identifier-naming>` check.
 
