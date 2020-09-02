@@ -31,6 +31,67 @@ The naming of virtual methods is reported where they occur in the base class,
 but not where they are overridden, as it can't be fixed locally there.
 This also applies for pseudo-override patterns like CRTP.
 
+Hungarian Notation casing type
+------------------------------
+
+In Hungarian notation, a variable name starts with a group of lower-case 
+letters which are mnemonics for the type or purpose of that variable, followed
+by whatever name the programmer has chosen; this last part is sometimes 
+distinguished as the given name. The first character of the given name can be 
+capitalized to separate it from the type indicators (see also CamelCase). 
+Otherwise the case of this character denotes scope.
+
+============ ============= ================ ============= =========== ==============
+Primitive Types                                           Microsoft data types
+--------------------------------------------------------- --------------------------
+    Type        Prefix          Type           Prefix        Type        Prefix
+============ ============= ================ ============= =========== ==============
+int8_t       i8            short            s             BOOL        b         
+int16_t      i16           signed           i             BOOLEAN     b         
+int32_t      i32           unsigned         u             BYTE        by        
+int64_t      i64           long             l             WORD        w         
+uint8_t      u8            long long        ll            DWORD       dw        
+uint16_t     u16           unsigned long    ul                                  
+uint32_t     u32           long double      ld                                  
+uint64_t     u64           ptrdiff_t        p                                   
+char8_t      c8                                                                 
+char16_t     c16                                                                
+char32_t     c32                                                                
+float        f                                                                  
+double       d                                                                  
+char         c                                                                  
+bool         b                                                                  
+_Bool        b                                                                  
+int          i                                                                  
+size_t       n                                                                  
+============ ============= ================ ============= =========== ==============
+
+
+
+- **Pointer type starts with `p`,**
+
+  .. code-block:: c++
+
+     void    *pData   = NULL;
+     void   **ppData  = NULL;
+     uint8_t *pu8Data = NULL;
+
+- **Array type start with `a`,**
+
+  .. code-block:: c++
+
+    int    aDataInt[1]     = {0};
+    int*   paDataIntPtr[1] = {0};
+
+- **Null terminated string starts with `sz`**
+
+  .. code-block:: c++
+
+    char   szNameArray[] = {"Text"};
+    char  *szNamePtr     = {"Text"};
+    char **pszNamePtr    = {"Text"};
+ 
+
 Options
 -------
 
