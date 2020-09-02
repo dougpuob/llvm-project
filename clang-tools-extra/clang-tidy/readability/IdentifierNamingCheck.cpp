@@ -182,13 +182,14 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
 
 static const std::string
 getHungarianNotationTypePrefix(const std::string &TypeName,
-                               const NamedDecl *Decl) {
-  if (0 == TypeName.length()) {
+                               const NamedDecl *InputDecl) {
+  if (!InputDecl || TypeName.empty()) {
     return TypeName;
   }
 
   // clang-format off
   const static llvm::StringMap<StringRef> HungarianNotationTable = {
+        // Primitive types
         {"int8_t",          "i8"},
         {"int16_t",         "i16"},
         {"int32_t",         "i32"},
@@ -197,6 +198,9 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"uint16_t",        "u16"},
         {"uint32_t",        "u32"},
         {"uint64_t",        "u64"},
+        {"char8_t",         "c8"},
+        {"char16_t",        "c16"},
+        {"char32_t",        "c32"},
         {"float",           "f"},
         {"double",          "d"},
         {"char",            "c"},
@@ -208,16 +212,28 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"short",           "s"},
         {"signed",          "i"},
         {"unsigned",        "u"},
-        {"long",            "l"}};
+        {"long",            "l"},
+        {"long long",       "ll"},
+        {"unsigned long",   "ul"},
+        {"long double",     "ld"},
+        {"ptrdiff_t",       "p"},
+        // Windows data types
+        {"BOOL",            "b"},
+        {"BOOLEAN",         "b"},
+        {"BYTE",            "by"},
+        {"WORD",            "w"},
+        {"DWORD",           "dw"}};
   // clang-format on
 
   std::string ClonedTypeName = TypeName;
 
   // Handle null string
   std::string PrefixStr;
-  if (const auto *TD = dyn_cast<ValueDecl>(Decl)) {
+  if (const auto *TD = dyn_cast<ValueDecl>(InputDecl)) {
     auto QT = TD->getType();
-    if (QT->isPointerType()) {
+    if (QT->isFunctionPointerType()) {
+      PrefixStr = "fn"; // Function Pointer
+    } else if (QT->isPointerType()) {
       // clang-format off
       const static llvm::StringMap<StringRef> NullString = {
         {"char*",     "sz"},
@@ -247,6 +263,14 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
           break;
         }
       }
+      if (PrefixStr.empty()) {
+        PrefixStr = 'a'; // Array
+      }
+    } else if (QT->isReferenceType()) {
+      size_t Pos = ClonedTypeName.find_last_of("&");
+      if (Pos != std::string::npos) {
+        ClonedTypeName = ClonedTypeName.substr(0, Pos);
+      }
     }
   }
 
@@ -272,11 +296,13 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
     }(ClonedTypeName, "*", "");
   }
 
-  for (const auto &Type : HungarianNotationTable) {
-    const auto &Key = Type.getKey();
-    if (ClonedTypeName == Key) {
-      PrefixStr = Type.getValue().str();
-      break;
+  if (PrefixStr.empty()) {
+    for (const auto &Type : HungarianNotationTable) {
+      const auto &Key = Type.getKey();
+      if (ClonedTypeName == Key) {
+        PrefixStr = Type.getValue().str();
+        break;
+      }
     }
   }
 
@@ -306,15 +332,15 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
     std::string Type(Begin, StrLen);
 
     const static std::list<std::string> Keywords = {
-        // Qualifier
-        "const", "volatile",
-        // Storage class specifiers
-        "auto", "register", "static", "extern", "thread_local",
         // Constexpr specifiers
-        "constexpr", "constinit", "const_cast", "consteval"};
+        "constexpr", "constinit", "consteval",
+        // Qualifier
+        "const", "volatile", "restrict", "mutable",
+        // Storage class specifiers
+        "auto", "register", "static", "extern", "thread_local"};
 
     // Remove keywords
-    for (const auto &Kw : Keywords) {
+    for (const std::string &Kw : Keywords) {
       for (size_t Pos = 0; (Pos = Type.find(Kw, Pos)) != std::string::npos;) {
         Type.replace(Pos, Kw.length(), "");
       }
@@ -330,6 +356,12 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
     for (size_t Pos = 0; (Pos = Type.find(" *", Pos)) != std::string::npos;
          Pos += strlen("*")) {
       Type.replace(Pos, strlen(" *"), "*");
+    }
+
+    // Replace " &" with "&"
+    for (size_t Pos = 0; (Pos = Type.find(" &", Pos)) != std::string::npos;
+         Pos += strlen("&")) {
+      Type.replace(Pos, strlen(" &"), "&");
     }
 
     Type = Type.erase(Type.find_last_not_of(" ") + 1);
@@ -381,7 +413,7 @@ static bool matchesStyle(StringRef Type, StringRef Name,
 }
 
 static std::string fixupWithCase(const StringRef &Type, const StringRef &Name,
-                                 const Decl *pDecl,
+                                 const Decl *InputDecl,
                                  IdentifierNamingCheck::CaseType Case) {
   static llvm::Regex Splitter(
       "([a-z0-9A-Z]*)(_+)|([A-Z]?[a-z0-9]+)([A-Z]|$)|([A-Z]+)([A-Z]|$)");
@@ -475,14 +507,14 @@ static std::string fixupWithCase(const StringRef &Type, const StringRef &Name,
     break;
 
   case IdentifierNamingCheck::CT_HungarianNotation: {
-    const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(pDecl);
+    const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(InputDecl);
     const std::string TypePrefix =
         getHungarianNotationTypePrefix(Type.str(), pNamedDecl);
     Fixup = TypePrefix;
     for (size_t Idx = 0; Idx < Words.size(); Idx++) {
-      // Skip first part if it's a lowercase string
+      // Skip first part if it's a lowercase string.
       if (Idx == 0) {
-        const bool LowerAlnum =
+        bool LowerAlnum =
             std::all_of(Words[Idx].begin(), Words[Idx].end(),
                         [](const char c) { return isdigit(c) || islower(c); });
         if (LowerAlnum)
@@ -560,9 +592,9 @@ static bool isParamInMainLikeFunction(const ParmVarDecl &ParmDecl,
 static std::string
 fixupWithStyle(const StringRef &Type, const StringRef &Name,
                const IdentifierNamingCheck::NamingStyle &Style,
-               const Decl *Decl) {
+               const Decl *InputDecl) {
   const std::string Fixed = fixupWithCase(
-      Type, Name, Decl,
+      Type, Name, InputDecl,
       Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
   StringRef Mid = StringRef(Fixed).trim("_");
   if (Mid.empty())
