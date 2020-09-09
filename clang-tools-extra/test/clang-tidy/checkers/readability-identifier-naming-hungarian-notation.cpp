@@ -8,7 +8,7 @@ typedef unsigned short      uint16_t;   // NOLINT
 typedef unsigned long       uint32_t;   // NOLINT
 typedef unsigned long long  uint64_t;   // NOLINT
 
-typedef unsigned int        size_t;     // NOLINT
+typedef unsigned long long  size_t;     // NOLINT
 typedef long                intptr_t;   // NOLINT
 typedef unsigned long       uintptr_t;  // NOLINT
 typedef long int            ptrdiff_t;  // NOLINT
@@ -34,7 +34,7 @@ typedef BYTE                BOOLEAN;    // NOLINT
 // RUN:     {key: readability-identifier-naming.ParameterCase      , value: szHungarianNotation }, \
 // RUN:     {key: readability-identifier-naming.GlobalPointerCase  , value: szHungarianNotation }, \
 // RUN:     {key: readability-identifier-naming.GlobalVariableCase , value: szHungarianNotation }, \
-// RUN:     {key: readability-identifier-naming.GlobalFunctionCase , value: CamelCase }, \
+// RUN:     {key: readability-identifier-naming.GlobalFunctionCase , value: CamelCase } \
 // RUN:   ]}"
 
 class UnlistedClass { public: mutable int ValInt; };
