@@ -507,16 +507,16 @@ static std::string fixupWithCase(const StringRef &Type, const StringRef &Name,
     break;
 
   case IdentifierNamingCheck::CT_HungarianNotation: {
-    const NamedDecl *pNamedDecl = dyn_cast<NamedDecl>(InputDecl);
+    const NamedDecl *ND = dyn_cast<NamedDecl>(InputDecl);
     const std::string TypePrefix =
-        getHungarianNotationTypePrefix(Type.str(), pNamedDecl);
+        getHungarianNotationTypePrefix(Type.str(), ND);
     Fixup = TypePrefix;
     for (size_t Idx = 0; Idx < Words.size(); Idx++) {
       // Skip first part if it's a lowercase string.
       if (Idx == 0) {
         bool LowerAlnum =
             std::all_of(Words[Idx].begin(), Words[Idx].end(),
-                        [](const char c) { return isdigit(c) || islower(c); });
+                        [](const char C) { return isdigit(C) || islower(C); });
         if (LowerAlnum)
           continue;
       }
