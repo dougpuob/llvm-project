@@ -2,24 +2,19 @@ typedef signed char         int8_t;     // NOLINT
 typedef short               int16_t;    // NOLINT
 typedef long                int32_t;    // NOLINT
 typedef long long           int64_t;    // NOLINT
-
 typedef unsigned char       uint8_t;    // NOLINT
 typedef unsigned short      uint16_t;   // NOLINT
 typedef unsigned long       uint32_t;   // NOLINT
 typedef unsigned long long  uint64_t;   // NOLINT
-
 typedef unsigned long long  size_t;     // NOLINT
 typedef long                intptr_t;   // NOLINT
 typedef unsigned long       uintptr_t;  // NOLINT
 typedef long int            ptrdiff_t;  // NOLINT
-
 typedef unsigned char       BYTE;       // NOLINT
 typedef unsigned short      WORD;       // NOLINT
 typedef unsigned long       DWORD;      // NOLINT
-
 typedef int                 BOOL;       // NOLINT
 typedef BYTE                BOOLEAN;    // NOLINT
-
 #define NULL                (0)         // NOLINT
 
 // RUN: clang-tidy %s -checks=readability-identifier-naming \
