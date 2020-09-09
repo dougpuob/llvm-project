@@ -1,28 +1,23 @@
-typedef signed char         int8_t;     // NOLINT
-typedef short               int16_t;    // NOLINT
-typedef long                int32_t;    // NOLINT
-typedef long long           int64_t;    // NOLINT
+typedef signed char int8_t;          // NOLINT
+typedef short int16_t;               // NOLINT
+typedef long int32_t;                // NOLINT
+typedef long long int64_t;           // NOLINT
+typedef unsigned char uint8_t;       // NOLINT
+typedef unsigned short uint16_t;     // NOLINT
+typedef unsigned long uint32_t;      // NOLINT
+typedef unsigned long long uint64_t; // NOLINT
+typedef unsigned long long size_t;   // NOLINT
+typedef long intptr_t;               // NOLINT
+typedef unsigned long uintptr_t;     // NOLINT
+typedef long int ptrdiff_t;          // NOLINT
+typedef unsigned char BYTE;          // NOLINT
+typedef unsigned short WORD;         // NOLINT
+typedef unsigned long DWORD;         // NOLINT
+typedef int BOOL;                    // NOLINT
+typedef BYTE BOOLEAN;                // NOLINT
+#define NULL (0)                     // NOLINT
 
-typedef unsigned char       uint8_t;    // NOLINT
-typedef unsigned short      uint16_t;   // NOLINT
-typedef unsigned long       uint32_t;   // NOLINT
-typedef unsigned long long  uint64_t;   // NOLINT
-
-typedef unsigned int        size_t;     // NOLINT
-typedef long                intptr_t;   // NOLINT
-typedef unsigned long       uintptr_t;  // NOLINT
-typedef long int            ptrdiff_t;  // NOLINT
-
-typedef unsigned char       BYTE;       // NOLINT
-typedef unsigned short      WORD;       // NOLINT
-typedef unsigned long       DWORD;      // NOLINT
-
-typedef int                 BOOL;       // NOLINT
-typedef BYTE                BOOLEAN;    // NOLINT
-
-#define NULL                (0)         // NOLINT
-
-// RUN: %check_clang_tidy %s readability-identifier-naming %t -- \
+// RUN: clang-tidy %s -checks=readability-identifier-naming \
 // RUN:   -config="{CheckOptions: [\
 // RUN:     {key: readability-identifier-naming.FunctionCase       , value: CamelCase },           \
 // RUN:     {key: readability-identifier-naming.ClassCase          , value: szHungarianNotation }, \
@@ -34,7 +29,7 @@ typedef BYTE                BOOLEAN;    // NOLINT
 // RUN:     {key: readability-identifier-naming.ParameterCase      , value: szHungarianNotation }, \
 // RUN:     {key: readability-identifier-naming.GlobalPointerCase  , value: szHungarianNotation }, \
 // RUN:     {key: readability-identifier-naming.GlobalVariableCase , value: szHungarianNotation }, \
-// RUN:     {key: readability-identifier-naming.GlobalFunctionCase , value: CamelCase }, \
+// RUN:     {key: readability-identifier-naming.GlobalFunctionCase , value: CamelCase } \
 // RUN:   ]}"
 
 class UnlistedClass { public: mutable int ValInt; };
