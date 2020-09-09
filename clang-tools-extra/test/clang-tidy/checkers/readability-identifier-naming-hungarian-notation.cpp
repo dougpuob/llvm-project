@@ -22,7 +22,7 @@ typedef BYTE                BOOLEAN;    // NOLINT
 
 #define NULL                (0)         // NOLINT
 
-// RUN: %check_clang_tidy %s readability-identifier-naming %t -- \
+// RUN: clang-tidy %s -checks=readability-identifier-naming \
 // RUN:   -config="{CheckOptions: [\
 // RUN:     {key: readability-identifier-naming.FunctionCase       , value: CamelCase },           \
 // RUN:     {key: readability-identifier-naming.ClassCase          , value: szHungarianNotation }, \
