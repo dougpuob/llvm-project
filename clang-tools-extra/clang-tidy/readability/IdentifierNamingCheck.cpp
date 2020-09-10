@@ -325,7 +325,7 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
   // Get type text of variable declarations.
   const auto &SM = ValDecl->getASTContext().getSourceManager();
   const char *Begin = SM.getCharacterData(ValDecl->getBeginLoc());
-  const char *Curr = SM.getCharacterData(ValDecl->getLocation());
+  const char *Curr = SM.getCharacterData(ValDecl->getEndLoc());
   const intptr_t StrLen = Curr - Begin;
   std::string TypeName;
   if (StrLen > 0) {
