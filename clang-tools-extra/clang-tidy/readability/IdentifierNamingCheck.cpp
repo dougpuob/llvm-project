@@ -322,21 +322,36 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
     return "";
   }
 
+  if (clang::Decl::Kind::EnumConstant == Decl->getKind() ||
+      clang::Decl::Kind::CXXMethod == Decl->getKind()||
+      clang::Decl::Kind::Function == Decl->getKind()) {
+    return "";
+  }
+
   // Get type text of variable declarations.
-  const auto &SM = ValDecl->getASTContext().getSourceManager();
+  auto &SM = ValDecl->getASTContext().getSourceManager();
   const char *Begin = SM.getCharacterData(ValDecl->getBeginLoc());
-  const char *Curr = SM.getCharacterData(ValDecl->getEndLoc());
-  intptr_t StrLen = Curr - Begin;
+  const char *End = SM.getCharacterData(ValDecl->getEndLoc());
+  intptr_t StrLen = End - Begin;
 
   // FIXME: Sometimes the value that returns from ValDecl->getEndLoc()
   // is wrong(out of location of Decl). This causes `StrLen` will be assigned
-  // an unexpected large value. Current workaround makes maximum value to the
-  // end of the line.
-  const char *EndOfLine = strstr(Begin, "\n");
-  if (EndOfLine) {
-    StrLen = std::min(StrLen, EndOfLine - Begin);
+  // an unexpected large value. Current workaround to find the terminated
+  // character instead of the `getEndLoc()` function.
+  char *EOL = const_cast<char *>(strchr(Begin, '\n'));
+  if (!EOL) {
+    EOL = const_cast<char *>(Begin) + strlen(Begin);
+  }
+  std::vector<const char *> PosList = {
+      strchr(Begin, '='), strchr(Begin, ';'),
+      strchr(Begin, ','), strchr(Begin, ')'), EOL};
+  for (auto &Pos : PosList) {
+    if (Pos > Begin) {
+      EOL = std::min(EOL, const_cast<char *>(Pos));
+    }
   }
 
+  StrLen = EOL - Begin;
   std::string TypeName;
   if (StrLen > 0) {
     std::string Type(Begin, StrLen);
@@ -347,7 +362,9 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
         // Qualifier
         "const", "volatile", "restrict", "mutable",
         // Storage class specifiers
-        "auto", "register", "static", "extern", "thread_local"};
+        "register", "static", "extern", "thread_local",
+        // Other keywords
+        "virtual"};
 
     // Remove keywords
     for (const std::string &Kw : Keywords) {
@@ -356,27 +373,44 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
       }
     }
 
-    // Replace spaces with single space
+    // Replace spaces with single space.
     for (size_t Pos = 0; (Pos = Type.find("  ", Pos)) != std::string::npos;
          Pos += strlen(" ")) {
       Type.replace(Pos, strlen("  "), " ");
     }
 
-    // Replace " *" with "*"
-    for (size_t Pos = 0; (Pos = Type.find(" *", Pos)) != std::string::npos;
-         Pos += strlen("*")) {
-      Type.replace(Pos, strlen(" *"), "*");
-    }
-
-    // Replace " &" with "&"
+    // Replace " &" with "&".
     for (size_t Pos = 0; (Pos = Type.find(" &", Pos)) != std::string::npos;
          Pos += strlen("&")) {
       Type.replace(Pos, strlen(" &"), "&");
     }
 
-    Type = Type.erase(Type.find_last_not_of(" ") + 1);
-    Type = Type.erase(0, Type.find_first_not_of(" "));
-    TypeName = Type;
+    // Replace " *" with "* ".
+    for (size_t Pos = 0; (Pos = Type.find(" *", Pos)) != std::string::npos;
+         Pos += strlen("*")) {
+      Type.replace(Pos, strlen(" *"), "* ");
+    }
+
+    // Remove redundant tailing.
+    const static std::list<std::string> TailsOfMultiWordType = {
+        " int", " char", " double", " long"};
+    bool RedundantRemoved = false;
+    for (const std::string &Kw : TailsOfMultiWordType) {
+      for (size_t Pos = 0; (Pos = Type.find(Kw, Pos)) != std::string::npos;) {
+        Type = Type.substr(0, Pos + Kw.length());
+        RedundantRemoved = true;
+        break;
+      }
+    }
+    TypeName = Type.erase(0, Type.find_first_not_of(" "));
+    if (!RedundantRemoved) {
+      std::size_t FoundSpace = Type.find(" ");
+      if (FoundSpace != std::string::npos) {
+        Type = Type.substr(0, FoundSpace);
+      }
+    }
+
+    TypeName = Type.erase(0, Type.find_first_not_of(" "));
   }
 
   return TypeName;
