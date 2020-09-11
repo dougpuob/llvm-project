@@ -325,8 +325,18 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
   // Get type text of variable declarations.
   const auto &SM = ValDecl->getASTContext().getSourceManager();
   const char *Begin = SM.getCharacterData(ValDecl->getBeginLoc());
-  const char *Curr = SM.getCharacterData(ValDecl->getLocation());
-  const intptr_t StrLen = Curr - Begin;
+  const char *Curr = SM.getCharacterData(ValDecl->getEndLoc());
+  intptr_t StrLen = Curr - Begin;
+
+  // FIXME: Sometimes the value that returns from ValDecl->getEndLoc()
+  // is wrong(out of location of Decl). This causes `StrLen` will be assigned
+  // an unexpected large value. Current workaround makes maximum value to the
+  // end of the line.
+  const char *EndOfLine = strstr(Begin, "\n");
+  if (EndOfLine) {
+    StrLen = std::min(StrLen, EndOfLine - Begin);
+  }
+
   std::string TypeName;
   if (StrLen > 0) {
     std::string Type(Begin, StrLen);
@@ -774,7 +784,7 @@ static StyleKind findStyleKind(
 
     if (Decl->isStaticLocal() && NamingStyles[SK_StaticVariable])
       return SK_StaticVariable;
- 
+
     if (Decl->isLocalVarDecl() && Type.getTypePtr()->isAnyPointerType() && NamingStyles[SK_LocalPointer])
       return SK_LocalPointer;
 
