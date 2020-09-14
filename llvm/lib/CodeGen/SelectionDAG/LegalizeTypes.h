@@ -311,7 +311,7 @@ private:
   SDValue PromoteIntRes_BUILD_PAIR(SDNode *N);
   SDValue PromoteIntRes_Constant(SDNode *N);
   SDValue PromoteIntRes_CTLZ(SDNode *N);
-  SDValue PromoteIntRes_CTPOP(SDNode *N);
+  SDValue PromoteIntRes_CTPOP_PARITY(SDNode *N);
   SDValue PromoteIntRes_CTTZ(SDNode *N);
   SDValue PromoteIntRes_EXTRACT_VECTOR_ELT(SDNode *N);
   SDValue PromoteIntRes_FP_TO_XINT(SDNode *N);
@@ -431,6 +431,7 @@ private:
   void ExpandIntRes_ADDSUBCARRY       (SDNode *N, SDValue &Lo, SDValue &Hi);
   void ExpandIntRes_BITREVERSE        (SDNode *N, SDValue &Lo, SDValue &Hi);
   void ExpandIntRes_BSWAP             (SDNode *N, SDValue &Lo, SDValue &Hi);
+  void ExpandIntRes_PARITY            (SDNode *N, SDValue &Lo, SDValue &Hi);
   void ExpandIntRes_MUL               (SDNode *N, SDValue &Lo, SDValue &Hi);
   void ExpandIntRes_SDIV              (SDNode *N, SDValue &Lo, SDValue &Hi);
   void ExpandIntRes_SREM              (SDNode *N, SDValue &Lo, SDValue &Hi);
@@ -985,8 +986,6 @@ private:
   void SplitRes_SELECT_CC   (SDNode *N, SDValue &Lo, SDValue &Hi);
   void SplitRes_UNDEF       (SDNode *N, SDValue &Lo, SDValue &Hi);
   void SplitRes_FREEZE      (SDNode *N, SDValue &Lo, SDValue &Hi);
-
-  void SplitVSETCC(const SDNode *N);
 
   //===--------------------------------------------------------------------===//
   // Generic Expansion: LegalizeTypesGeneric.cpp

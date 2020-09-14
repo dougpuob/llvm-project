@@ -2982,7 +2982,7 @@ bool CodeGenFunction::EmitOMPWorksharingLoop(
           ((ScheduleKind.Schedule == OMPC_SCHEDULE_static ||
             ScheduleKind.Schedule == OMPC_SCHEDULE_unknown) &&
            !(ScheduleKind.M1 == OMPC_SCHEDULE_MODIFIER_nonmonotonic ||
-             ScheduleKind.M1 == OMPC_SCHEDULE_MODIFIER_nonmonotonic)) ||
+             ScheduleKind.M2 == OMPC_SCHEDULE_MODIFIER_nonmonotonic)) ||
           ScheduleKind.M1 == OMPC_SCHEDULE_MODIFIER_monotonic ||
           ScheduleKind.M2 == OMPC_SCHEDULE_MODIFIER_monotonic;
       if ((RT.isStaticNonchunked(ScheduleKind.Schedule,
@@ -4137,7 +4137,7 @@ createImplicitFirstprivateForType(ASTContext &C, OMPTaskDataTy &Data,
   PrivateVD->setInitStyle(VarDecl::CInit);
   PrivateVD->setInit(ImplicitCastExpr::Create(C, ElemType, CK_LValueToRValue,
                                               InitRef, /*BasePath=*/nullptr,
-                                              VK_RValue));
+                                              VK_RValue, FPOptionsOverride()));
   Data.FirstprivateVars.emplace_back(OrigRef);
   Data.FirstprivateCopies.emplace_back(PrivateRef);
   Data.FirstprivateInits.emplace_back(InitRef);

@@ -126,6 +126,8 @@ class StdLibraryFunctionsChecker
     }
     ArgNo getArgNo() const { return ArgN; }
 
+    virtual StringRef getName() const = 0;
+
   protected:
     ArgNo ArgN; // Argument to which we apply the constraint.
 
@@ -152,6 +154,7 @@ class StdLibraryFunctionsChecker
     IntRangeVector Ranges;
 
   public:
+    StringRef getName() const override { return "Range"; }
     RangeConstraint(ArgNo ArgN, RangeKind Kind, const IntRangeVector &Ranges)
         : ValueConstraint(ArgN), Kind(Kind), Ranges(Ranges) {}
 
@@ -205,6 +208,7 @@ class StdLibraryFunctionsChecker
     ArgNo OtherArgN;
 
   public:
+    virtual StringRef getName() const override { return "Comparison"; };
     ComparisonConstraint(ArgNo ArgN, BinaryOperator::Opcode Opcode,
                          ArgNo OtherArgN)
         : ValueConstraint(ArgN), Opcode(Opcode), OtherArgN(OtherArgN) {}
@@ -221,6 +225,7 @@ class StdLibraryFunctionsChecker
     bool CannotBeNull = true;
 
   public:
+    StringRef getName() const override { return "NonNull"; }
     ProgramStateRef apply(ProgramStateRef State, const CallEvent &Call,
                           const Summary &Summary,
                           CheckerContext &C) const override {
@@ -272,6 +277,7 @@ class StdLibraryFunctionsChecker
     BinaryOperator::Opcode Op = BO_LE;
 
   public:
+    StringRef getName() const override { return "BufferSize"; }
     BufferSizeConstraint(ArgNo Buffer, llvm::APSInt BufMinSize)
         : ValueConstraint(Buffer), ConcreteSize(BufMinSize) {}
     BufferSizeConstraint(ArgNo Buffer, ArgNo BufSize)
@@ -466,6 +472,8 @@ class StdLibraryFunctionsChecker
       return *this;
     }
     Summary &ArgConstraint(ValueConstraintPtr VC) {
+      assert(VC->getArgNo() != Ret &&
+             "Arg constraint should not refer to the return value");
       ArgConstraints.push_back(VC);
       return *this;
     }
@@ -549,17 +557,24 @@ private:
   void initFunctionSummaries(CheckerContext &C) const;
 
   void reportBug(const CallEvent &Call, ExplodedNode *N,
-                 CheckerContext &C) const {
+                 const ValueConstraint *VC, CheckerContext &C) const {
     if (!ChecksEnabled[CK_StdCLibraryFunctionArgsChecker])
       return;
-    // TODO Add detailed diagnostic.
-    StringRef Msg = "Function argument constraint is not satisfied";
+    // TODO Add more detailed diagnostic.
+    std::string Msg =
+        (Twine("Function argument constraint is not satisfied, constraint: ") +
+         VC->getName().data() + ", ArgN: " + Twine(VC->getArgNo()))
+            .str();
     if (!BT_InvalidArg)
       BT_InvalidArg = std::make_unique<BugType>(
           CheckNames[CK_StdCLibraryFunctionArgsChecker],
           "Unsatisfied argument constraints", categories::LogicError);
     auto R = std::make_unique<PathSensitiveBugReport>(*BT_InvalidArg, Msg, N);
-    bugreporter::trackExpressionValue(N, Call.getArgExpr(0), *R);
+    bugreporter::trackExpressionValue(N, Call.getArgExpr(VC->getArgNo()), *R);
+
+    // Highlight the range of the argument that was violated.
+    R->addRange(Call.getArgSourceRange(VC->getArgNo()));
+
     C.emitReport(std::move(R));
   }
 };
@@ -696,7 +711,7 @@ void StdLibraryFunctionsChecker::checkPreCall(const CallEvent &Call,
     // The argument constraint is not satisfied.
     if (FailureSt && !SuccessSt) {
       if (ExplodedNode *N = C.generateErrorNode(NewState))
-        reportBug(Call, N, C);
+        reportBug(Call, N, Constraint.get(), C);
       break;
     } else {
       // We will apply the constraint even if we cannot reason about the
@@ -951,6 +966,8 @@ void StdLibraryFunctionsChecker::initFunctionSummaries(
   const QualType ConstWchar_tPtrTy =
       getPointerTy(getConstTy(WCharTy)); // const wchar_t *
   const QualType ConstVoidPtrRestrictTy = getRestrictTy(ConstVoidPtrTy);
+  const QualType SizePtrTy = getPointerTy(SizeTy);
+  const QualType SizePtrRestrictTy = getRestrictTy(SizePtrTy);
 
   const RangeInt IntMax = BVF.getMaxValue(IntTy).getLimitedValue();
   const RangeInt UnsignedIntMax =
@@ -1674,22 +1691,6 @@ void StdLibraryFunctionsChecker::initFunctionSummaries(
                                               RetType{IntTy}, NoEvalCall)
                                           .ArgConstraint(NotNull(ArgNo(0))));
 
-    // int strcasecmp(const char *s1, const char *s2);
-    addToFunctionSummaryMap("strcasecmp",
-                            Summary(ArgTypes{ConstCharPtrTy, ConstCharPtrTy},
-                                    RetType{IntTy}, EvalCallAsPure)
-                                .ArgConstraint(NotNull(ArgNo(0)))
-                                .ArgConstraint(NotNull(ArgNo(1))));
-
-    // int strncasecmp(const char *s1, const char *s2, size_t n);
-    addToFunctionSummaryMap(
-        "strncasecmp", Summary(ArgTypes{ConstCharPtrTy, ConstCharPtrTy, SizeTy},
-                               RetType{IntTy}, EvalCallAsPure)
-                           .ArgConstraint(NotNull(ArgNo(0)))
-                           .ArgConstraint(NotNull(ArgNo(1)))
-                           .ArgConstraint(ArgumentCondition(
-                               2, WithinRange, Range(0, SizeMax))));
-
     // int fileno(FILE *stream);
     addToFunctionSummaryMap(
         "fileno", Summary(ArgTypes{FilePtrTy}, RetType{IntTy}, NoEvalCall)
@@ -2182,6 +2183,99 @@ void StdLibraryFunctionsChecker::initFunctionSummaries(
                             Summary(ArgTypes{IntTy, StructItimervalPtrTy},
                                     RetType{IntTy}, NoEvalCall)
                                 .ArgConstraint(NotNull(ArgNo(1))));
+
+    Optional<QualType> Pthread_cond_tTy = lookupTy("pthread_cond_t");
+    Optional<QualType> Pthread_cond_tPtrTy = getPointerTy(Pthread_cond_tTy);
+    Optional<QualType> Pthread_tTy = lookupTy("pthread_t");
+    Optional<QualType> Pthread_tPtrTy = getPointerTy(Pthread_tTy);
+    Optional<QualType> Pthread_tPtrRestrictTy = getRestrictTy(Pthread_tPtrTy);
+    Optional<QualType> Pthread_mutex_tTy = lookupTy("pthread_mutex_t");
+    Optional<QualType> Pthread_mutex_tPtrTy = getPointerTy(Pthread_mutex_tTy);
+    Optional<QualType> Pthread_mutex_tPtrRestrictTy =
+        getRestrictTy(Pthread_mutex_tPtrTy);
+    Optional<QualType> Pthread_attr_tTy = lookupTy("pthread_attr_t");
+    Optional<QualType> Pthread_attr_tPtrTy = getPointerTy(Pthread_attr_tTy);
+    Optional<QualType> ConstPthread_attr_tPtrTy =
+        getPointerTy(getConstTy(Pthread_attr_tTy));
+    Optional<QualType> ConstPthread_attr_tPtrRestrictTy =
+        getRestrictTy(ConstPthread_attr_tPtrTy);
+    Optional<QualType> Pthread_mutexattr_tTy = lookupTy("pthread_mutexattr_t");
+    Optional<QualType> ConstPthread_mutexattr_tPtrTy =
+        getPointerTy(getConstTy(Pthread_mutexattr_tTy));
+    Optional<QualType> ConstPthread_mutexattr_tPtrRestrictTy =
+        getRestrictTy(ConstPthread_mutexattr_tPtrTy);
+
+    QualType PthreadStartRoutineTy = getPointerTy(
+        ACtx.getFunctionType(/*ResultTy=*/VoidPtrTy, /*Args=*/VoidPtrTy,
+                             FunctionProtoType::ExtProtoInfo()));
+
+    // int pthread_cond_signal(pthread_cond_t *cond);
+    // int pthread_cond_broadcast(pthread_cond_t *cond);
+    addToFunctionSummaryMap(
+        {"pthread_cond_signal", "pthread_cond_broadcast"},
+        Signature(ArgTypes{Pthread_cond_tPtrTy}, RetType{IntTy}),
+        Summary(NoEvalCall).ArgConstraint(NotNull(ArgNo(0))));
+
+    // int pthread_create(pthread_t *restrict thread,
+    //                    const pthread_attr_t *restrict attr,
+    //                    void *(*start_routine)(void*), void *restrict arg);
+    addToFunctionSummaryMap(
+        "pthread_create",
+        Signature(ArgTypes{Pthread_tPtrRestrictTy,
+                           ConstPthread_attr_tPtrRestrictTy,
+                           PthreadStartRoutineTy, VoidPtrRestrictTy},
+                  RetType{IntTy}),
+        Summary(NoEvalCall)
+            .ArgConstraint(NotNull(ArgNo(0)))
+            .ArgConstraint(NotNull(ArgNo(2))));
+
+    // int pthread_attr_destroy(pthread_attr_t *attr);
+    // int pthread_attr_init(pthread_attr_t *attr);
+    addToFunctionSummaryMap(
+        {"pthread_attr_destroy", "pthread_attr_init"},
+        Signature(ArgTypes{Pthread_attr_tPtrTy}, RetType{IntTy}),
+        Summary(NoEvalCall).ArgConstraint(NotNull(ArgNo(0))));
+
+    // int pthread_attr_getstacksize(const pthread_attr_t *restrict attr,
+    //                               size_t *restrict stacksize);
+    // int pthread_attr_getguardsize(const pthread_attr_t *restrict attr,
+    //                               size_t *restrict guardsize);
+    addToFunctionSummaryMap(
+        {"pthread_attr_getstacksize", "pthread_attr_getguardsize"},
+        Signature(ArgTypes{ConstPthread_attr_tPtrRestrictTy, SizePtrRestrictTy},
+                  RetType{IntTy}),
+        Summary(NoEvalCall)
+            .ArgConstraint(NotNull(ArgNo(0)))
+            .ArgConstraint(NotNull(ArgNo(1))));
+
+    // int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
+    // int pthread_attr_setguardsize(pthread_attr_t *attr, size_t guardsize);
+    addToFunctionSummaryMap(
+        {"pthread_attr_setstacksize", "pthread_attr_setguardsize"},
+        Signature(ArgTypes{Pthread_attr_tPtrTy, SizeTy}, RetType{IntTy}),
+        Summary(NoEvalCall)
+            .ArgConstraint(NotNull(ArgNo(0)))
+            .ArgConstraint(
+                ArgumentCondition(1, WithinRange, Range(0, SizeMax))));
+
+    // int pthread_mutex_init(pthread_mutex_t *restrict mutex, const
+    //                        pthread_mutexattr_t *restrict attr);
+    addToFunctionSummaryMap(
+        "pthread_mutex_init",
+        Signature(ArgTypes{Pthread_mutex_tPtrRestrictTy,
+                           ConstPthread_mutexattr_tPtrRestrictTy},
+                  RetType{IntTy}),
+        Summary(NoEvalCall).ArgConstraint(NotNull(ArgNo(0))));
+
+    // int pthread_mutex_destroy(pthread_mutex_t *mutex);
+    // int pthread_mutex_lock(pthread_mutex_t *mutex);
+    // int pthread_mutex_trylock(pthread_mutex_t *mutex);
+    // int pthread_mutex_unlock(pthread_mutex_t *mutex);
+    addToFunctionSummaryMap(
+        {"pthread_mutex_destroy", "pthread_mutex_lock", "pthread_mutex_trylock",
+         "pthread_mutex_unlock"},
+        Signature(ArgTypes{Pthread_mutex_tPtrTy}, RetType{IntTy}),
+        Summary(NoEvalCall).ArgConstraint(NotNull(ArgNo(0))));
   }
 
   // Functions for testing.

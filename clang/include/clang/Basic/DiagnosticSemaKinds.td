@@ -3141,6 +3141,9 @@ def warn_nocf_check_attribute_ignored :
 def warn_attribute_after_definition_ignored : Warning<
   "attribute %0 after definition is ignored">,
    InGroup<IgnoredAttributes>;
+def warn_attributes_likelihood_ifstmt_conflict
+    : Warning<"conflicting attributes %0 are ignored">,
+      InGroup<IgnoredAttributes>;
 def warn_cxx11_gnu_attribute_on_type : Warning<
   "attribute %0 ignored, because it cannot be applied to a type">,
   InGroup<IgnoredAttributes>;
@@ -3970,6 +3973,13 @@ def err_objc_bridged_related_known_method : Error<
 
 def err_objc_attr_protocol_requires_definition : Error<
   "attribute %0 can only be applied to @protocol definitions, not forward declarations">;
+
+def err_attr_swift_error_no_error_parameter : Error<
+  "%0 attribute can only be applied to a %select{function|method}1 with an "
+  "error parameter">;
+def err_attr_swift_error_return_type : Error<
+  "%0 attribute with '%1' convention can only be applied to a "
+  "%select{function|method}2 returning %select{an integral type|a pointer}3">;
 
 def warn_ignored_objc_externally_retained : Warning<
   "'objc_externally_retained' can only be applied to local variables "
@@ -5092,6 +5102,9 @@ def err_fold_expression_empty : Error<
   "with no fallback value">;
 def err_fold_expression_bad_operand : Error<
   "expression not permitted as operand of fold expression">;
+def err_fold_expression_limit_exceeded: Error<
+  "instantiating fold expression with %0 arguments exceeded expression nesting "
+  "limit of %1">, DefaultFatal, NoSFINAE;
 
 def err_unexpected_typedef : Error<
   "unexpected type name %0: expected expression">;

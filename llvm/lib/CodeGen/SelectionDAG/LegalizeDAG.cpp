@@ -181,6 +181,7 @@ private:
 
   SDValue ExpandBITREVERSE(SDValue Op, const SDLoc &dl);
   SDValue ExpandBSWAP(SDValue Op, const SDLoc &dl);
+  SDValue ExpandPARITY(SDValue Op, const SDLoc &dl);
 
   SDValue ExpandExtractFromVectorThroughStack(SDValue Op);
   SDValue ExpandInsertToVectorThroughStack(SDValue Op);
@@ -1735,12 +1736,16 @@ bool SelectionDAGLegalize::LegalizeSetCCCondCode(
     if (CCCode != ISD::SETO && CCCode != ISD::SETUO) {
       // If we aren't the ordered or unorder operation,
       // then the pattern is (LHS CC1 RHS) Opc (LHS CC2 RHS).
-      SetCC1 = DAG.getSetCC(dl, VT, LHS, RHS, CC1, Chain, IsSignaling);
-      SetCC2 = DAG.getSetCC(dl, VT, LHS, RHS, CC2, Chain, IsSignaling);
+      SetCC1 = DAG.getSetCC(dl, VT, LHS, RHS, CC1, SDNodeFlags(), Chain,
+                            IsSignaling);
+      SetCC2 = DAG.getSetCC(dl, VT, LHS, RHS, CC2, SDNodeFlags(), Chain,
+                            IsSignaling);
     } else {
       // Otherwise, the pattern is (LHS CC1 LHS) Opc (RHS CC2 RHS)
-      SetCC1 = DAG.getSetCC(dl, VT, LHS, LHS, CC1, Chain, IsSignaling);
-      SetCC2 = DAG.getSetCC(dl, VT, RHS, RHS, CC2, Chain, IsSignaling);
+      SetCC1 = DAG.getSetCC(dl, VT, LHS, LHS, CC1, SDNodeFlags(), Chain,
+                            IsSignaling);
+      SetCC2 = DAG.getSetCC(dl, VT, RHS, RHS, CC2, SDNodeFlags(), Chain,
+                            IsSignaling);
     }
     if (Chain)
       Chain = DAG.getNode(ISD::TokenFactor, dl, MVT::Other, SetCC1.getValue(1),
@@ -2781,6 +2786,28 @@ SDValue SelectionDAGLegalize::ExpandBSWAP(SDValue Op, const SDLoc &dl) {
   }
 }
 
+/// Open code the operations for PARITY of the specified operation.
+SDValue SelectionDAGLegalize::ExpandPARITY(SDValue Op, const SDLoc &dl) {
+  EVT VT = Op.getValueType();
+  EVT ShVT = TLI.getShiftAmountTy(VT, DAG.getDataLayout());
+  unsigned Sz = VT.getScalarSizeInBits();
+
+  // If CTPOP is legal, use it. Otherwise use shifts and xor.
+  SDValue Result;
+  if (TLI.isOperationLegal(ISD::CTPOP, VT)) {
+    Result = DAG.getNode(ISD::CTPOP, dl, VT, Op);
+  } else {
+    Result = Op;
+    for (unsigned i = Log2_32_Ceil(Sz); i != 0;) {
+      SDValue Shift = DAG.getNode(ISD::SRL, dl, VT, Result,
+                                  DAG.getConstant(1 << (--i), dl, ShVT));
+      Result = DAG.getNode(ISD::XOR, dl, VT, Result, Shift);
+    }
+  }
+
+  return DAG.getNode(ISD::AND, dl, VT, Result, DAG.getConstant(1, dl, VT));
+}
+
 bool SelectionDAGLegalize::ExpandNode(SDNode *Node) {
   LLVM_DEBUG(dbgs() << "Trying to expand node\n");
   SmallVector<SDValue, 8> Results;
@@ -2811,6 +2838,9 @@ bool SelectionDAGLegalize::ExpandNode(SDNode *Node) {
     break;
   case ISD::BSWAP:
     Results.push_back(ExpandBSWAP(Node->getOperand(0), dl));
+    break;
+  case ISD::PARITY:
+    Results.push_back(ExpandPARITY(Node->getOperand(0), dl));
     break;
   case ISD::FRAMEADDR:
   case ISD::RETURNADDR:

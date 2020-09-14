@@ -784,10 +784,13 @@ void PassManagerBuilder::populateModulePassManager(
   // convert to more optimized IR using more aggressive simplify CFG options.
   // The extra sinking transform can create larger basic blocks, so do this
   // before SLP vectorization.
+  // FIXME: study whether hoisting and/or sinking of common instructions should
+  //        be delayed until after SLP vectorizer.
   MPM.add(createCFGSimplificationPass(SimplifyCFGOptions()
                                           .forwardSwitchCondToPhi(true)
                                           .convertSwitchToLookupTable(true)
                                           .needCanonicalLoops(false)
+                                          .hoistCommonInsts(true)
                                           .sinkCommonInsts(true)));
 
   if (SLPVectorize) {
@@ -995,7 +998,7 @@ void PassManagerBuilder::addLTOOptimizationPasses(legacy::PassManagerBase &PM) {
   // The IPO passes may leave cruft around.  Clean up after them.
   PM.add(createInstructionCombiningPass());
   addExtensionsToPM(EP_Peephole, PM);
-  PM.add(createJumpThreadingPass());
+  PM.add(createJumpThreadingPass(/*FreezeSelectCond*/ true));
 
   // Break up allocas
   PM.add(createSROAPass());
@@ -1058,7 +1061,7 @@ void PassManagerBuilder::addLTOOptimizationPasses(legacy::PassManagerBase &PM) {
   PM.add(createInstructionCombiningPass());
   addExtensionsToPM(EP_Peephole, PM);
 
-  PM.add(createJumpThreadingPass());
+  PM.add(createJumpThreadingPass(/*FreezeSelectCond*/ true));
 }
 
 void PassManagerBuilder::addLateLTOOptimizationPasses(
