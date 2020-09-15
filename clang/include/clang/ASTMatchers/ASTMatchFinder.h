@@ -274,6 +274,19 @@ selectFirst(StringRef BoundTo, const SmallVectorImpl<BoundNodes> &Results) {
   return nullptr;
 }
 
+template <typename NodeT>
+const NodeT *
+selectSecond(StringRef BoundTo, const SmallVectorImpl<BoundNodes> &Results) {
+  size_t Idx = 0;
+  for (const BoundNodes &N : Results) {
+    if (++Idx == 2) {
+        if (const NodeT *Node = N.getNodeAs<NodeT>(BoundTo))
+          return Node;
+    }
+  }
+  return nullptr;
+}
+
 namespace internal {
 class CollectMatchesCallback : public MatchFinder::MatchCallback {
 public:

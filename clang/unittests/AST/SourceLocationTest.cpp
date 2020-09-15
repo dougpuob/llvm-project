@@ -912,4 +912,35 @@ TEST(Decl, MemberPointerStarLoc) {
   ASSERT_EQ(SM.getFileOffset(TL.getStarLoc()), Example.point("star"));
 }
 
+TEST(Decl, MacroExpandDeclaration) {
+  llvm::Annotations Example(R"cpp(
+    int global0;
+    #define USE_NUMBERED_GLOBAL(number) auto use_global##number = global##number
+    USE_NUMBERED_GLOBAL(0);    
+  )cpp");
+
+  auto AST = tooling::buildASTFromCode(Example.code());
+  SourceManager &SM = AST->getSourceManager();
+  auto &Ctx = AST->getASTContext();
+
+  auto *VD = selectSecond<VarDecl>("decl", match(varDecl().bind("decl"), Ctx));
+  SourceLocation Begin;
+  SourceLocation End;
+  char* StrBegin;
+  char* StrEnd;
+  if (const auto *TD = dyn_cast<ValueDecl>(VD)) {    
+    Begin = TD->getBeginLoc();
+    End   = TD->getEndLoc();
+    
+    StrBegin = (char*)SM.getCharacterData(Begin);
+    StrEnd  = (char*)SM.getCharacterData(End);
+  }
+  auto Diff = StrEnd - StrBegin;
+
+  auto TL =
+      VD->getTypeSourceInfo()->getTypeLoc().castAs<MemberPointerTypeLoc>();
+  ASSERT_EQ(SM.getFileOffset(TL.getStarLoc()), Example.point("star"));
+}
+
+
 } // end namespace
