@@ -324,7 +324,7 @@ TEST(CompoundLiteralExpr, ParensCompoundVectorLiteralRange) {
   Verifier.expectRange(2, 20, 2, 31);
   EXPECT_TRUE(Verifier.match(
                   "typedef int int2 __attribute__((ext_vector_type(2)));\n"
-                  "constant int2 i2 = (int2)(1, 2);", 
+                  "constant int2 i2 = (int2)(1, 2);",
                   compoundLiteralExpr(), Lang_OpenCL));
 }
 
@@ -912,11 +912,11 @@ TEST(Decl, MemberPointerStarLoc) {
   ASSERT_EQ(SM.getFileOffset(TL.getStarLoc()), Example.point("star"));
 }
 
-TEST(Decl, MacroExpandDeclaration) {
+TEST(Decl, MacroExpandVarDecl) {
   llvm::Annotations Example(R"cpp(
-    int global0;
-    #define USE_NUMBERED_GLOBAL(number) auto use_global##number = global##number
-    USE_NUMBERED_GLOBAL(0);    
+    int global1;
+    #define USE_NUMBERED_GLOBAL(number) auto use_global##number = global1
+    USE_NUMBERED_GLOBAL(0);
   )cpp");
 
   auto AST = tooling::buildASTFromCode(Example.code());
@@ -924,26 +924,40 @@ TEST(Decl, MacroExpandDeclaration) {
   auto &Ctx = AST->getASTContext();
 
   auto *VD = selectSecond<VarDecl>("decl", match(varDecl().bind("decl"), Ctx));
-  SourceLocation Begin;
-  SourceLocation End;
-  char* StrBegin;
-  char* StrEnd;
-  bool IsValid = false;
-  if (const auto *TD = dyn_cast<ValueDecl>(VD)) {    
-    IsValid = !TD->isInvalidDecl();
-    Begin = TD->getBeginLoc();
-    End   = TD->getEndLoc();
-    
-    StrBegin = (char*)SM.getCharacterData(Begin);
-    StrEnd  = (char*)SM.getCharacterData(End);
-  }
-  auto Diff = StrEnd - StrBegin;
-  Diff;
+  if (const auto *TD = dyn_cast<ValueDecl>(VD)) {
+    SourceLocation Begin = TD->getBeginLoc();
+    SourceLocation End   = TD->getEndLoc();
 
-  //auto TL =
-  //    VD->getTypeSourceInfo()->getTypeLoc().castAs<MemberPointerTypeLoc>();
-  //ASSERT_EQ(SM.getFileOffset(TL.getStarLoc()), Example.point("star"));
+    char* StrBegin = (char*)SM.getCharacterData(Begin);
+    char* StrEnd  = (char*)SM.getCharacterData(End);
+
+    std::size_t Diff = StrEnd - StrBegin;
+    ASSERT_GT(Diff, 0U);
+  }
 }
 
+TEST(Decl, MacroExpandVarDeclAsignWithPrevIdentifier) {
+  llvm::Annotations Example(R"cpp(
+    int global0;
+    #define USE_NUMBERED_GLOBAL(number) auto use_global##number = global##number
+    USE_NUMBERED_GLOBAL(0);
+  )cpp");
+
+  auto AST = tooling::buildASTFromCode(Example.code());
+  SourceManager &SM = AST->getSourceManager();
+  auto &Ctx = AST->getASTContext();
+
+  auto *VD = selectSecond<VarDecl>("decl", match(varDecl().bind("decl"), Ctx));
+  if (const auto *TD = dyn_cast<ValueDecl>(VD)) {
+    SourceLocation Begin = TD->getBeginLoc();
+    SourceLocation End   = TD->getEndLoc();
+
+    char* StrBegin = (char*)SM.getCharacterData(Begin);
+    char* StrEnd  = (char*)SM.getCharacterData(End);
+
+    std::size_t Diff = StrEnd - StrBegin;
+    ASSERT_GT(Diff, 0U);
+  }
+}
 
 } // end namespace
