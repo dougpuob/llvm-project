@@ -34,63 +34,49 @@ This also applies for pseudo-override patterns like CRTP.
 Hungarian Notation casing type
 ------------------------------
 
-In Hungarian notation, a variable name starts with a group of lower-case 
+In Hungarian notation, a variable name starts with a group of lower-case
 letters which are mnemonics for the type or purpose of that variable, followed
-by whatever name the programmer has chosen; this last part is sometimes 
-distinguished as the given name. The first character of the given name can be 
-capitalized to separate it from the type indicators (see also CamelCase). 
+by whatever name the programmer has chosen; this last part is sometimes
+distinguished as the given name. The first character of the given name can be
+capitalized to separate it from the type indicators (see also CamelCase).
 Otherwise the case of this character denotes scope.
 
-============ ============= ================ ============= =========== ==============
-Primitive Types                                           Microsoft data types
---------------------------------------------------------- --------------------------
-    Type        Prefix          Type           Prefix        Type        Prefix
-============ ============= ================ ============= =========== ==============
-int8_t       i8            short            s             BOOL        b         
-int16_t      i16           signed           i             BOOLEAN     b         
-int32_t      i32           unsigned         u             BYTE        by        
-int64_t      i64           long             l             WORD        w         
-uint8_t      u8            long long        ll            DWORD       dw        
-uint16_t     u16           unsigned long    ul                                  
-uint32_t     u32           long double      ld                                  
-uint64_t     u64           ptrdiff_t        p                                   
-char8_t      c8                                                                 
-char16_t     c16                                                                
-char32_t     c32                                                                
-float        f                                                                  
-double       d                                                                  
-char         c                                                                  
-bool         b                                                                  
-_Bool        b                                                                  
-int          i                                                                  
-size_t       n                                                                  
-============ ============= ================ ============= =========== ==============
+================= ============== ====================== ============== =========== ==============
+Primitive Types                                                        Microsoft data types
+---------------------------------------------------------------------- --------------------------
+    Type          Prefix         Type                   Prefix         Type        Prefix
+================= ============== ====================== ============== =========== ==============
+int8_t            i8             signed int             si             BOOL        b
+int16_t           i16            signed short           ss             BOOLEAN     b
+int32_t           i32            signed short int       ssi            BYTE        by
+int64_t           i64            signed long long int   slli           CHAR        c
+uint8_t           u8             signed long long       sll            UCHAR       uc
+uint16_t          u16            signed long int        sli            SHORT       s
+uint32_t          u32            signed long            sl             USHORT      us
+uint64_t          u64            signed                 s              WORD        w
+char8_t           c8             unsigned long long int ulli           DWORD       dw
+char16_t          c16            unsigned long long     ull            DWORD32     dw32
+char32_t          c32            unsigned long int      uli            DWORD64     dw64
+float             f              unsigned long          ul             LONG        l
+double            d              unsigned short int     usi            ULONG       ul
+char              c              unsigned short         us             ULONG32     ul32
+bool              b              unsigned int           ui             ULONG64     ul64
+_Bool             b              unsigned               u              ULONGLONG   ull
+int               i              long long int          lli            HANDLE      h
+size_t            n              long double            ld             INT         i
+short             s              long long              ll             INT8        i8
+signed            i              long int               li             INT16       i16
+unsigned          u              long                   l              INT32       i32
+long              l              ptrdiff_t              p              INT64       i64
+long long         ll                                                   UINT        ui
+unsigned long     ul                                                   UINT8       u8
+long double       ld                                                   UINT16      u16
+ptrdiff_t         p                                                    UINT32      u32
+wchar_t           wc                                                   UINT64      u64
+short int         si                                                   PVOID       p
+short             s
+================= ============== ====================== ============== =========== ==============
 
-
-
-- **Pointer type starts with `p`,**
-
-  .. code-block:: c++
-
-     void    *pData   = NULL;
-     void   **ppData  = NULL;
-     uint8_t *pu8Data = NULL;
-
-- **Array type start with `a`,**
-
-  .. code-block:: c++
-
-    int    aDataInt[1]     = {0};
-    int*   paDataIntPtr[1] = {0};
-
-- **Null terminated string starts with `sz`**
-
-  .. code-block:: c++
-
-    char   szNameArray[] = {"Text"};
-    char  *szNamePtr     = {"Text"};
-    char **pszNamePtr    = {"Text"};
- 
 
 Options
 -------
@@ -2100,3 +2086,179 @@ After:
     public:
       virtual int pre_member_function_post();
     }
+
+
+Options for Hungarian Notation
+-----------------------------
+
+The following options(readability-identifier-naming.HungarianNotation.Options.) are describe below:
+
+ - :option:`ClassPrefixWithC`, :option:`VirtualClassPrefixWithI`
+
+.. option:: ClassPrefixWithC
+
+    When set to `1` it makes the name of class starting with a `C` character. Default value is `0`.
+
+.. option:: VirtualClassPrefixWithI
+
+    When set to `1` it makes the name of abstract class starting with a `I` character. Default value is `0`.
+
+
+The following options(readability-identifier-naming.HungarianNotation.DerivedType.) are describe below:
+
+ - :option:`Array`, :option:`Pointer`, :option:`FunctionPointer`
+
+.. option:: Array
+
+    When defined, the check will ensure variable names will add the
+    prefix with the given value.
+
+.. option:: Pointer
+
+    When defined, the check will ensure variable names will add the
+    prefix with the given value.
+
+.. option:: FunctionPointer
+
+    When defined, the check will ensure variable names will add the
+    prefix with the given value.
+
+For example using values of:
+
+   - Array of ``a``
+   - Pointer of ``p``
+   - FunctionPointer of ``fn``
+
+Before:
+
+.. code-block:: c++
+
+    // Array
+    int DataArray[2] = {0};
+
+    // Pointer
+    void *DataBuffer = NULL;
+
+    // FunctionPointer
+    typedef void (*FUNC_PTR)();
+    FUNC_PTR FuncPtr = NULL;
+
+After:
+
+.. code-block:: c++
+
+    // Array
+    int aDataArray[2] = {0};
+
+    // Pointer
+    void *pDataBuffer = NULL;
+
+    // FunctionPointer
+    typedef void (*FUNC_PTR)();
+    FUNC_PTR fnFuncPtr = NULL;
+
+
+The following options(readability-identifier-naming.HungarianNotation.CString.) are describe below:
+
+ - :option:`CharPrinter`, :option:`CharArray`, :option:`WideCharPrinter`, :option:`WideCharArray`
+
+.. option:: CharPrinter
+
+    When defined, the check will ensure variable names will add the
+    prefix with the given value.
+
+.. option:: CharArray
+
+    When defined, the check will ensure variable names will add the
+    prefix with the given value.
+
+.. option:: WideCharPrinter
+
+    When defined, the check will ensure variable names will add the
+    prefix with the given value.
+
+.. option:: WideCharArray
+
+    When defined, the check will ensure variable names will add the
+    prefix with the given value.
+
+For example using values of:
+
+   - CharPrinter of ``sz``
+   - CharArray of ``sz``
+   - WideCharPrinter of ``wsz``
+   - WideCharArray of ``wsz``
+
+Before:
+
+.. code-block:: c++
+
+    // CharPrinter
+    const char *NamePtr = "Name";
+
+    // CharArray
+    const char NameArray[] = "Name";
+
+    // WideCharPrinter
+    const wchar_t *WideNamePtr = L"Name";
+
+    // WideCharArray
+    const wchar_t WideNameArray[] = L"Name";
+
+After:
+
+.. code-block:: c++
+
+    // CharPrinter
+    const char *szNamePtr = "Name";
+
+    // CharArray
+    const char szNameArray[] = "Name";
+
+    // WideCharPrinter
+    const wchar_t *wszWideNamePtr = L"Name";
+
+    // WideCharArray
+    const wchar_t wszWideNameArray[] = L"Name";
+
+
+The following options(readability-identifier-naming.HungarianNotation.PrimitiveType.) are describe below:
+
+ - :option:`int8_t`, :option:`int16_t`, :option:`int32_t`, :option:`int64_t`, :option:`uint8_t`, :option:`uint16_t`, :option:`uint32_t`, :option:`uint64_t`, :option:`char8_t`, :option:`char16_t`, :option:`char32_t`
+ - :option:`char`, :option:`wchar_t`, :option:`float`, :option:`double`, :option:`bool`, :option:`_Bool`, :option:`int`, :option:`size_t`, :option:`short`, :option:`long`, :option:`ptrdiff_t`
+ - :option:`short-int`, :option:`signed-int`, :option:`signed-short`, :option:`signed-short-int`, :option:`signed-long-long-int`, :option:`signed-long-long`, :option:`signed-long-int`, :option:`signed-long`, :option:`signed`, :option:`unsigned-long-long-int`, :option:`unsigned-long-long`, :option:`unsigned-long-int`, :option:`unsigned-long`, :option:`unsigned-short-int`, :option:`unsigned-short`, :option:`unsigned-int`, :option:`unsigned`, :option:`long-long-int`, :option:`long-double`, :option:`long-long`, :option:`long-int`
+ - :option:`BOOL`, :option:`BOOLEAN`, :option:`BYTE`, :option:`CHAR`, :option:`UCHAR`, :option:`SHORT`, :option:`USHORT`, :option:`WORD`, :option:`DWORD`, :option:`DWORD32`, :option:`DWORD64`, :option:`LONG`, :option:`ULONG`, :option:`ULONG32`, :option:`ULONG64`, :option:`ULONGLONG`, :option:`HANDLE`, :option:`INT`, :option:`INT8`, :option:`INT16`, :option:`INT32`, :option:`INT64`, :option:`UINT`, :option:`UINT8`, :option:`UINT16`, :option:`UINT32`, :option:`UINT64`, :option:`PVOID`
+
+Before:
+
+.. code-block:: c++
+
+    int8_t   ValueI8;
+    int16_t  ValueI16;
+    int32_t  ValueI32;
+    int64_t  ValueI64;
+    uint8_t  ValueU8;
+    uint16_t ValueU16;
+    uint32_t ValueU32;
+    uint64_t ValueU64;
+    float    ValueFloat;
+    double   ValueDouble;
+    ULONG    ValueUlong;
+    DWORD    ValueDword;
+
+After:
+
+.. code-block:: c++
+
+    int8_t   i8ValueI8;
+    int16_t  i16ValueI16;
+    int32_t  i32ValueI32;
+    int64_t  i64ValueI64;
+    uint8_t  u8ValueU8;
+    uint16_t u16ValueU16;
+    uint32_t u32ValueU32;
+    uint64_t u64ValueU64;
+    float    fValueFloat;
+    double   dValueDouble;
+    ULONG    ulValueUlong;
+    DWORD    dwValueDword;
