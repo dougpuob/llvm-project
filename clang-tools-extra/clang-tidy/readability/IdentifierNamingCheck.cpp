@@ -190,39 +190,79 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
   // clang-format off
   const static llvm::StringMap<StringRef> HungarianNotationTable = {
         // Primitive types
-        {"int8_t",          "i8"},
-        {"int16_t",         "i16"},
-        {"int32_t",         "i32"},
-        {"int64_t",         "i64"},
-        {"uint8_t",         "u8"},
-        {"uint16_t",        "u16"},
-        {"uint32_t",        "u32"},
-        {"uint64_t",        "u64"},
-        {"char8_t",         "c8"},
-        {"char16_t",        "c16"},
-        {"char32_t",        "c32"},
-        {"float",           "f"},
-        {"double",          "d"},
-        {"char",            "c"},
-        {"bool",            "b"},
-        {"_Bool",           "b"},
-        {"int",             "i"},
-        {"size_t",          "n"},
-        {"wchar_t",         "wc"},
-        {"short",           "s"},
-        {"signed",          "i"},
-        {"unsigned",        "u"},
-        {"long",            "l"},
-        {"long long",       "ll"},
-        {"unsigned long",   "ul"},
-        {"long double",     "ld"},
-        {"ptrdiff_t",       "p"},
+        {"int8_t",                  "i8"  },
+        {"int16_t",                 "i16" },
+        {"int32_t",                 "i32" },
+        {"int64_t",                 "i64" },
+        {"uint8_t",                 "u8"  },
+        {"uint16_t",                "u16" },
+        {"uint32_t",                "u32" },
+        {"uint64_t",                "u64" },
+        {"char8_t",                 "c8"  },
+        {"char16_t",                "c16" },
+        {"char32_t",                "c32" },
+        {"float",                   "f"   },
+        {"double",                  "d"   },
+        {"char",                    "c"   },
+        {"bool",                    "b"   },
+        {"_Bool",                   "b"   },
+        {"int",                     "i"   },
+        {"size_t",                  "n"   },
+        {"wchar_t",                 "wc"  },
+        {"short",                   "s"   },
+        {"signed int",              "si"  },
+        {"signed short",            "ss"  },
+        {"signed short int",        "ssi" },
+        {"signed long long int",    "slli"},
+        {"signed long long",        "sll" },
+        {"signed long int",         "sli" },
+        {"signed long",             "sl"  },
+        {"signed",                  "i"   },
+        {"unsigned long long int",  "ulli"},
+        {"unsigned long int",       "uli" },
+        {"unsigned long",           "ul"  },
+        {"unsigned short int",      "usi" },
+        {"unsigned short",          "us"  },
+        {"unsigned int",            "ui"  },
+        {"unsigned",                "u"   },
+        {"long long int",           "lli" },
+        {"long double",             "ld"  },
+        {"long long",               "ll"  },
+        {"long int",                "li"  },
+        {"long",                    "l"   },
+        {"ptrdiff_t",               "p"   },
         // Windows data types
-        {"BOOL",            "b"},
-        {"BOOLEAN",         "b"},
-        {"BYTE",            "by"},
-        {"WORD",            "w"},
-        {"DWORD",           "dw"}};
+        {"BOOL",                    "b"   },
+        {"BOOLEAN",                 "b"   },
+        {"BYTE",                    "by"  },
+        {"CHAR",                    "c"   },
+        {"UCHAR",                   "uc"  },
+        {"SHORT",                   "s"   },
+        {"USHORT",                  "us"  },
+        {"WORD",                    "w"   },
+        {"WORD",                    "w"   },
+        {"DWORD",                   "dw"  },
+        {"DWORD32",                 "dw32"},
+        {"DWORD64",                 "dw64"},
+        {"LONG",                    "l"   },
+        {"ULONG",                   "ul"  },
+        {"ULONG32",                 "ul32"},
+        {"ULONG64",                 "ul64"},
+        {"ULONGLONG",               "ull" },
+        {"HANDLE",                  "h"   },
+        {"FILE",                    "f"   },
+        {"INT",                     "i"   },
+        {"INT8",                    "i8"  },
+        {"INT16",                   "i16" },
+        {"INT32",                   "i32" },
+        {"INT64",                   "i64" },
+        {"UINT",                    "ui"  },
+        {"UINT8",                   "u8"  },
+        {"UINT16",                  "u16" },
+        {"UINT32",                  "u32" },
+        {"UINT64",                  "u64" },
+        {"FLOAT",                   "f"   },
+        {"PVOID",                   "p"   }};
   // clang-format on
 
   std::string ClonedTypeName = TypeName;
@@ -372,6 +412,7 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
         Type.replace(Pos, Kw.length(), "");
       }
     }
+    TypeName = Type.erase(0, Type.find_first_not_of(" "));
 
     // Replace spaces with single space.
     for (size_t Pos = 0; (Pos = Type.find("  ", Pos)) != std::string::npos;
@@ -396,8 +437,9 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
         " int", " char", " double", " long"};
     bool RedundantRemoved = false;
     for (const std::string &Kw : TailsOfMultiWordType) {
-      for (size_t Pos = 0; (Pos = Type.find(Kw, Pos)) != std::string::npos;) {
-        Type = Type.substr(0, Pos + Kw.length());
+      size_t Pos = Type.find_last_of(Kw);
+      if (Pos != std::string::npos) {
+        Type = Type.substr(0,Pos - Kw.length());
         RedundantRemoved = true;
         break;
       }
