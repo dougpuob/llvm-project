@@ -960,4 +960,28 @@ TEST(Decl, MacroExpandVarDeclAsignWithPrevIdentifier) {
   }
 }
 
+TEST(Decl, MacroExpandVarDeclAsignWithPrevIdentifier1) {
+  llvm::Annotations Example(R"cpp(    
+    int global0;    
+    #define USE_NUMBERED_GLOBAL(number) int use_global##number = global##number    
+    USE_NUMBERED_GLOBAL(0);
+  )cpp");
+
+  auto AST = tooling::buildASTFromCode(Example.code());
+  SourceManager &SM = AST->getSourceManager();
+  auto &Ctx = AST->getASTContext();
+
+  auto *VD = selectSecond<VarDecl>("decl", match(varDecl().bind("decl"), Ctx));
+  if (const auto *TD = dyn_cast<ValueDecl>(VD)) {
+    SourceLocation Begin = TD->getBeginLoc();
+    SourceLocation End   = TD->getEndLoc();
+
+    char* StrBegin = (char*)SM.getCharacterData(Begin);
+    char* StrEnd  = (char*)SM.getCharacterData(End);
+
+    std::size_t Diff = StrEnd - StrBegin;
+    ASSERT_GT(Diff, 0U);
+  }
+}
+
 } // end namespace
