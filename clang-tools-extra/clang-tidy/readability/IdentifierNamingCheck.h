@@ -36,7 +36,6 @@ public:
   IdentifierNamingCheck(StringRef Name, ClangTidyContext *Context);
   ~IdentifierNamingCheck();
 
-  std::string getDeclTypeName(const clang::NamedDecl *Decl) const;
   void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
   enum CaseType {
@@ -50,6 +49,14 @@ public:
     CT_HungarianNotation
   };
 
+  struct HungarianNotationOption {
+    llvm::StringMap<std::string> Options;
+    llvm::StringMap<std::string> CString;
+    llvm::StringMap<std::string> PrimitiveType;
+    llvm::StringMap<std::string> UserDefinedType;
+    llvm::StringMap<std::string> DerivedType;
+  };
+
   struct NamingStyle {
     NamingStyle() = default;
 
@@ -57,9 +64,15 @@ public:
                 const std::string &Suffix)
         : Case(Case), Prefix(Prefix), Suffix(Suffix) {}
 
+    NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
+                const std::string &Suffix,
+                const std::shared_ptr<HungarianNotationOption> HNOption)
+        : Case(Case), Prefix(Prefix), Suffix(Suffix), HNOption(HNOption) {}
+
     llvm::Optional<CaseType> Case;
     std::string Prefix;
     std::string Suffix;
+    std::shared_ptr<HungarianNotationOption> HNOption;
   };
 
 private:
