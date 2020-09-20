@@ -34,39 +34,48 @@ This also applies for pseudo-override patterns like CRTP.
 Hungarian Notation casing type
 ------------------------------
 
-In Hungarian notation, a variable name starts with a group of lower-case 
+In Hungarian notation, a variable name starts with a group of lower-case
 letters which are mnemonics for the type or purpose of that variable, followed
-by whatever name the programmer has chosen; this last part is sometimes 
-distinguished as the given name. The first character of the given name can be 
-capitalized to separate it from the type indicators (see also CamelCase). 
+by whatever name the programmer has chosen; this last part is sometimes
+distinguished as the given name. The first character of the given name can be
+capitalized to separate it from the type indicators (see also CamelCase).
 Otherwise the case of this character denotes scope.
 
-============ ============= ================ ============= =========== ==============
-Primitive Types                                           Microsoft data types
---------------------------------------------------------- --------------------------
-    Type        Prefix          Type           Prefix        Type        Prefix
-============ ============= ================ ============= =========== ==============
-int8_t       i8            short            s             BOOL        b         
-int16_t      i16           signed           i             BOOLEAN     b         
-int32_t      i32           unsigned         u             BYTE        by        
-int64_t      i64           long             l             WORD        w         
-uint8_t      u8            long long        ll            DWORD       dw        
-uint16_t     u16           unsigned long    ul                                  
-uint32_t     u32           long double      ld                                  
-uint64_t     u64           ptrdiff_t        p                                   
-char8_t      c8                                                                 
-char16_t     c16                                                                
-char32_t     c32                                                                
-float        f                                                                  
-double       d                                                                  
-char         c                                                                  
-bool         b                                                                  
-_Bool        b                                                                  
-int          i                                                                  
-size_t       n                                                                  
-============ ============= ================ ============= =========== ==============
-
-
+================= ============== ====================== ============== =========== ==============
+Primitive Types                                                        Microsoft data types
+---------------------------------------------------------------------- --------------------------
+    Type          Prefix         Type                   Prefix         Type        Prefix
+================= ============== ====================== ============== =========== ==============
+int8_t            i8             signed int             si             BOOL        b
+int16_t           i16            signed short           ss             BOOLEAN     b
+int32_t           i32            signed short int       ssi            BYTE        by
+int64_t           i64            signed long long int   slli           CHAR        c
+uint8_t           u8             signed long long       sll            UCHAR       uc
+uint16_t          u16            signed long int        sli            SHORT       s
+uint32_t          u32            signed long            sl             USHORT      us
+uint64_t          u64            signed                 s              WORD        w
+char8_t           c8             unsigned long long int ulli           DWORD       dw
+char16_t          c16            unsigned long long     ull            DWORD32     dw32
+char32_t          c32            unsigned long int      uli            DWORD64     dw64
+float             f              unsigned long          ul             LONG        l
+double            d              unsigned short int     usi            ULONG       ul
+char              c              unsigned short         us             ULONG32     ul32
+bool              b              unsigned int           ui             ULONG64     ul64
+_Bool             b              unsigned               u              ULONGLONG   ull
+int               i              long long int          lli            HANDLE      h
+size_t            n              long double            ld             INT         i
+short             s              long long              ll             INT8        i8
+signed            i              long int               li             INT16       i16
+unsigned          u              long                   l              INT32       i32
+long              l              ptrdiff_t              p              INT64       i64
+long long         ll                                                   UINT        ui
+unsigned long     ul                                                   UINT8       u8
+long double       ld                                                   UINT16      u16
+ptrdiff_t         p                                                    UINT32      u32
+wchar_t           wc                                                   UINT64      u64
+short int         si                                                   PVOID       p
+short             s
+================= ============== ====================== ============== =========== ==============
 
 - **Pointer type starts with `p`,**
 
@@ -90,7 +99,7 @@ size_t       n
     char   szNameArray[] = {"Text"};
     char  *szNamePtr     = {"Text"};
     char **pszNamePtr    = {"Text"};
- 
+
 
 Options
 -------

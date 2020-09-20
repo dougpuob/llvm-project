@@ -182,8 +182,8 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
 
 static const std::string
 getHungarianNotationTypePrefix(const std::string &TypeName,
-                               const NamedDecl *InputDecl) {
-  if (!InputDecl || TypeName.empty()) {
+                               const NamedDecl *ND) {
+  if (!ND || TypeName.empty()) {
     return TypeName;
   }
 
@@ -209,6 +209,7 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"int",                     "i"   },
         {"size_t",                  "n"   },
         {"wchar_t",                 "wc"  },
+        {"short int",               "si"  },
         {"short",                   "s"   },
         {"signed int",              "si"  },
         {"signed short",            "ss"  },
@@ -217,7 +218,7 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"signed long long",        "sll" },
         {"signed long int",         "sli" },
         {"signed long",             "sl"  },
-        {"signed",                  "i"   },
+        {"signed",                  "s"   },
         {"unsigned long long int",  "ulli"},
         {"unsigned long long",      "ull" },
         {"unsigned long int",       "uli" },
@@ -241,7 +242,6 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"SHORT",                   "s"   },
         {"USHORT",                  "us"  },
         {"WORD",                    "w"   },
-        {"WORD",                    "w"   },
         {"DWORD",                   "dw"  },
         {"DWORD32",                 "dw32"},
         {"DWORD64",                 "dw64"},
@@ -251,7 +251,6 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"ULONG64",                 "ul64"},
         {"ULONGLONG",               "ull" },
         {"HANDLE",                  "h"   },
-        {"FILE",                    "f"   },
         {"INT",                     "i"   },
         {"INT8",                    "i8"  },
         {"INT16",                   "i16" },
@@ -262,7 +261,6 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"UINT16",                  "u16" },
         {"UINT32",                  "u32" },
         {"UINT64",                  "u64" },
-        {"FLOAT",                   "f"   },
         {"PVOID",                   "p"   }};
   // clang-format on
 
@@ -270,7 +268,7 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
 
   // Handle null string
   std::string PrefixStr;
-  if (const auto *TD = dyn_cast<ValueDecl>(InputDecl)) {
+  if (const auto *TD = dyn_cast<ValueDecl>(ND)) {
     auto QT = TD->getType();
     if (QT->isFunctionPointerType()) {
       PrefixStr = "fn"; // Function Pointer
@@ -350,7 +348,7 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
   for (size_t Idx = 0; Idx < PtrCount; Idx++) {
     PrefixStr.insert(PrefixStr.begin(), 'p');
   }
-  
+
   return PrefixStr;
 }
 
@@ -592,7 +590,7 @@ static std::string fixupWithCase(const StringRef &Type, const StringRef &Name,
     break;
 
   case IdentifierNamingCheck::CT_HungarianNotation: {
-    const NamedDecl *ND = dyn_cast<NamedDecl>(InputDecl);
+    const auto ND = dyn_cast<NamedDecl>(InputDecl);
     const std::string TypePrefix =
         getHungarianNotationTypePrefix(Type.str(), ND);
     Fixup = TypePrefix;
