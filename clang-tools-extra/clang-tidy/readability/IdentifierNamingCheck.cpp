@@ -219,6 +219,7 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         {"signed long",             "sl"  },
         {"signed",                  "i"   },
         {"unsigned long long int",  "ulli"},
+        {"unsigned long long",      "ull" },
         {"unsigned long int",       "uli" },
         {"unsigned long",           "ul"  },
         {"unsigned short int",      "usi" },
@@ -434,12 +435,12 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
 
     // Remove redundant tailing.
     const static std::list<std::string> TailsOfMultiWordType = {
-        " int", " char", " double", " long"};
+        " int", " char", " double", " long", " short"};
     bool RedundantRemoved = false;
-    for (const std::string &Kw : TailsOfMultiWordType) {
-      size_t Pos = Type.find_last_of(Kw);
+    for (const auto &Kw : TailsOfMultiWordType) {
+      size_t Pos = Type.rfind(Kw);
       if (Pos != std::string::npos) {
-        Type = Type.substr(0,Pos - Kw.length());
+        Type = Type.substr(0, Pos + Kw.length());
         RedundantRemoved = true;
         break;
       }

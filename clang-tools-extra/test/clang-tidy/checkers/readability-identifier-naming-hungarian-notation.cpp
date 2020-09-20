@@ -47,7 +47,9 @@ typedef float               FLOAT;      // NOLINT
 typedef int                 INT;        // NOLINT
 typedef unsigned int        UINT;       // NOLINT
 typedef unsigned long       ULONG;      // NOLINT
+typedef short               SHORT;      // NOLINT
 typedef unsigned short      USHORT;     // NOLINT
+typedef char                CHAR;       // NOLINT
 typedef unsigned char       UCHAR;      // NOLINT
 typedef signed char         INT8;       // NOLINT
 typedef signed short        INT16;      // NOLINT
@@ -57,15 +59,17 @@ typedef unsigned char       UINT8;      // NOLINT
 typedef unsigned short      UINT16;     // NOLINT
 typedef unsigned int        UINT32;     // NOLINT
 typedef unsigned long long  UINT64;     // NOLINT
+typedef long                LONG;       // NOLINT
 typedef signed int          LONG32;     // NOLINT
 typedef unsigned int        ULONG32;    // NOLINT
-typedef unsigned long long  ULONG64;    // NOLINT
+typedef uint64_t            ULONG64;    // NOLINT
 typedef unsigned int        DWORD32;    // NOLINT
-typedef unsigned long long  DWORD64;    // NOLINT
+typedef uint64_t            DWORD64;    // NOLINT
+typedef uint64_t            ULONGLONG;  // NOLINT
+typedef void*               PVOID;      // NOLINT
+typedef void*               HANDLE;     // NOLINT
+typedef void*               FILE;       // NOLINT
 #define NULL                (0)         // NOLINT
-
-
-
 
 
 //===----------------------------------------------------------------------===//
@@ -224,6 +228,114 @@ BOOL MsBool = 0;
 BOOLEAN MsBoolean = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:9: warning: invalid case style for global variable 'MsBoolean' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}BOOLEAN bMsBoolean = 0;
+
+CHAR MsValueChar = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'MsValueChar' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}CHAR cMsValueChar = 0;
+
+UCHAR MsValueUchar = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueUchar' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}UCHAR ucMsValueUchar = 0;
+
+SHORT MsValueShort = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueShort' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}SHORT sMsValueShort = 0;
+
+USHORT MsValueUshort = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'MsValueUshort' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}USHORT usMsValueUshort = 0;
+
+WORD MsValueWord = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'MsValueWord' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}WORD wMsValueWord = 0;
+
+DWORD MsValueDword = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueDword' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}DWORD dwMsValueDword = 0;
+
+DWORD32 MsValueDword32 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:9: warning: invalid case style for global variable 'MsValueDword32' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}DWORD32 dw32MsValueDword32 = 0;
+
+DWORD64 MsValueDword64 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:9: warning: invalid case style for global variable 'MsValueDword64' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}DWORD64 dw64MsValueDword64 = 0;
+
+LONG MsValueLong = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'MsValueLong' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}LONG lMsValueLong = 0;
+
+ULONG MsValueUlong = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueUlong' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}ULONG ulMsValueUlong = 0;
+
+ULONG32 MsValueUlong32 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:9: warning: invalid case style for global variable 'MsValueUlong32' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}ULONG32 ul32MsValueUlong32 = 0;
+
+ULONG64 MsValueUlong64 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:9: warning: invalid case style for global variable 'MsValueUlong64' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}ULONG64 ul64MsValueUlong64 = 0;
+
+ULONGLONG MsValueUlongLong = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:11: warning: invalid case style for global variable 'MsValueUlongLong' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}ULONGLONG ullMsValueUlongLong = 0;
+
+HANDLE MsValueHandle = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'MsValueHandle' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}HANDLE hMsValueHandle = 0;
+
+FILE MsValueFile = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'MsValueFile' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}FILE fMsValueFile = 0;
+
+INT MsValueInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:5: warning: invalid case style for global variable 'MsValueInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}INT iMsValueInt = 0;
+
+INT8 MsValueInt8 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'MsValueInt8' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}INT8 i8MsValueInt8 = 0;
+
+INT16 MsValueInt16 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueInt16' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}INT16 i16MsValueInt16 = 0;
+
+INT32 MsValueInt32 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueInt32' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}INT32 i32MsValueInt32 = 0;
+
+INT64 MsValueINt64 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueINt64' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}INT64 i64MsValueINt64 = 0;
+
+UINT MsValueUint = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'MsValueUint' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}UINT uiMsValueUint = 0;
+
+UINT8 MsValueUint8 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueUint8' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}UINT8 u8MsValueUint8 = 0;
+
+UINT16 MsValueUint16 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'MsValueUint16' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}UINT16 u16MsValueUint16 = 0;
+
+UINT32 MsValueUint32 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'MsValueUint32' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}UINT32 u32MsValueUint32 = 0;
+
+UINT64 MsValueUint64 = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'MsValueUint64' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}UINT64 u64MsValueUint64 = 0;
+
+FLOAT MsValueFloat = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueFloat' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}FLOAT fMsValueFloat = 0;
+
+PVOID MsValuePvoid = NULL;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValuePvoid' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}PVOID pMsValuePvoid = NULL;
 
 
 //===----------------------------------------------------------------------===//
@@ -404,6 +516,62 @@ long double ValueLongDouble = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:13: warning: invalid case style for global variable 'ValueLongDouble' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}long double ldValueLongDouble = 0;
 
+signed int ValueSignedInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:12: warning: invalid case style for global variable 'ValueSignedInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}signed int siValueSignedInt = 0;
+
+signed short ValueSignedShort = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:14: warning: invalid case style for global variable 'ValueSignedShort' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}signed short ssValueSignedShort = 0;
+
+signed short int ValueSignedShortInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:18: warning: invalid case style for global variable 'ValueSignedShortInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}signed short int ssiValueSignedShortInt = 0;
+
+signed long long ValueSignedLongLong = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:18: warning: invalid case style for global variable 'ValueSignedLongLong' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}signed long long sllValueSignedLongLong = 0;
+
+signed long int ValueSignedLongInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:17: warning: invalid case style for global variable 'ValueSignedLongInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}signed long int sliValueSignedLongInt = 0;
+
+signed long ValueSignedLong = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:13: warning: invalid case style for global variable 'ValueSignedLong' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}signed long slValueSignedLong = 0;
+
+unsigned long long int ValueUnsignedLongLongInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:24: warning: invalid case style for global variable 'ValueUnsignedLongLongInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}unsigned long long int ulliValueUnsignedLongLongInt = 0;
+
+unsigned long long ValueUnsignedLongLong = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:20: warning: invalid case style for global variable 'ValueUnsignedLongLong' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}unsigned long long ullValueUnsignedLongLong = 0;
+
+unsigned long int ValueUnsignedLongInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:19: warning: invalid case style for global variable 'ValueUnsignedLongInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}unsigned long int uliValueUnsignedLongInt = 0;
+
+unsigned long ValueUnsignedLong = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:15: warning: invalid case style for global variable 'ValueUnsignedLong' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}unsigned long ulValueUnsignedLong = 0;
+
+unsigned short int ValueUnsignedShortInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:20: warning: invalid case style for global variable 'ValueUnsignedShortInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}unsigned short int usiValueUnsignedShortInt = 0;
+
+unsigned short ValueUnsignedShort = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:16: warning: invalid case style for global variable 'ValueUnsignedShort' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}unsigned short usValueUnsignedShort = 0;
+
+unsigned int ValueUnsignedInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:14: warning: invalid case style for global variable 'ValueUnsignedInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}unsigned int uiValueUnsignedInt = 0;
+
+long int ValueLongInt = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:10: warning: invalid case style for global variable 'ValueLongInt' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}long int liValueLongInt = 0;
+
 
 //===----------------------------------------------------------------------===//
 // Specifier, Qualifier, Other keywords
@@ -432,7 +600,16 @@ static constexpr int const &ConstExprInt = 42;
 
 
 //===----------------------------------------------------------------------===//
-// Others
+// Redefined types
+//===----------------------------------------------------------------------===//
+typedef int INDEX;
+INDEX iIndex = 0;
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'iIndex' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}INDEX Index = 0;
+
+
+//===----------------------------------------------------------------------===//
+// Unsupported
 //===----------------------------------------------------------------------===//
 class UnlistedClass { public: mutable int ValInt; };
 // CHECK-MESSAGES: :[[@LINE-1]]:43: warning: invalid case style for member 'ValInt' [readability-identifier-naming]
@@ -445,8 +622,3 @@ UnlistedClass cUnlisted2;
 UnlistedClass objUnlistedClass3;
 // CHECK-MESSAGES: :[[@LINE-1]]:15: warning: invalid case style for global variable 'objUnlistedClass3' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}UnlistedClass UnlistedClass3;
-
-typedef int INDEX;
-INDEX iIndex = 0;
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'iIndex' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}INDEX Index = 0;
