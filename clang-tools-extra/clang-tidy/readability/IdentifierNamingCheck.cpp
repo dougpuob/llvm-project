@@ -347,32 +347,30 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
     }
   }
 
-  if (PtrCount > 0) {
-    for (size_t Idx = 0; Idx < PtrCount; Idx++) {
-      PrefixStr.insert(PrefixStr.begin(), 'p');
-    }
+  for (size_t Idx = 0; Idx < PtrCount; Idx++) {
+    PrefixStr.insert(PrefixStr.begin(), 'p');
   }
-
+  
   return PrefixStr;
 }
 
 std::string
-IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *Decl) const {
-  const ValueDecl *ValDecl = dyn_cast<ValueDecl>(Decl);
-  if (!ValDecl) {
+IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *ND) const {
+  const auto VD = dyn_cast<ValueDecl>(ND);
+  if (!VD) {
     return "";
   }
 
-  if (clang::Decl::Kind::EnumConstant == Decl->getKind() ||
-      clang::Decl::Kind::CXXMethod == Decl->getKind()||
-      clang::Decl::Kind::Function == Decl->getKind()) {
+  if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
+      clang::Decl::Kind::CXXMethod == ND->getKind()||
+      clang::Decl::Kind::Function == ND->getKind()) {
     return "";
   }
 
   // Get type text of variable declarations.
-  auto &SM = ValDecl->getASTContext().getSourceManager();
-  const char *Begin = SM.getCharacterData(ValDecl->getBeginLoc());
-  const char *End = SM.getCharacterData(ValDecl->getEndLoc());
+  auto &SM = VD->getASTContext().getSourceManager();
+  const char *Begin = SM.getCharacterData(VD->getBeginLoc());
+  const char *End = SM.getCharacterData(VD->getEndLoc());
   intptr_t StrLen = End - Begin;
 
   // FIXME: Sometimes the value that returns from ValDecl->getEndLoc()
