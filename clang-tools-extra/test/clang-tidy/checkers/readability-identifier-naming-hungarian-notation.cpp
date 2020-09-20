@@ -285,10 +285,6 @@ HANDLE MsValueHandle = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'MsValueHandle' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}HANDLE hMsValueHandle = 0;
 
-FILE MsValueFile = 0;
-// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'MsValueFile' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}FILE fMsValueFile = 0;
-
 INT MsValueInt = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:5: warning: invalid case style for global variable 'MsValueInt' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}INT iMsValueInt = 0;
@@ -328,10 +324,6 @@ UINT32 MsValueUint32 = 0;
 UINT64 MsValueUint64 = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'MsValueUint64' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}UINT64 u64MsValueUint64 = 0;
-
-FLOAT MsValueFloat = 0;
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValueFloat' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}FLOAT fMsValueFloat = 0;
 
 PVOID MsValuePvoid = NULL;
 // CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValuePvoid' [readability-identifier-naming]
@@ -498,7 +490,7 @@ unsigned ValueUnsigned = 0;
 
 signed ValueSigned = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'ValueSigned' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}signed iValueSigned = 0;
+// CHECK-FIXES: {{^}}signed sValueSigned = 0;
 
 long ValueLong = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'ValueLong' [readability-identifier-naming]
