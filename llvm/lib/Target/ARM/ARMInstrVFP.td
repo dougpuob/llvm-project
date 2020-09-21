@@ -54,6 +54,16 @@ def vfp_f16imm : Operand<f16>,
   let ParserMatchClass = FPImmOperand;
 }
 
+def vfp_f32f16imm_xform : SDNodeXForm<fpimm, [{
+      APFloat InVal = N->getValueAPF();
+      uint32_t enc = ARM_AM::getFP32FP16Imm(InVal);
+      return CurDAG->getTargetConstant(enc, SDLoc(N), MVT::i32);
+    }]>;
+
+def vfp_f32f16imm : PatLeaf<(f32 fpimm), [{
+      return ARM_AM::getFP32FP16Imm(N->getValueAPF()) != -1;
+    }], vfp_f32f16imm_xform>;
+
 def vfp_f32imm_xform : SDNodeXForm<fpimm, [{
       APFloat InVal = N->getValueAPF();
       uint32_t enc = ARM_AM::getFP32Imm(InVal);
@@ -2490,7 +2500,8 @@ let DecoderMethod = "DecodeForVMRSandVMSR" in {
                                 "vmrs", "\t$Rt, fpcxts", []>;
  }
 
- let Predicates = [HasV8_1MMainline, HasMVEInt] in {
+ let Predicates = [HasV8_1MMainline, HasMVEInt],
+                   D=MVEDomain, validForTailPredication=1 in {
    // System level VPR/P0 -> GPR
    let Uses = [VPR] in
    def VMRS_VPR : MovFromVFP<0b1100 /* vpr */, (outs GPR:$Rt), (ins),
@@ -2634,6 +2645,11 @@ def FCONSTH : VFPAI<(outs HPR:$Sd), (ins vfp_f16imm:$imm),
 
   let isUnpredicable = 1;
 }
+}
+
+def : Pat<(f32 (vfp_f32f16imm:$imm)),
+          (f32 (COPY_TO_REGCLASS (f16 (FCONSTH (vfp_f32f16imm_xform (f32 $imm)))), SPR))> {
+  let Predicates = [HasFullFP16];
 }
 
 //===----------------------------------------------------------------------===//
@@ -2845,12 +2861,19 @@ let Defs = [FPSCR] in {
   }
 }
 
-let Predicates = [HasV8_1MMainline, HasMVEInt] in {
+let Predicates = [HasV8_1MMainline, HasMVEInt],
+                  D=MVEDomain, validForTailPredication=1 in {
   let Uses = [VPR] in {
     defm VSTR_VPR          : vfp_vstrldr_sysreg<0b0,0b1100, "vpr">;
   }
   defm VSTR_P0             : vfp_vstrldr_sysreg<0b0,0b1101, "p0",
                                                 (outs), (ins VCCR:$P0)>;
+
+  let Defs = [VPR] in {
+    defm VLDR_VPR          : vfp_vstrldr_sysreg<0b1,0b1100, "vpr">;
+  }
+  defm VLDR_P0             : vfp_vstrldr_sysreg<0b1,0b1101, "p0",
+                                                (outs VCCR:$P0), (ins)>;
 }
 
 let Uses = [FPSCR] in {
@@ -2861,12 +2884,4 @@ let Uses = [FPSCR] in {
     defm VLDR_FPCXTNS      : vfp_vstrldr_sysreg<0b1,0b1110, "fpcxtns">;
     defm VLDR_FPCXTS       : vfp_vstrldr_sysreg<0b1,0b1111, "fpcxts">;
   }
-}
-
-let Predicates = [HasV8_1MMainline, HasMVEInt] in {
-  let Defs = [VPR] in {
-    defm VLDR_VPR          : vfp_vstrldr_sysreg<0b1,0b1100, "vpr">;
-  }
-  defm VLDR_P0             : vfp_vstrldr_sysreg<0b1,0b1101, "p0",
-                                                (outs VCCR:$P0), (ins)>;
 }
