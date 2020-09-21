@@ -105,6 +105,7 @@ namespace readability {
     m(TypeAlias) \
     m(MacroDefinition) \
     m(ObjcIvar) \
+    m(HungarianNotation) \
 
 enum StyleKind {
 #define ENUMERATE(v) SK_ ## v,
@@ -120,8 +121,124 @@ static StringRef const StyleNames[] = {
 #undef STRINGIZE
 };
 
+#define HUNGARIAN_NOTATION_TYPES(m) \
+     m(int8_t) \
+     m(int16_t) \
+     m(int32_t) \
+     m(int64_t) \
+     m(uint8_t) \
+     m(uint16_t) \
+     m(uint32_t) \
+     m(uint64_t) \
+     m(char8_t) \
+     m(char16_t) \
+     m(char32_t) \
+     m(float) \
+     m(double) \
+     m(char) \
+     m(bool) \
+     m(_Bool) \
+     m(int) \
+     m(size_t) \
+     m(wchar_t) \
+     m(short-int) \
+     m(short) \
+     m(signed-int) \
+     m(signed-short) \
+     m(signed-short-int) \
+     m(signed-long-long-int) \
+     m(signed-long-long) \
+     m(signed-long-int) \
+     m(signed-long) \
+     m(signed) \
+     m(unsigned-long-long-int) \
+     m(unsigned-long-long) \
+     m(unsigned-long-int) \
+     m(unsigned-long) \
+     m(unsigned-short-int) \
+     m(unsigned-short) \
+     m(unsigned-int) \
+     m(unsigned) \
+     m(long-long-int) \
+     m(long-double) \
+     m(long-long) \
+     m(long-int) \
+     m(long) \
+     m(ptrdiff_t) \
+     m(BOOL) \
+     m(BOOLEAN) \
+     m(BYTE) \
+     m(CHAR) \
+     m(UCHAR) \
+     m(SHORT) \
+     m(USHORT) \
+     m(WORD) \
+     m(DWORD) \
+     m(DWORD32) \
+     m(DWORD64) \
+     m(LONG) \
+     m(ULONG) \
+     m(ULONG32) \
+     m(ULONG64) \
+     m(ULONGLONG) \
+     m(HANDLE) \
+     m(INT) \
+     m(INT8) \
+     m(INT16) \
+     m(INT32) \
+     m(INT64) \
+     m(UINT) \
+     m(UINT8) \
+     m(UINT16) \
+     m(UINT32) \
+     m(UINT64) \
+     m(PVOID) \
+
+static StringRef const HungarainTypeList[] = {
+#define STRINGIZE(v) #v,
+  HUNGARIAN_NOTATION_TYPES(STRINGIZE)
+#undef STRINGIZE
+};
+
 #undef NAMING_KEYS
 // clang-format on
+
+static void
+getHungarianNotationNamingStyles(const ClangTidyCheck::OptionsView& Options, std::vector<llvm::Optional<IdentifierNamingCheck::NamingStyle>>& Styles) {
+	std::string HungarianNotation = "HungarianNotation.";
+
+	std::vector<std::string> HungarianNotationOptions = { "DontChangeCharPointer", "Array", "Pointer" };
+	for (auto const& Opt : HungarianNotationOptions) {
+		std::string opt = Options.get(HungarianNotation + Opt, "");
+		if (!opt.empty()) {
+			Styles.push_back(IdentifierNamingCheck::NamingStyle(IdentifierNamingCheck::CaseType::CT_HungarianNotation, "", ""));
+		}
+		else {
+			Styles.emplace_back(llvm::None);
+		}
+	}
+
+	std::vector<std::string> HungarianNotationCStrs = { "CharPrinter", "CharArray", "WideCharPrinter", "WideCharArray" };
+	for (auto const& Cstr : HungarianNotationCStrs) {
+		std::string cstr = Options.get(HungarianNotation + "CStrList." + Cstr, "");
+		if (!cstr.empty()) {
+			Styles.push_back(IdentifierNamingCheck::NamingStyle(IdentifierNamingCheck::CaseType::CT_HungarianNotation, "", ""));
+		}
+		else {
+			Styles.emplace_back(llvm::None);
+		}
+	}
+
+	for (auto const& Type : HungarainTypeList) {
+		auto type = Options.get((HungarianNotation + "TypeList." + Type).str(), "");
+		if (!type.empty()) {
+			Styles.push_back(IdentifierNamingCheck::NamingStyle(IdentifierNamingCheck::CaseType::CT_HungarianNotation, "", ""));
+		}
+		else {
+			Styles.push_back(llvm::None);
+		}
+	}
+}
 
 static std::vector<llvm::Optional<IdentifierNamingCheck::NamingStyle>>
 getNamingStyles(const ClangTidyCheck::OptionsView &Options) {
@@ -133,12 +250,16 @@ getNamingStyles(const ClangTidyCheck::OptionsView &Options) {
     auto Prefix = Options.get((StyleName + "Prefix").str(), "");
     auto Postfix = Options.get((StyleName + "Suffix").str(), "");
 
-    if (CaseOptional || !Prefix.empty() || !Postfix.empty())
+    if (CaseOptional || !Prefix.empty() || !Postfix.empty()) {
       Styles.emplace_back(IdentifierNamingCheck::NamingStyle{
           std::move(CaseOptional), std::move(Prefix), std::move(Postfix)});
-    else
+    } else {
       Styles.emplace_back(llvm::None);
+    }
   }
+
+  getHungarianNotationNamingStyles(Options, Styles);
+
   return Styles;
 }
 
