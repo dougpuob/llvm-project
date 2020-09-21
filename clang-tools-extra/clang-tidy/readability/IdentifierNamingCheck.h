@@ -50,6 +50,13 @@ public:
     CT_HungarianNotation
   };
 
+  struct HungarianNotationNamingOption {
+    llvm::StringMap<std::string> Options;
+    llvm::StringMap<std::string> OtherMap;
+    llvm::StringMap<std::string> CStrMap;
+    llvm::StringMap<std::string> TypeMap;
+  };
+
   struct NamingStyle {
     NamingStyle() = default;
 
@@ -57,9 +64,14 @@ public:
                 const std::string &Suffix)
         : Case(Case), Prefix(Prefix), Suffix(Suffix) {}
 
+    NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
+                const std::string &Suffix, const std::shared_ptr<HungarianNotationNamingOption> HungarianNotationOptions)
+        : Case(Case), Prefix(Prefix), Suffix(Suffix), HungarianNotationOptions(HungarianNotationOptions) {}
+
     llvm::Optional<CaseType> Case;
     std::string Prefix;
     std::string Suffix;
+    std::shared_ptr<HungarianNotationNamingOption> HungarianNotationOptions;
   };
 
 private:
