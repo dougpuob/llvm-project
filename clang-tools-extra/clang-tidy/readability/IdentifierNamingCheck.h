@@ -37,6 +37,8 @@ public:
   ~IdentifierNamingCheck();
 
   std::string getDeclTypeName(const clang::NamedDecl *ND) const;
+  std::string getDeclTypeNameByNativeApi(const clang::ValueDecl* VD) const;
+  std::string getDeclTypeNameByManualParsing(const clang::ValueDecl* VD) const;
   void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
   enum CaseType {

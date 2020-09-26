@@ -456,8 +456,6 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
         auto Key = CStr.getKey().str();
         if (ModifiedTypeName.find(Key) == 0) {
           PrefixStr = CStr.getValue();
-          //ModifiedTypeName = ModifiedTypeName.substr(
-          //    Key.size(), ModifiedTypeName.size() - Key.size());
           break;
         }
       }
@@ -512,18 +510,69 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
 }
 
 std::string
-IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *ND) const {
-  const auto VD = dyn_cast<ValueDecl>(ND);
-  if (!VD) {
-    return "";
-  }
+IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl* ND) const {
+    const auto VD = dyn_cast<ValueDecl>(ND);
+    if (!VD) {
+        return "";
+    }
 
-  if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
-      clang::Decl::Kind::CXXMethod == ND->getKind()||
-      clang::Decl::Kind::Function == ND->getKind()) {
-    return "";
-  }
+    if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
+        clang::Decl::Kind::CXXMethod == ND->getKind() ||
+        clang::Decl::Kind::Function == ND->getKind()) {
+        return "";
+    }
 
+    std::string Ret1 = getDeclTypeNameByClangApi(VD);
+    std::string Ret2 = getDeclTypeNameByManualParsing(VD);
+    printf("--------------------------------------------------------------------------------------------------------------------------\n");
+    return Ret2;
+}
+
+std::string
+IdentifierNamingCheck::getDeclTypeNameByClangApi(const clang::ValueDecl* VD) const {
+    std::string TypeName = VD->getType().getAsString();
+
+    auto a = VD->getKind();
+
+    const static std::list<std::string> Keywords = { "const", "volatile", "class" };
+
+    // Remove keywords
+    for (const std::string& Kw : Keywords) {
+        for (size_t Pos = 0; (Pos = TypeName.find(Kw, Pos)) != std::string::npos;) {
+            TypeName.replace(Pos, Kw.length(), "");
+        }
+    }
+
+    std::size_t BacketPosLeft = TypeName.find('[');
+    std::size_t BacketPosRight = TypeName.find(']');
+    if (BacketPosLeft != std::string::npos && BacketPosRight != std::string::npos) {
+        TypeName = TypeName.substr(0, BacketPosLeft);
+    }
+
+    // Replace spaces with single space.
+    for (size_t Pos = 0; (Pos = TypeName.find(" *", Pos)) != std::string::npos;
+        Pos += 1) {
+        TypeName.replace(Pos, strlen(" *"), "*");
+    }
+
+    // Replace " &" with "&".
+    for (size_t Pos = 0; (Pos = TypeName.find(" &", Pos)) != std::string::npos;
+        Pos += 1) {
+        TypeName.replace(Pos, strlen(" &"), "");
+    }
+
+    size_t Start = TypeName.find_first_not_of(' ');
+    TypeName = (Start == std::string::npos) ? "" : TypeName.substr(Start);
+
+    size_t End = TypeName.find_last_not_of(' ');
+    TypeName = (End == std::string::npos) ? "" : TypeName.substr(0, End + 1);
+
+    printf("%s() \t\tTypeName=%s\n", __FUNCTION__, TypeName.c_str());
+    return TypeName;
+}
+
+std::string
+IdentifierNamingCheck::getDeclTypeNameByManualParsing(const clang::ValueDecl* VD) const {
   // Get type text of variable declarations.
   auto &SM = VD->getASTContext().getSourceManager();
   const char *Begin = SM.getCharacterData(VD->getBeginLoc());
@@ -554,7 +603,7 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *ND) const {
 
     const static std::list<std::string> Keywords = {
         // Constexpr specifiers
-        "constexpr", "constinit", "consteval",
+        "constexpr", "constinit", "consteval", "ConstExprInt",
         // Qualifier
         "const", "volatile", "restrict", "mutable",
         // Storage class specifiers
@@ -576,11 +625,11 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *ND) const {
       Type.replace(Pos, strlen("  "), " ");
     }
 
-    // Replace " &" with "&".
-    for (size_t Pos = 0; (Pos = Type.find(" &", Pos)) != std::string::npos;
-         Pos += strlen("&")) {
-      Type.replace(Pos, strlen(" &"), "&");
-    }
+    //// Replace " &" with "&".
+    //for (size_t Pos = 0; (Pos = Type.find(" &", Pos)) != std::string::npos;
+    //     Pos += strlen("&")) {
+    //  Type.replace(Pos, strlen(" &"), "&");
+    //}
 
     // Replace " *" with "* ".
     for (size_t Pos = 0; (Pos = Type.find(" *", Pos)) != std::string::npos;
@@ -611,6 +660,7 @@ IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl *ND) const {
     TypeName = Type.erase(0, Type.find_first_not_of(" "));
   }
 
+  printf("%s() \tTypeName=%s\n", __FUNCTION__, TypeName.c_str());
   return TypeName;
 }
 
