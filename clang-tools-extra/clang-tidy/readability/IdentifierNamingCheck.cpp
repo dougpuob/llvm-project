@@ -426,7 +426,7 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
 }
 
 static const std::string
-getHungarianNotationTypePrefixFromOptions(const std::string &TypeName,
+getHungarianNotationTypePrefix(const std::string &TypeName,
                                const NamedDecl *ND,
     const IdentifierNamingCheck::HungarianNotationNamingOption& Option) {
   if (!ND || TypeName.empty()) {
@@ -640,7 +640,7 @@ static bool matchesStyle(StringRef Type, StringRef Name,
 
   if (Style.Case == IdentifierNamingCheck::CaseType::CT_HungarianNotation) {
     const std::string TypePrefix =
-        getHungarianNotationTypePrefixFromOptions(Type.str(), Decl, *Style.HungarianNotationOptions);
+        getHungarianNotationTypePrefix(Type.str(), Decl, *Style.HungarianNotationOptions);
     if (TypePrefix.length() > 0) {
       if (!Name.startswith(TypePrefix))
         return false;
@@ -752,7 +752,7 @@ static std::string fixupWithCase(const StringRef &Type, const StringRef &Name,
   case IdentifierNamingCheck::CT_HungarianNotation: {
     const auto ND = dyn_cast<NamedDecl>(InputDecl);
     const std::string TypePrefix =
-        getHungarianNotationTypePrefixFromOptions(Type.str(), ND, *Style.HungarianNotationOptions);
+        getHungarianNotationTypePrefix(Type.str(), ND, *Style.HungarianNotationOptions);
     Fixup = TypePrefix;
     for (size_t Idx = 0; Idx < Words.size(); Idx++) {
       // Skip first part if it's a lowercase string.
