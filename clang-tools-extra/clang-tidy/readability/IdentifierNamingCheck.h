@@ -36,8 +36,14 @@ public:
   IdentifierNamingCheck(StringRef Name, ClangTidyContext *Context);
   ~IdentifierNamingCheck();
 
-  std::string getDeclTypeName(const clang::NamedDecl *ND) const;
-  std::string getDeclTypeNameByNativeApi(const clang::ValueDecl* VD) const;
+  std::string getDeclTypeName(const clang::NamedDecl* ND, const SourceManager& SM) const;
+  
+  SourceLocation IdentifierNamingCheck::findPreviousTokenStart(const SourceLocation Start,
+      const SourceManager& SM,
+      const LangOptions& LangOpts) const;
+
+  const clang::FunctionDecl* findFunctionDecl(const clang::NamedDecl* ND) const;
+  std::string getDeclTypeNameByClangApi(const clang::ValueDecl* VD) const;
   std::string getDeclTypeNameByManualParsing(const clang::ValueDecl* VD) const;
   void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 

@@ -509,22 +509,95 @@ getHungarianNotationTypePrefix(const std::string &TypeName,
   return PrefixStr;
 }
 
+
+// FIXME: handling of macros should be configurable.
+SourceLocation IdentifierNamingCheck::findPreviousTokenStart(const SourceLocation Start,
+    const SourceManager& SM,
+    const LangOptions& LangOpts) const {
+    if (Start.isInvalid() || Start.isMacroID())
+        return SourceLocation();
+
+    SourceLocation BeforeStart = Start.getLocWithOffset(-1);
+    if (BeforeStart.isInvalid() || BeforeStart.isMacroID())
+        return SourceLocation();
+
+    return Lexer::GetBeginningOfToken(BeforeStart, SM, LangOpts);
+}
+
+
+const clang::FunctionDecl*
+IdentifierNamingCheck::findFunctionDecl(const clang::NamedDecl* ND) const {
+    if (isa<FunctionDecl>(ND))
+    {
+        const auto FD = dyn_cast<FunctionDecl>(ND);
+        llvm::ArrayRef<ParmVarDecl*> Params = FD->parameters();
+        for (auto aaa : Params)
+        {            
+            auto Name = aaa->getNameAsString();
+            printf("Name=%s\n", Name.c_str());
+        }
+    }
+    else if (isa<CXXRecordDecl>(ND))
+    {
+        const auto CXXRD = dyn_cast<CXXRecordDecl>(ND);
+        for (auto field = CXXRD->field_begin(); field != CXXRD->field_end(); field++)
+        {
+            auto Name = field->getNameAsString();
+            printf("Name=%s\n", Name.c_str());
+        }
+    }
+    else if (isa<RecordDecl>(ND))
+    {
+        const auto RD = dyn_cast<RecordDecl>(ND);
+        for (auto field = RD->field_begin(); field != RD->field_end(); field++)
+        {
+            auto Name = field->getNameAsString();
+            printf("Name=%s\n", Name.c_str());
+        }
+    }
+    else
+    {
+        const auto VD = dyn_cast<ValueDecl>(ND);
+        //if (ND && (clang::Decl::Kind::Var == ND->getKind()))
+        //{
+        auto PrevDecl = VD->getPreviousDecl();;
+        while (PrevDecl)
+        {
+            PrevDecl = VD->getPreviousDecl();
+            if ((clang::Decl::Kind::Function == VD->getKind()) || (clang::Decl::Kind::CXXMethod == VD->getKind())) {
+                const Decl* BaseDecl = dyn_cast<Decl>(PrevDecl);
+                const clang::FunctionDecl* FnDecl = dyn_cast<FunctionDecl>(BaseDecl);
+                return FnDecl;
+            }
+        }
+        //}
+    }
+
+    return NULL;    
+}
+
 std::string
-IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl* ND) const {
+IdentifierNamingCheck::getDeclTypeName(const clang::NamedDecl* ND, const SourceManager& SM) const {
+
+    const clang::FunctionDecl* FnDecl = findFunctionDecl(ND);
+    printf("--------------------------------------------------------------------------------------------------------------------------\n");
+
+
     const auto VD = dyn_cast<ValueDecl>(ND);
     if (!VD) {
         return "";
     }
 
-    if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
-        clang::Decl::Kind::CXXMethod == ND->getKind() ||
-        clang::Decl::Kind::Function == ND->getKind()) {
-        return "";
-    }
-
+    //if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
+    //    clang::Decl::Kind::CXXMethod == ND->getKind() ||
+    //    clang::Decl::Kind::Function == ND->getKind()) {
+    //    return "";
+    //}
+       
     std::string Ret1 = getDeclTypeNameByClangApi(VD);
     std::string Ret2 = getDeclTypeNameByManualParsing(VD);
-    printf("--------------------------------------------------------------------------------------------------------------------------\n");
+
+    
     return Ret2;
 }
 
@@ -677,7 +750,7 @@ static bool matchesStyle(StringRef Type, StringRef Name,
       llvm::Regex("^[a-z]([a-z0-9]*(_[A-Z])?)*"),
       llvm::Regex("^[A-Z][a-zA-Z0-9]*$"),
   };
-
+  
   if (!Name.consume_front(Style.Prefix))
     return false;
   if (!Name.consume_back(Style.Suffix))
@@ -1211,7 +1284,7 @@ IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
   ArrayRef<llvm::Optional<NamingStyle>> NamingStyles =
       getStyleForFile(SM.getFilename(Loc));
 
-  std::string TypeName = getDeclTypeName(Decl);
+  std::string TypeName = getDeclTypeName(Decl, SM);
   return getFailureInfo(
       TypeName, Decl->getName(), Decl, Loc, NamingStyles,
       findStyleKind(Decl, NamingStyles, IgnoreMainLikeFunctions), SM,
