@@ -288,7 +288,7 @@ Token Lexer::lexIdentifier(const char *tokStart) {
 
   // Check to see if this identifier is a keyword.
   StringRef str(tokStart, curPtr - tokStart);
-  Token::Kind kind = llvm::StringSwitch<Token::Kind>(str)
+  Token::Kind kind = StringSwitch<Token::Kind>(str)
                          .Case("def", Token::Kind::kw_def)
                          .Case("ods_def", Token::Kind::kw_ods_def)
                          .Case("floordiv", Token::Kind::kw_floordiv)
@@ -994,6 +994,10 @@ public:
   void printRegionBuilder(llvm::raw_ostream &os, StringRef cppOpName,
                           ComprehensionParsingState &state);
 
+  /// Print the C++ impl for named ops canonicalizers and fodlers.
+  void printCanonicalizersAndFolders(llvm::raw_ostream &os,
+                                     StringRef cppOpName);
+
 private:
   //===--------------------------------------------------------------------===//
   // Internal bookkeeping of tensors.
@@ -1430,6 +1434,7 @@ LogicalResult TCParser::parseAndEmitODSDef(llvm::raw_ostream &os) {
     printReferenceIterators(ss, cppOpName, state);
     printReferenceIndexingMaps(ss, cppOpName, state);
     printRegionBuilder(ss, cppOpName, state);
+    printCanonicalizersAndFolders(ss, cppOpName);
     ss.flush();
     os << extraMethods << "\n";
   }
@@ -1452,11 +1457,12 @@ void TCParser::printODS(llvm::raw_ostream &os, StringRef cppOpName,
       let arguments = (ins Variadic<AnyShaped>:$inputs,
                            Variadic<AnyMemRef>:$output_buffers,
                            Variadic<AnyRankedTensor>:$init_tensors);
-      let results = (outs Variadic<AnyRankedTensor>:$output_tensors);
+      let results = (outs Variadic<AnyRankedTensor>:$result_tensors);
       let regions = (region AnyRegion:$region);
 
+      let skipDefaultBuilders = 1;
       let builders = [ OpBuilder<
-        "OpBuilder &b, OperationState &result,"
+        "OpBuilder &b, OperationState &result, "
         "ValueRange inputs, ValueRange outputBuffers",
         [{{
           result.addOperands(inputs);
@@ -1493,6 +1499,14 @@ void TCParser::printODS(llvm::raw_ostream &os, StringRef cppOpName,
             TypeRange(outputBuffers),
             TypeRange(initTensors),
             resultTensorTypes);
+        }]>, OpBuilder<
+        "OpBuilder &b, OperationState &result, TypeRange resultTensorTypes,"
+        "ValueRange operands, ArrayRef<NamedAttribute> attributes = {{}",
+        [{{
+          result.addOperands(operands);
+          result.addAttributes(attributes);
+          result.addTypes(resultTensorTypes);
+          (void)result.addRegion();
         }]>
       ];
       let printer = [{{ return ::printNamedStructuredOp(p, *this); }];
@@ -1560,6 +1574,22 @@ void TCParser::printReferenceIterators(llvm::raw_ostream &os,
   ss.flush();
 
   os << llvm::formatv(referenceReferenceIteratorsFmt, cppOpName, iteratorsStr);
+}
+
+void TCParser::printCanonicalizersAndFolders(llvm::raw_ostream &os,
+                                             StringRef cppOpName) {
+  const char *canonicalizersAndFoldersFmt = R"FMT(
+    void {0}::getCanonicalizationPatterns(
+        OwningRewritePatternList &results,
+        MLIRContext *context) {{
+      results.insert<EraseDeadLinalgOp>();
+      results.insert<FoldTensorCastOp>();
+    }
+    LogicalResult {0}::fold(ArrayRef<Attribute>,
+                            SmallVectorImpl<OpFoldResult> &) {{
+      return foldMemRefCast(*this);
+    })FMT";
+  os << llvm::formatv(canonicalizersAndFoldersFmt, cppOpName);
 }
 
 /// Print the C++ StructuredOpsInterface impl of `referenceIndexingMaps`.

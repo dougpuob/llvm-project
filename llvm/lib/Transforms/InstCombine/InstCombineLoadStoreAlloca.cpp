@@ -554,49 +554,15 @@ static Instruction *combineLoadToOperationType(InstCombinerImpl &IC,
   if (LI.getPointerOperand()->isSwiftError())
     return nullptr;
 
-  Type *Ty = LI.getType();
   const DataLayout &DL = IC.getDataLayout();
 
-  // Try to canonicalize loads which are only ever stored to operate over
-  // integers instead of any other type. We only do this when the loaded type
-  // is sized and has a size exactly the same as its store size and the store
-  // size is a legal integer type.
-  // Do not perform canonicalization if minmax pattern is found (to avoid
-  // infinite loop).
-  Type *Dummy;
-  if (!Ty->isIntegerTy() && Ty->isSized() && !isa<ScalableVectorType>(Ty) &&
-      DL.isLegalInteger(DL.getTypeStoreSizeInBits(Ty)) &&
-      DL.typeSizeEqualsStoreSize(Ty) && !DL.isNonIntegralPointerType(Ty) &&
-      !isMinMaxWithLoads(InstCombiner::peekThroughBitcast(
-                             LI.getPointerOperand(), /*OneUseOnly=*/true),
-                         Dummy)) {
-    if (all_of(LI.users(), [&LI](User *U) {
-          auto *SI = dyn_cast<StoreInst>(U);
-          return SI && SI->getPointerOperand() != &LI &&
-                 !SI->getPointerOperand()->isSwiftError();
-        })) {
-      LoadInst *NewLoad = IC.combineLoadToNewType(
-          LI, Type::getIntNTy(LI.getContext(), DL.getTypeStoreSizeInBits(Ty)));
-      // Replace all the stores with stores of the newly loaded value.
-      for (auto UI = LI.user_begin(), UE = LI.user_end(); UI != UE;) {
-        auto *SI = cast<StoreInst>(*UI++);
-        IC.Builder.SetInsertPoint(SI);
-        combineStoreToNewValue(IC, *SI, NewLoad);
-        IC.eraseInstFromFunction(*SI);
-      }
-      assert(LI.use_empty() && "Failed to remove all users of the load!");
-      // Return the old load so the combiner can delete it safely.
-      return &LI;
-    }
-  }
-
   // Fold away bit casts of the loaded value by loading the desired type.
-  // We can do this for BitCastInsts as well as casts from and to pointer types,
-  // as long as those are noops (i.e., the source or dest type have the same
-  // bitwidth as the target's pointers).
+  // Note that we should not do this for pointer<->integer casts,
+  // because that would result in type punning.
   if (LI.hasOneUse())
     if (auto* CI = dyn_cast<CastInst>(LI.user_back()))
-      if (CI->isNoopCast(DL))
+      if (CI->isNoopCast(DL) && LI.getType()->isPtrOrPtrVectorTy() ==
+                                    CI->getDestTy()->isPtrOrPtrVectorTy())
         if (!LI.isAtomic() || isSupportedAtomicType(CI->getDestTy())) {
           LoadInst *NewLoad = IC.combineLoadToNewType(LI, CI->getDestTy());
           CI->replaceAllUsesWith(NewLoad);

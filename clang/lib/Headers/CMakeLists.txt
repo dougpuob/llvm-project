@@ -47,6 +47,7 @@ set(files
   __clang_cuda_math_forward_declares.h
   __clang_cuda_runtime_wrapper.h
   __clang_hip_libdevice_declares.h
+  __clang_hip_cmath.h
   __clang_hip_math.h
   __clang_hip_runtime_wrapper.h
   cetintrin.h
@@ -72,6 +73,7 @@ set(files
   inttypes.h
   invpcidintrin.h
   iso646.h
+  keylockerintrin.h
   limits.h
   lwpintrin.h
   lzcntintrin.h

@@ -719,7 +719,7 @@ static void genLiteralParser(StringRef value, OpMethodBody &body) {
     body << "Keyword(\"" << value << "\")";
     return;
   }
-  body << (StringRef)llvm::StringSwitch<StringRef>(value)
+  body << (StringRef)StringSwitch<StringRef>(value)
               .Case("->", "Arrow()")
               .Case(":", "Colon()")
               .Case(",", "Comma()")
@@ -943,8 +943,8 @@ static void genCustomDirectiveParser(CustomDirective *dir, OpMethodBody &body) {
       if (var->attr.isOptional())
         body << llvm::formatv("    if ({0}Attr)\n  ", var->name);
 
-      body << llvm::formatv(
-          "    result.attributes.addAttribute(\"{0}\", {0}Attr);", var->name);
+      body << llvm::formatv("    result.addAttribute(\"{0}\", {0}Attr);\n",
+                            var->name);
     } else if (auto *operand = dyn_cast<OperandVariable>(&param)) {
       const NamedTypeConstraint *var = operand->getVar();
       if (!var->isOptional())
@@ -952,7 +952,7 @@ static void genCustomDirectiveParser(CustomDirective *dir, OpMethodBody &body) {
       body << llvm::formatv("    if ({0}Operand.hasValue())\n"
                             "      {0}Operands.push_back(*{0}Operand);\n",
                             var->name);
-    } else if (auto *dir = dyn_cast<TypeRefDirective>(&param)) {
+    } else if (isa<TypeRefDirective>(&param)) {
       // In the `type_ref` case, do not parse a new Type that needs to be added.
       // Just do nothing here.
     } else if (auto *dir = dyn_cast<TypeDirective>(&param)) {
@@ -1936,7 +1936,7 @@ Token FormatLexer::lexIdentifier(const char *tokStart) {
   // Check to see if this identifier is a keyword.
   StringRef str(tokStart, curPtr - tokStart);
   Token::Kind kind =
-      llvm::StringSwitch<Token::Kind>(str)
+      StringSwitch<Token::Kind>(str)
           .Case("attr-dict", Token::kw_attr_dict)
           .Case("attr-dict-with-keyword", Token::kw_attr_dict_w_keyword)
           .Case("custom", Token::kw_custom)

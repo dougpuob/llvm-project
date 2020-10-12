@@ -1742,12 +1742,28 @@ ASTNodeImporter::ImportDeclContext(DeclContext *FromDC, bool ForceImport) {
       Decl *ImportedDecl = *ImportedOrErr;
       FieldDecl *FieldTo = dyn_cast_or_null<FieldDecl>(ImportedDecl);
       if (FieldFrom && FieldTo) {
-        const RecordType *RecordFrom = FieldFrom->getType()->getAs<RecordType>();
-        const RecordType *RecordTo = FieldTo->getType()->getAs<RecordType>();
-        if (RecordFrom && RecordTo) {
-          RecordDecl *FromRecordDecl = RecordFrom->getDecl();
-          RecordDecl *ToRecordDecl = RecordTo->getDecl();
+        RecordDecl *FromRecordDecl = nullptr;
+        RecordDecl *ToRecordDecl = nullptr;
+        // If we have a field that is an ArrayType we need to check if the array
+        // element is a RecordDecl and if so we need to import the defintion.
+        if (FieldFrom->getType()->isArrayType()) {
+          // getBaseElementTypeUnsafe(...) handles multi-dimensonal arrays for us.
+          FromRecordDecl = FieldFrom->getType()->getBaseElementTypeUnsafe()->getAsRecordDecl();
+          ToRecordDecl = FieldTo->getType()->getBaseElementTypeUnsafe()->getAsRecordDecl();
+        }
 
+        if (!FromRecordDecl || !ToRecordDecl) {
+          const RecordType *RecordFrom =
+              FieldFrom->getType()->getAs<RecordType>();
+          const RecordType *RecordTo = FieldTo->getType()->getAs<RecordType>();
+
+          if (RecordFrom && RecordTo) {
+            FromRecordDecl = RecordFrom->getDecl();
+            ToRecordDecl = RecordTo->getDecl();
+          }
+        }
+
+        if (FromRecordDecl && ToRecordDecl) {
           if (FromRecordDecl->isCompleteDefinition() &&
               !ToRecordDecl->isCompleteDefinition()) {
             Error Err = ImportDefinition(FromRecordDecl, ToRecordDecl);
@@ -7519,6 +7535,7 @@ ExpectedStmt ASTNodeImporter::VisitCXXUnresolvedConstructExpr(
   Error Err = Error::success();
   auto ToLParenLoc = importChecked(Err, E->getLParenLoc());
   auto ToRParenLoc = importChecked(Err, E->getRParenLoc());
+  auto ToType = importChecked(Err, E->getType());
   auto ToTypeSourceInfo = importChecked(Err, E->getTypeSourceInfo());
   if (Err)
     return std::move(Err);
@@ -7529,7 +7546,7 @@ ExpectedStmt ASTNodeImporter::VisitCXXUnresolvedConstructExpr(
     return std::move(Err);
 
   return CXXUnresolvedConstructExpr::Create(
-      Importer.getToContext(), ToTypeSourceInfo, ToLParenLoc,
+      Importer.getToContext(), ToType, ToTypeSourceInfo, ToLParenLoc,
       llvm::makeArrayRef(ToArgs), ToRParenLoc);
 }
 

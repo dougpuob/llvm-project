@@ -60,9 +60,9 @@ uptr internal_prctl(int option, uptr arg2, uptr arg3, uptr arg4, uptr arg5);
 // internal_sigaction instead.
 int internal_sigaction_norestorer(int signum, const void *act, void *oldact);
 void internal_sigdelset(__sanitizer_sigset_t *set, int signum);
-#if defined(__x86_64__) || defined(__mips__) || defined(__aarch64__) \
-  || defined(__powerpc64__) || defined(__s390__) || defined(__i386__) \
-  || defined(__arm__)
+#if defined(__x86_64__) || defined(__mips__) || defined(__aarch64__) || \
+    defined(__powerpc64__) || defined(__s390__) || defined(__i386__) || \
+    defined(__arm__) || SANITIZER_RISCV64
 uptr internal_clone(int (*fn)(void *), void *child_stack, int flags, void *arg,
                     int *parent_tidptr, void *newtls, int *child_tidptr);
 #endif
@@ -154,6 +154,16 @@ ALWAYS_INLINE uptr *get_android_tls_ptr() {
   return reinterpret_cast<uptr *>(&__get_tls()[TLS_SLOT_SANITIZER]);
 }
 
+// Bionic provides this API since 31.
+extern "C" SANITIZER_WEAK_ATTRIBUTE void __libc_get_static_tls_bounds(void **,
+                                                                      void **);
+extern "C" SANITIZER_WEAK_ATTRIBUTE void __libc_iterate_dynamic_tls(
+    pid_t, void (*cb)(void *, void *, uptr, void *), void *);
+
+#define HAS_ANDROID_THREAD_PROPERTIES_API (&__libc_iterate_dynamic_tls != 0)
+
+#else
+#define HAS_ANDROID_THREAD_PROPERTIES_API (0)
 #endif  // SANITIZER_ANDROID
 
 }  // namespace __sanitizer

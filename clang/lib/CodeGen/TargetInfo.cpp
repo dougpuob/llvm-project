@@ -3061,6 +3061,7 @@ void X86_64ABIInfo::classify(QualType Ty, uint64_t OffsetBase,
 
     // Classify the fields one at a time, merging the results.
     unsigned idx = 0;
+    bool IsUnion = RT->isUnionType();
     for (RecordDecl::field_iterator i = RD->field_begin(), e = RD->field_end();
            i != e; ++i, ++idx) {
       uint64_t Offset = OffsetBase + Layout.getFieldOffset(idx);
@@ -3071,14 +3072,17 @@ void X86_64ABIInfo::classify(QualType Ty, uint64_t OffsetBase,
         continue;
 
       // AMD64-ABI 3.2.3p2: Rule 1. If the size of an object is larger than
-      // four eightbytes, or it contains unaligned fields, it has class MEMORY.
+      // eight eightbytes, or it contains unaligned fields, it has class MEMORY.
       //
-      // The only case a 256-bit wide vector could be used is when the struct
-      // contains a single 256-bit element. Since Lo and Hi logic isn't extended
-      // to work for sizes wider than 128, early check and fallback to memory.
+      // The only case a 256-bit or a 512-bit wide vector could be used is when
+      // the struct contains a single 256-bit or 512-bit element. Early check
+      // and fallback to memory.
       //
-      if (Size > 128 && (Size != getContext().getTypeSize(i->getType()) ||
-                         Size > getNativeVectorSizeForAVXABI(AVXLevel))) {
+      // FIXME: Extended the Lo and Hi logic properly to work for size wider
+      // than 128.
+      if (Size > 128 &&
+          ((!IsUnion && Size != getContext().getTypeSize(i->getType())) ||
+           Size > getNativeVectorSizeForAVXABI(AVXLevel))) {
         Lo = Memory;
         postMerge(Size, Lo, Hi);
         return;
@@ -4504,7 +4508,7 @@ bool AIXABIInfo::isPromotableTypeForABI(QualType Ty) const {
 
 ABIArgInfo AIXABIInfo::classifyReturnType(QualType RetTy) const {
   if (RetTy->isAnyComplexType())
-    llvm::report_fatal_error("complex type is not supported on AIX yet");
+    return ABIArgInfo::getDirect();
 
   if (RetTy->isVectorType())
     llvm::report_fatal_error("vector type is not supported on AIX yet");
@@ -4512,8 +4516,6 @@ ABIArgInfo AIXABIInfo::classifyReturnType(QualType RetTy) const {
   if (RetTy->isVoidType())
     return ABIArgInfo::getIgnore();
 
-  // TODO:  Evaluate if AIX power alignment rule would have an impact on the
-  // alignment here.
   if (isAggregateTypeForABI(RetTy))
     return getNaturalAlignIndirect(RetTy);
 
@@ -4525,13 +4527,11 @@ ABIArgInfo AIXABIInfo::classifyArgumentType(QualType Ty) const {
   Ty = useFirstFieldIfTransparentUnion(Ty);
 
   if (Ty->isAnyComplexType())
-    llvm::report_fatal_error("complex type is not supported on AIX yet");
+    return ABIArgInfo::getDirect();
 
   if (Ty->isVectorType())
     llvm::report_fatal_error("vector type is not supported on AIX yet");
 
-  // TODO:  Evaluate if AIX power alignment rule would have an impact on the
-  // alignment here.
   if (isAggregateTypeForABI(Ty)) {
     // Records with non-trivial destructors/copy-constructors should not be
     // passed by value.
@@ -4550,8 +4550,9 @@ ABIArgInfo AIXABIInfo::classifyArgumentType(QualType Ty) const {
 }
 
 CharUnits AIXABIInfo::getParamTypeAlignment(QualType Ty) const {
-  if (Ty->isAnyComplexType())
-    llvm::report_fatal_error("complex type is not supported on AIX yet");
+  // Complex types are passed just like their elements.
+  if (const ComplexType *CTy = Ty->getAs<ComplexType>())
+    Ty = CTy->getElementType();
 
   if (Ty->isVectorType())
     llvm::report_fatal_error("vector type is not supported on AIX yet");
@@ -5521,40 +5522,33 @@ public:
     if (!FD)
       return;
 
-    LangOptions::SignReturnAddressScopeKind Scope =
-        CGM.getLangOpts().getSignReturnAddressScope();
-    LangOptions::SignReturnAddressKeyKind Key =
-        CGM.getLangOpts().getSignReturnAddressKey();
-    bool BranchTargetEnforcement = CGM.getLangOpts().BranchTargetEnforcement;
-    if (const auto *TA = FD->getAttr<TargetAttr>()) {
-      ParsedTargetAttr Attr = TA->parse();
-      if (!Attr.BranchProtection.empty()) {
-        TargetInfo::BranchProtectionInfo BPI;
-        StringRef Error;
-        (void)CGM.getTarget().validateBranchProtection(Attr.BranchProtection,
-                                                       BPI, Error);
-        assert(Error.empty());
-        Scope = BPI.SignReturnAddr;
-        Key = BPI.SignKey;
-        BranchTargetEnforcement = BPI.BranchTargetEnforcement;
-      }
-    }
+    const auto *TA = FD->getAttr<TargetAttr>();
+    if (TA == nullptr)
+      return;
+
+    ParsedTargetAttr Attr = TA->parse();
+    if (Attr.BranchProtection.empty())
+      return;
+
+    TargetInfo::BranchProtectionInfo BPI;
+    StringRef Error;
+    (void)CGM.getTarget().validateBranchProtection(Attr.BranchProtection,
+                                                   BPI, Error);
+    assert(Error.empty());
 
     auto *Fn = cast<llvm::Function>(GV);
-    if (Scope != LangOptions::SignReturnAddressScopeKind::None) {
-      Fn->addFnAttr("sign-return-address",
-                    Scope == LangOptions::SignReturnAddressScopeKind::All
-                        ? "all"
-                        : "non-leaf");
+    static const char *SignReturnAddrStr[] = {"none", "non-leaf", "all"};
+    Fn->addFnAttr("sign-return-address", SignReturnAddrStr[static_cast<int>(BPI.SignReturnAddr)]);
 
+    if (BPI.SignReturnAddr != LangOptions::SignReturnAddressScopeKind::None) {
       Fn->addFnAttr("sign-return-address-key",
-                    Key == LangOptions::SignReturnAddressKeyKind::AKey
+                    BPI.SignKey == LangOptions::SignReturnAddressKeyKind::AKey
                         ? "a_key"
                         : "b_key");
     }
 
-    if (BranchTargetEnforcement)
-      Fn->addFnAttr("branch-target-enforcement");
+    Fn->addFnAttr("branch-target-enforcement",
+                  BPI.BranchTargetEnforcement ? "true" : "false");
   }
 };
 
@@ -9066,9 +9060,13 @@ void AMDGPUTargetCodeGenInfo::setTargetAttributes(
       assert(Max == 0 && "Max must be zero");
   } else if (IsOpenCLKernel || IsHIPKernel) {
     // By default, restrict the maximum size to a value specified by
-    // --gpu-max-threads-per-block=n or its default value.
+    // --gpu-max-threads-per-block=n or its default value for HIP.
+    const unsigned OpenCLDefaultMaxWorkGroupSize = 256;
+    const unsigned DefaultMaxWorkGroupSize =
+        IsOpenCLKernel ? OpenCLDefaultMaxWorkGroupSize
+                       : M.getLangOpts().GPUMaxThreadsPerBlock;
     std::string AttrVal =
-        std::string("1,") + llvm::utostr(M.getLangOpts().GPUMaxThreadsPerBlock);
+        std::string("1,") + llvm::utostr(DefaultMaxWorkGroupSize);
     F->addFnAttr("amdgpu-flat-work-group-size", AttrVal);
   }
 

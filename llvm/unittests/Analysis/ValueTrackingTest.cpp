@@ -768,6 +768,40 @@ TEST_F(ValueTrackingTest, isGuaranteedNotToBePoison_exploitBranchCond) {
   }
 }
 
+TEST_F(ValueTrackingTest, isGuaranteedNotToBePoison_phi) {
+  parseAssembly("declare i32 @any_i32(i32)"
+                "define void @test() {\n"
+                "ENTRY:\n"
+                "  br label %LOOP\n"
+                "LOOP:\n"
+                "  %A = phi i32 [0, %ENTRY], [%A.next, %NEXT]\n"
+                "  %A.next = call i32 @any_i32(i32 %A)\n"
+                "  %cond = icmp eq i32 %A.next, 0\n"
+                "  br i1 %cond, label %NEXT, label %EXIT\n"
+                "NEXT:\n"
+                "  br label %LOOP\n"
+                "EXIT:\n"
+                "  ret void\n"
+                "}\n");
+  DominatorTree DT(*F);
+  for (auto &BB : *F) {
+    if (BB.getName() == "LOOP") {
+      EXPECT_EQ(isGuaranteedNotToBePoison(A, A, &DT), true)
+          << "isGuaranteedNotToBePoison does not hold";
+    }
+  }
+}
+
+TEST_F(ValueTrackingTest, isGuaranteedNotToBeUndefOrPoison) {
+  parseAssembly("declare void @f(i32 noundef)"
+                "define void @test(i32 %x) {\n"
+                "  %A = bitcast i32 %x to i32\n"
+                "  call void @f(i32 noundef %x)\n"
+                "  ret void\n"
+                "}\n");
+  EXPECT_EQ(isGuaranteedNotToBeUndefOrPoison(A), true);
+}
+
 TEST(ValueTracking, canCreatePoisonOrUndef) {
   std::string AsmHead =
       "declare i32 @g(i32)\n"
@@ -1075,6 +1109,60 @@ TEST_F(ComputeKnownBitsTest, ComputeKnownBitsFreeze) {
                                      F->front().getTerminator());
   EXPECT_EQ(Known.Zero.getZExtValue(), 31u);
   EXPECT_EQ(Known.One.getZExtValue(), 0u);
+}
+
+TEST_F(ComputeKnownBitsTest, ComputeKnownBitsAddWithRange) {
+  parseAssembly("define void @test(i64* %p) {\n"
+                "  %A = load i64, i64* %p, !range !{i64 64, i64 65536}\n"
+                "  %APlus512 = add i64 %A, 512\n"
+                "  %c = icmp ugt i64 %APlus512, 523\n"
+                "  call void @llvm.assume(i1 %c)\n"
+                "  ret void\n"
+                "}\n"
+                "declare void @llvm.assume(i1)\n");
+  AssumptionCache AC(*F);
+  KnownBits Known = computeKnownBits(A, M->getDataLayout(), /* Depth */ 0, &AC,
+                                     F->front().getTerminator());
+  EXPECT_EQ(Known.Zero.getZExtValue(), ~(65536llu - 1));
+  EXPECT_EQ(Known.One.getZExtValue(), 0u);
+  Instruction &APlus512 = findInstructionByName(F, "APlus512");
+  Known = computeKnownBits(&APlus512, M->getDataLayout(), /* Depth */ 0, &AC,
+                           F->front().getTerminator());
+  // We know of one less zero because 512 may have produced a 1 that
+  // got carried all the way to the first trailing zero.
+  EXPECT_EQ(Known.Zero.getZExtValue(), (~(65536llu - 1)) << 1);
+  EXPECT_EQ(Known.One.getZExtValue(), 0u);
+  // The known range is not precise given computeKnownBits works
+  // with the masks of zeros and ones, not the ranges.
+  EXPECT_EQ(Known.getMinValue(), 0u);
+  EXPECT_EQ(Known.getMaxValue(), 131071);
+}
+
+// 512 + [32, 64) doesn't produce overlapping bits.
+// Make sure we get all the individual bits properly.
+TEST_F(ComputeKnownBitsTest, ComputeKnownBitsAddWithRangeNoOverlap) {
+  parseAssembly("define void @test(i64* %p) {\n"
+                "  %A = load i64, i64* %p, !range !{i64 32, i64 64}\n"
+                "  %APlus512 = add i64 %A, 512\n"
+                "  %c = icmp ugt i64 %APlus512, 523\n"
+                "  call void @llvm.assume(i1 %c)\n"
+                "  ret void\n"
+                "}\n"
+                "declare void @llvm.assume(i1)\n");
+  AssumptionCache AC(*F);
+  KnownBits Known = computeKnownBits(A, M->getDataLayout(), /* Depth */ 0, &AC,
+                                     F->front().getTerminator());
+  EXPECT_EQ(Known.Zero.getZExtValue(), ~(64llu - 1));
+  EXPECT_EQ(Known.One.getZExtValue(), 32u);
+  Instruction &APlus512 = findInstructionByName(F, "APlus512");
+  Known = computeKnownBits(&APlus512, M->getDataLayout(), /* Depth */ 0, &AC,
+                           F->front().getTerminator());
+  EXPECT_EQ(Known.Zero.getZExtValue(), ~512llu & ~(64llu - 1));
+  EXPECT_EQ(Known.One.getZExtValue(), 512u | 32u);
+  // The known range is not precise given computeKnownBits works
+  // with the masks of zeros and ones, not the ranges.
+  EXPECT_EQ(Known.getMinValue(), 544);
+  EXPECT_EQ(Known.getMaxValue(), 575);
 }
 
 class IsBytewiseValueTest : public ValueTrackingTest,

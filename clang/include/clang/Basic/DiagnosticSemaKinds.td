@@ -1034,6 +1034,8 @@ def warn_objc_boxing_invalid_utf8_string : Warning<
   "string is ill-formed as UTF-8 and will become a null %0 when boxed">,
   InGroup<ObjCBoxing>;
 
+def err_objc_non_runtime_protocol_in_protocol_expr : Error<
+  "cannot use a protocol declared 'objc_non_runtime_protocol' in a @protocol expression">;
 def err_objc_direct_on_protocol : Error<
   "'objc_direct' attribute cannot be applied to %select{methods|properties}0 "
   "declared in an Objective-C protocol">;
@@ -1842,7 +1844,7 @@ def note_nontrivial_no_copy : Note<
 def note_nontrivial_user_provided : Note<
   "because %select{base class of |field of |}0type %1 has a user-provided "
   "%sub{select_special_member_kind}2">;
-def note_nontrivial_in_class_init : Note<
+def note_nontrivial_default_member_init : Note<
   "because field %0 has an initializer">;
 def note_nontrivial_param_type : Note<
   "because its parameter is %diff{of type $, not $|of the wrong type}2,3">;
@@ -3974,6 +3976,46 @@ def err_objc_bridged_related_known_method : Error<
 def err_objc_attr_protocol_requires_definition : Error<
   "attribute %0 can only be applied to @protocol definitions, not forward declarations">;
 
+// Swift attributes.
+def warn_attr_swift_name_function
+  : Warning<"%0 attribute argument must be a string literal specifying a Swift function name">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_invalid_identifier
+  : Warning<"%0 attribute has invalid identifier for the %select{base|context|parameter}1 name">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_decl_kind
+  : Warning<"%0 attribute cannot be applied to this declaration">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_subscript_invalid_parameter
+  : Warning<"%0 attribute for 'subscript' must %select{be a getter or setter|"
+        "have at least one parameter|"
+        "have a 'self:' parameter}1">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_missing_parameters
+  : Warning<"%0 attribute is missing parameter label clause">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_setter_parameters
+  : Warning<"%0 attribute for setter must have one parameter for new value">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_multiple_selfs
+  : Warning<"%0 attribute cannot specify more than one 'self:' parameter">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_getter_parameters
+  : Warning<"%0 attribute for getter must not have any parameters besides 'self:'">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_subscript_setter_no_newValue
+  : Warning<"%0 attribute for 'subscript' setter must have a 'newValue:' parameter">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_subscript_setter_multiple_newValues
+  : Warning<"%0 attribute for 'subscript' setter cannot have multiple 'newValue:' parameters">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_subscript_getter_newValue
+  : Warning<"%0 attribute for 'subscript' getter cannot have a 'newValue:' parameter">,
+    InGroup<SwiftNameAttribute>;
+def warn_attr_swift_name_num_params
+  : Warning<"too %select{few|many}0 parameters in %1 attribute (expected %2; got %3)">,
+    InGroup<SwiftNameAttribute>;
+
 def err_attr_swift_error_no_error_parameter : Error<
   "%0 attribute can only be applied to a %select{function|method}1 with an "
   "error parameter">;
@@ -5579,8 +5621,6 @@ def err_bitfield_width_exceeds_type_width : Error<
 def err_anon_bitfield_width_exceeds_type_width : Error<
   "width of anonymous bit-field (%0 bits) exceeds %select{width|size}1 "
   "of its type (%2 bit%s2)">;
-def err_anon_bitfield_init : Error<
-  "anonymous bit-field cannot have a default member initializer">;
 def err_incorrect_number_of_vector_initializers : Error<
   "number of elements must be either one or match the size of the vector">;
 
@@ -8481,12 +8521,12 @@ def err_in_class_initializer_literal_type : Error<
   "'constexpr' specifier">;
 def err_in_class_initializer_non_constant : Error<
   "in-class initializer for static data member is not a constant expression">;
-def err_in_class_initializer_not_yet_parsed : Error<
+def err_default_member_initializer_not_yet_parsed : Error<
   "default member initializer for %1 needed within definition of enclosing "
   "class %0 outside of member functions">;
-def note_in_class_initializer_not_yet_parsed : Note<
+def note_default_member_initializer_not_yet_parsed : Note<
   "default member initializer declared here">;
-def err_in_class_initializer_cycle
+def err_default_member_initializer_cycle
     : Error<"default member initializer for %0 uses itself">;
 
 def ext_in_class_initializer_non_constant : Extension<
@@ -8881,7 +8921,7 @@ def note_array_declared_here : Note<
   "array %0 declared here">;
 
 def warn_printf_insufficient_data_args : Warning<
-  "more '%%' conversions than data arguments">, InGroup<Format>;
+  "more '%%' conversions than data arguments">, InGroup<FormatInsufficientArgs>;
 def warn_printf_data_arg_not_used : Warning<
   "data argument not used by format string">, InGroup<FormatExtraArgs>;
 def warn_format_invalid_conversion : Warning<
