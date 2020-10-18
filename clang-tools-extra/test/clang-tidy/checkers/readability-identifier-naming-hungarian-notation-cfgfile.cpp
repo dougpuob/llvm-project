@@ -1,27 +1,54 @@
 // RUN: %check_clang_tidy %s readability-identifier-naming %t -- \
 // RUN:   -config='{ CheckOptions: [ \
-// RUN:     { key: readability-identifier-naming.ClassMemberCase                                         , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.ConstantCase                                            , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.ConstantMemberCase                                      , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.ConstantParameterCase                                   , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.ConstantPointerParameterCase                            , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.ConstexprVariableCase                                   , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.GlobalConstantCase                                      , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.GlobalConstantPointerCase                               , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.GlobalVariableCase                                      , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.LocalConstantCase                                       , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.LocalConstantPointerCase                                , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.LocalPointerCase                                        , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.LocalVariableCase                                       , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.MemberCase                                              , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.ParameterCase                                           , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.PointerParameterCase                                    , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.PrivateMemberCase                                       , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.StaticConstantCase                                      , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.StaticVariableCase                                      , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.StructCase                                              , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.UnionCase                                               , value: szHungarianNotation }, \
-// RUN:     { key: readability-identifier-naming.VariableCase                                            , value: szHungarianNotation }, \
+// RUN:     { key: readability-identifier-naming.ClassCase                                               , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.AbstractClassCase                                       , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ClassMemberCase                                         , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ConstantCase                                            , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ConstantMemberCase                                      , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ConstantParameterCase                                   , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ConstantPointerParameterCase                            , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ConstexprVariableCase                                   , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.GlobalConstantCase                                      , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.GlobalConstantPointerCase                               , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.GlobalVariableCase                                      , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.LocalConstantCase                                       , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.LocalConstantPointerCase                                , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.LocalPointerCase                                        , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.LocalVariableCase                                       , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.MemberCase                                              , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ParameterCase                                           , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.PointerParameterCase                                    , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.PrivateMemberCase                                       , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.StaticConstantCase                                      , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.StaticVariableCase                                      , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.StructCase                                              , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.UnionCase                                               , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.VariableCase                                            , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ClassHungarianPrefix                                    , value: true      }, \
+// RUN:     { key: readability-identifier-naming.AbstractClassHungarianPrefix                            , value: true      }, \
+// RUN:     { key: readability-identifier-naming.ClassMemberHungarianPrefix                              , value: true      }, \
+// RUN:     { key: readability-identifier-naming.ConstantHungarianPrefix                                 , value: true      }, \
+// RUN:     { key: readability-identifier-naming.ConstantMemberHungarianPrefix                           , value: true      }, \
+// RUN:     { key: readability-identifier-naming.ConstantParameterHungarianPrefix                        , value: true      }, \
+// RUN:     { key: readability-identifier-naming.ConstantPointerParameterHungarianPrefix                 , value: true      }, \
+// RUN:     { key: readability-identifier-naming.ConstexprVariableHungarianPrefix                        , value: true      }, \
+// RUN:     { key: readability-identifier-naming.GlobalConstantHungarianPrefix                           , value: true      }, \
+// RUN:     { key: readability-identifier-naming.GlobalConstantPointerHungarianPrefix                    , value: true      }, \
+// RUN:     { key: readability-identifier-naming.GlobalVariableHungarianPrefix                           , value: true      }, \
+// RUN:     { key: readability-identifier-naming.LocalConstantHungarianPrefix                            , value: true      }, \
+// RUN:     { key: readability-identifier-naming.LocalConstantPointerHungarianPrefix                     , value: true      }, \
+// RUN:     { key: readability-identifier-naming.LocalPointerHungarianPrefix                             , value: true      }, \
+// RUN:     { key: readability-identifier-naming.LocalVariableHungarianPrefix                            , value: true      }, \
+// RUN:     { key: readability-identifier-naming.MemberHungarianPrefix                                   , value: true      }, \
+// RUN:     { key: readability-identifier-naming.ParameterHungarianPrefix                                , value: true      }, \
+// RUN:     { key: readability-identifier-naming.PointerParameterHungarianPrefix                         , value: true      }, \
+// RUN:     { key: readability-identifier-naming.PrivateMemberHungarianPrefix                            , value: true      }, \
+// RUN:     { key: readability-identifier-naming.StaticConstantHungarianPrefix                           , value: true      }, \
+// RUN:     { key: readability-identifier-naming.StaticVariableHungarianPrefix                           , value: true      }, \
+// RUN:     { key: readability-identifier-naming.StructHungarianPrefix                                   , value: true      }, \
+// RUN:     { key: readability-identifier-naming.UnionHungarianPrefix                                    , value: true      }, \
+// RUN:     { key: readability-identifier-naming.VariableHungarianPrefix                                 , value: true      }, \
+// RUN:     { key: readability-identifier-naming.HungarianNotation.Options.TreatStructAsClass            , value: false     }, \
 // RUN:     { key: readability-identifier-naming.HungarianNotation.DerivedType.Array                     , value: a    }, \
 // RUN:     { key: readability-identifier-naming.HungarianNotation.DerivedType.Pointer                   , value: p    }, \
 // RUN:     { key: readability-identifier-naming.HungarianNotation.DerivedType.FunctionPointer           , value: fn   }, \
@@ -155,7 +182,7 @@ typedef void*               FILE;       // NOLINT
 //===----------------------------------------------------------------------===//
 // Cases to CheckOptions
 //===----------------------------------------------------------------------===//
-class MyClass1 {
+class CMyClass1 {
 public:
   static int ClassMemberCase;
   // CHECK-MESSAGES: :[[@LINE-1]]:14: warning: invalid case style for class member 'ClassMemberCase' [readability-identifier-naming]
@@ -208,7 +235,7 @@ void Func1(){
   // CHECK-FIXES: {{^}}  int iLocalVariableCase = 0;
 }
 
-class MyClass2 {
+class CMyClass2 {
   char MemberCase;
   // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for private member 'MemberCase' [readability-identifier-naming]
   // CHECK-FIXES: {{^}}  char cMemberCase;
@@ -226,7 +253,7 @@ class MyClass2 {
   // CHECK-FIXES: {{^}}  void Func3(const int *piPointerParameterCase);
 };
 
-class MyClass3 {
+class CMyClass3 {
 private:
   char PrivateMemberCase;
   // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for private member 'PrivateMemberCase' [readability-identifier-naming]
@@ -276,7 +303,7 @@ const wchar_t *WideNamePtrArray[] = {L"AA", L"BB"};
 // CHECK-MESSAGES: :[[@LINE-1]]:16: warning: invalid case style for global variable 'WideNamePtrArray' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}const wchar_t *pwszWideNamePtrArray[] = {L"AA", L"BB"};
 
-class MyClass4 {
+class CMyClass4 {
 private:
   char *Name = "Text";
   // CHECK-MESSAGES: :[[@LINE-1]]:9: warning: invalid case style for private member 'Name' [readability-identifier-naming]
@@ -692,19 +719,20 @@ INDEX iIndex = 0;
 
 
 //===----------------------------------------------------------------------===//
-// Unsupported
+// Class
 //===----------------------------------------------------------------------===//
-class UnlistedClass { public: mutable int ValInt; };
-// CHECK-MESSAGES: :[[@LINE-1]]:43: warning: invalid case style for member 'ValInt' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}class UnlistedClass { public: mutable int iValInt; };
+class GenericClass { int Func(); };
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for class 'GenericClass' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}class CGenericClass { int Func(); };
 
-UnlistedClass cUnlisted2;
-// CHECK-MESSAGES: :[[@LINE-1]]:15: warning: invalid case style for global variable 'cUnlisted2' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}UnlistedClass Unlisted2;
+class AbstractClass { virtual int Func() = 0; };
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for abstract class 'AbstractClass' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}class IAbstractClass { virtual int Func() = 0; };
 
-UnlistedClass objUnlistedClass3;
-// CHECK-MESSAGES: :[[@LINE-1]]:15: warning: invalid case style for global variable 'objUnlistedClass3' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}UnlistedClass ObjUnlistedClass3;
+class AbstractClass1 { virtual int Func1() = 0; int Func2(); };
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for abstract class 'AbstractClass1' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}class IAbstractClass1 { virtual int Func1() = 0; int Func2(); };
+
 
 //===----------------------------------------------------------------------===//
 // Other Cases

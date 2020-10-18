@@ -17,8 +17,7 @@ Casing types include:
  - ``CamelCase``,
  - ``camel_Snake_Back``,
  - ``Camel_Snake_Case``,
- - ``aNy_CasE``,
- - ``szHungarianNotation``.
+ - ``aNy_CasE``.
 
 It also supports a fixed prefix and suffix that will be prepended or appended
 to the identifiers, regardless of the casing.
@@ -31,101 +30,55 @@ The naming of virtual methods is reported where they occur in the base class,
 but not where they are overridden, as it can't be fixed locally there.
 This also applies for pseudo-override patterns like CRTP.
 
-Hungarian Notation casing type
-------------------------------
-
-In Hungarian notation, a variable name starts with a group of lower-case
-letters which are mnemonics for the type or purpose of that variable, followed
-by whatever name the programmer has chosen; this last part is sometimes
-distinguished as the given name. The first character of the given name can be
-capitalized to separate it from the type indicators (see also CamelCase).
-Otherwise the case of this character denotes scope.
-
-================= ============== ====================== ============== =========== ==============
-Primitive Types                                                        Microsoft data types
----------------------------------------------------------------------- --------------------------
-    Type          Prefix         Type                   Prefix         Type        Prefix
-================= ============== ====================== ============== =========== ==============
-int8_t            i8             signed int             si             BOOL        b
-int16_t           i16            signed short           ss             BOOLEAN     b
-int32_t           i32            signed short int       ssi            BYTE        by
-int64_t           i64            signed long long int   slli           CHAR        c
-uint8_t           u8             signed long long       sll            UCHAR       uc
-uint16_t          u16            signed long int        sli            SHORT       s
-uint32_t          u32            signed long            sl             USHORT      us
-uint64_t          u64            signed                 s              WORD        w
-char8_t           c8             unsigned long long int ulli           DWORD       dw
-char16_t          c16            unsigned long long     ull            DWORD32     dw32
-char32_t          c32            unsigned long int      uli            DWORD64     dw64
-float             f              unsigned long          ul             LONG        l
-double            d              unsigned short int     usi            ULONG       ul
-char              c              unsigned short         us             ULONG32     ul32
-bool              b              unsigned int           ui             ULONG64     ul64
-_Bool             b              unsigned               u              ULONGLONG   ull
-int               i              long long int          lli            HANDLE      h
-size_t            n              long double            ld             INT         i
-short             s              long long              ll             INT8        i8
-signed            i              long int               li             INT16       i16
-unsigned          u              long                   l              INT32       i32
-long              l              ptrdiff_t              p              INT64       i64
-long long         ll                                                   UINT        ui
-unsigned long     ul                                                   UINT8       u8
-long double       ld                                                   UINT16      u16
-ptrdiff_t         p                                                    UINT32      u32
-wchar_t           wc                                                   UINT64      u64
-short int         si                                                   PVOID       p
-short             s
-================= ============== ====================== ============== =========== ==============
-
 
 Options
 -------
 
 The following options are describe below:
 
- - :option:`AbstractClassCase`, :option:`AbstractClassPrefix`, :option:`AbstractClassSuffix`
+ - :option:`AbstractClassCase`, :option:`AbstractClassPrefix`, :option:`AbstractClassSuffix`, :option:`AbstractClassHungarianPrefix`
  - :option:`AggressiveDependentMemberLookup`
- - :option:`ClassCase`, :option:`ClassPrefix`, :option:`ClassSuffix`
- - :option:`ClassConstantCase`, :option:`ClassConstantPrefix`, :option:`ClassConstantSuffix`
- - :option:`ClassMemberCase`, :option:`ClassMemberPrefix`, :option:`ClassMemberSuffix`
+ - :option:`ClassCase`, :option:`ClassPrefix`, :option:`ClassSuffix`, :option:`ClassHungarianPrefix`
+ - :option:`ClassConstantCase`, :option:`ClassConstantPrefix`, :option:`ClassConstantSuffix`, :option:`ClassConstantHungarianPrefix`
+ - :option:`ClassMemberCase`, :option:`ClassMemberPrefix`, :option:`ClassMemberSuffix`, :option:`ClassMemberHungarianPrefix`
  - :option:`ClassMethodCase`, :option:`ClassMethodPrefix`, :option:`ClassMethodSuffix`
- - :option:`ConstantCase`, :option:`ConstantPrefix`, :option:`ConstantSuffix`
- - :option:`ConstantMemberCase`, :option:`ConstantMemberPrefix`, :option:`ConstantMemberSuffix`
- - :option:`ConstantParameterCase`, :option:`ConstantParameterPrefix`, :option:`ConstantParameterSuffix`
- - :option:`ConstantPointerParameterCase`, :option:`ConstantPointerParameterPrefix`, :option:`ConstantPointerParameterSuffix`
+ - :option:`ConstantCase`, :option:`ConstantPrefix`, :option:`ConstantSuffix`, :option:`ConstantHungarianPrefix`
+ - :option:`ConstantMemberCase`, :option:`ConstantMemberPrefix`, :option:`ConstantMemberSuffix`, :option:`ConstantMemberHungarianPrefix`
+ - :option:`ConstantParameterCase`, :option:`ConstantParameterPrefix`, :option:`ConstantParameterSuffix`, :option:`ConstantParameterHungarianPrefix`
+ - :option:`ConstantPointerParameterCase`, :option:`ConstantPointerParameterPrefix`, :option:`ConstantPointerParameterSuffix`, :option:`ConstantPointerParameterHungarianPrefix`
  - :option:`ConstexprFunctionCase`, :option:`ConstexprFunctionPrefix`, :option:`ConstexprFunctionSuffix`
- - :option:`ConstexprMethodCase`, :option:`ConstexprMethodPrefix`, :option:`ConstexprMethodSuffix`
- - :option:`ConstexprVariableCase`, :option:`ConstexprVariablePrefix`, :option:`ConstexprVariableSuffix`
+ - :option:`ConstexprMethodCase`, :option:`ConstexprMethodPrefix` :option:`ConstexprMethodSuffix`
+ - :option:`ConstexprVariableCase`, :option:`ConstexprVariablePrefix`, :option:`ConstexprVariableSuffix`, :option:`ConstexprVariableHungarianPrefix`
  - :option:`EnumCase`, :option:`EnumPrefix`, :option:`EnumSuffix`
- - :option:`EnumConstantCase`, :option:`EnumConstantPrefix`, :option:`EnumConstantSuffix`
+ - :option:`EnumConstantCase`, :option:`EnumConstantPrefix`, :option:`EnumConstantSuffix`, :option:`EnumConstantHungarianPrefix`
  - :option:`FunctionCase`, :option:`FunctionPrefix`, :option:`FunctionSuffix`
  - :option:`GetConfigPerFile`
- - :option:`GlobalConstantCase`, :option:`GlobalConstantPrefix`, :option:`GlobalConstantSuffix`
- - :option:`GlobalConstantPointerCase`, :option:`GlobalConstantPointerPrefix`, :option:`GlobalConstantPointerSuffix`
+ - :option:`GlobalConstantCase`, :option:`GlobalConstantPrefix`, :option:`GlobalConstantSuffix`, :option:`GlobalConstantHungarianPrefix`
+ - :option:`GlobalConstantPointerCase`, :option:`GlobalConstantPointerPrefix`, :option:`GlobalConstantPointerSuffix`, :option:`GlobalConstantPointerHungarianPrefix`
  - :option:`GlobalFunctionCase`, :option:`GlobalFunctionPrefix`, :option:`GlobalFunctionSuffix`
- - :option:`GlobalPointerCase`, :option:`GlobalPointerPrefix`, :option:`GlobalPointerSuffix`
- - :option:`GlobalVariableCase`, :option:`GlobalVariablePrefix`, :option:`GlobalVariableSuffix`
+ - :option:`GlobalPointerCase`, :option:`GlobalPointerPrefix`, :option:`GlobalPointerSuffix`, :option:`GlobalPointerHungarianPrefix`
+ - :option:`GlobalVariableCase`, :option:`GlobalVariablePrefix`, :option:`GlobalVariableSuffix`, :option:`GlobalVariableHungarianPrefix`
  - :option:`IgnoreMainLikeFunctions`
  - :option:`InlineNamespaceCase`, :option:`InlineNamespacePrefix`, :option:`InlineNamespaceSuffix`
- - :option:`LocalConstantCase`, :option:`LocalConstantPrefix`, :option:`LocalConstantSuffix`
- - :option:`LocalConstantPointerCase`, :option:`LocalConstantPointerPrefix`, :option:`LocalConstantPointerSuffix`
- - :option:`LocalPointerCase`, :option:`LocalPointerPrefix`, :option:`LocalPointerSuffix`
- - :option:`LocalVariableCase`, :option:`LocalVariablePrefix`, :option:`LocalVariableSuffix`
+ - :option:`LocalConstantCase`, :option:`LocalConstantPrefix`, :option:`LocalConstantSuffix`, :option:`LocalConstantHungarianPrefix`
+ - :option:`LocalConstantPointerCase`, :option:`LocalConstantPointerPrefix`, :option:`LocalConstantPointerSuffix`, :option:`LocalConstantPointerHungarianPrefix`
+ - :option:`LocalPointerCase`, :option:`LocalPointerPrefix`, :option:`LocalPointerSuffix`, :option:`LocalPointerHungarianPrefix`
+ - :option:`LocalVariableCase`, :option:`LocalVariablePrefix`, :option:`LocalVariableSuffix`, :option:`LocalVariableHungarianPrefix`
  - :option:`MacroDefinitionCase`, :option:`MacroDefinitionPrefix`, :option:`MacroDefinitionSuffix`
- - :option:`MemberCase`, :option:`MemberPrefix`, :option:`MemberSuffix`
+ - :option:`MemberCase`, :option:`MemberPrefix`, :option:`MemberSuffix`, :option:`MemberHungarianPrefix`
  - :option:`MethodCase`, :option:`MethodPrefix`, :option:`MethodSuffix`
  - :option:`NamespaceCase`, :option:`NamespacePrefix`, :option:`NamespaceSuffix`
- - :option:`ParameterCase`, :option:`ParameterPrefix`, :option:`ParameterSuffix`
+ - :option:`ParameterCase`, :option:`ParameterPrefix`, :option:`ParameterSuffix`, :option:`ParameterHungarianPrefix`
  - :option:`ParameterPackCase`, :option:`ParameterPackPrefix`, :option:`ParameterPackSuffix`
- - :option:`PointerParameterCase`, :option:`PointerParameterPrefix`, :option:`PointerParameterSuffix`
- - :option:`PrivateMemberCase`, :option:`PrivateMemberPrefix`, :option:`PrivateMemberSuffix`
+ - :option:`PointerParameterCase`, :option:`PointerParameterPrefix`, :option:`PointerParameterSuffix`, :option:`PointerParameterHungarianPrefix`
+ - :option:`PrivateMemberCase`, :option:`PrivateMemberPrefix`, :option:`PrivateMemberSuffix`, :option:`PrivateMemberHungarianPrefix`
  - :option:`PrivateMethodCase`, :option:`PrivateMethodPrefix`, :option:`PrivateMethodSuffix`
- - :option:`ProtectedMemberCase`, :option:`ProtectedMemberPrefix`, :option:`ProtectedMemberSuffix`
+ - :option:`ProtectedMemberCase`, :option:`ProtectedMemberPrefix`, :option:`ProtectedMemberSuffix`, :option:`ProtectedMemberHungarianPrefix`
  - :option:`ProtectedMethodCase`, :option:`ProtectedMethodPrefix`, :option:`ProtectedMethodSuffix`
- - :option:`PublicMemberCase`, :option:`PublicMemberPrefix`, :option:`PublicMemberSuffix`
+ - :option:`PublicMemberCase`, :option:`PublicMemberPrefix`, :option:`PublicMemberSuffix`, :option:`PublicMemberHungarianPrefix`
  - :option:`PublicMethodCase`, :option:`PublicMethodPrefix`, :option:`PublicMethodSuffix`
- - :option:`StaticConstantCase`, :option:`StaticConstantPrefix`, :option:`StaticConstantSuffix`
- - :option:`StaticVariableCase`, :option:`StaticVariablePrefix`, :option:`StaticVariableSuffix`
+ - :option:`StaticConstantCase`, :option:`StaticConstantPrefix`, :option:`StaticConstantSuffix`, :option:`StaticConstantHungarianPrefix`
+ - :option:`StaticVariableCase`, :option:`StaticVariablePrefix`, :option:`StaticVariableSuffix`, :option:`StaticVariableHungarianPrefix`
  - :option:`StructCase`, :option:`StructPrefix`, :option:`StructSuffix`
  - :option:`TemplateParameterCase`, :option:`TemplateParameterPrefix`, :option:`TemplateParameterSuffix`
  - :option:`TemplateTemplateParameterCase`, :option:`TemplateTemplateParameterPrefix`, :option:`TemplateTemplateParameterSuffix`
@@ -134,7 +87,7 @@ The following options are describe below:
  - :option:`TypeTemplateParameterCase`, :option:`TypeTemplateParameterPrefix`, :option:`TypeTemplateParameterSuffix`
  - :option:`UnionCase`, :option:`UnionPrefix`, :option:`UnionSuffix`
  - :option:`ValueTemplateParameterCase`, :option:`ValueTemplateParameterPrefix`, :option:`ValueTemplateParameterSuffix`
- - :option:`VariableCase`, :option:`VariablePrefix`, :option:`VariableSuffix`
+ - :option:`VariableCase`, :option:`VariablePrefix`, :option:`VariableSuffix`, :option:`VariableHungarianPrefix`
  - :option:`VirtualMethodCase`, :option:`VirtualMethodPrefix`, :option:`VirtualMethodSuffix`
 
 .. option:: AbstractClassCase
@@ -152,11 +105,18 @@ The following options are describe below:
     When defined, the check will ensure abstract class names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: AbstractClassHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - AbstractClassCase of ``lower_case``
    - AbstractClassPrefix of ``pre_``
    - AbstractClassSuffix of ``_post``
+   - AbstractClassHungarianPrefix of ``true``
+
 
 Identifies and/or transforms abstract class names as follows:
 
@@ -251,11 +211,17 @@ After if AggressiveDependentMemberLookup is ``1``:
     When defined, the check will ensure class names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ClassHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ClassCase of ``lower_case``
    - ClassPrefix of ``pre_``
    - ClassSuffix of ``_post``
+   - ClassHungarianPrefix of ``true``
 
 Identifies and/or transforms class names as follows:
 
@@ -294,11 +260,17 @@ After:
     When defined, the check will ensure class constant names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ClassConstantHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ClassConstantCase of ``lower_case``
    - ClassConstantPrefix of ``pre_``
    - ClassConstantSuffix of ``_post``
+   - ClassConstantHungarianPrefix of ``true``
 
 Identifies and/or transforms class constant names as follows:
 
@@ -335,11 +307,17 @@ After:
     When defined, the check will ensure class member names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ClassMemberHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ClassMemberCase of ``lower_case``
    - ClassMemberPrefix of ``pre_``
    - ClassMemberSuffix of ``_post``
+   - ClassMemberHungarianPrefix of ``true``
 
 Identifies and/or transforms class member names as follows:
 
@@ -376,11 +354,17 @@ After:
     When defined, the check will ensure class method names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ClassMethodHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ClassMethodCase of ``lower_case``
    - ClassMethodPrefix of ``pre_``
    - ClassMethodSuffix of ``_post``
+   - ClassMethodHungarianPrefix of ``true``
 
 Identifies and/or transforms class method names as follows:
 
@@ -417,11 +401,17 @@ After:
     When defined, the check will ensure constant names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ConstantHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ConstantCase of ``lower_case``
    - ConstantPrefix of ``pre_``
    - ConstantSuffix of ``_post``
+   - ConstantHungarianPrefix of ``true``
 
 Identifies and/or transforms constant names as follows:
 
@@ -452,11 +442,17 @@ After:
     When defined, the check will ensure constant member names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ConstantMemberHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ConstantMemberCase of ``lower_case``
    - ConstantMemberPrefix of ``pre_``
    - ConstantMemberSuffix of ``_post``
+   - ConstantMemberHungarianPrefix of ``true``
 
 Identifies and/or transforms constant member names as follows:
 
@@ -491,11 +487,17 @@ After:
     When defined, the check will ensure constant parameter names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ConstantParameterHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ConstantParameterCase of ``lower_case``
    - ConstantParameterPrefix of ``pre_``
    - ConstantParameterSuffix of ``_post``
+   - ConstantParameterHungarianPrefix of ``true``
 
 Identifies and/or transforms constant parameter names as follows:
 
@@ -526,11 +528,17 @@ After:
     When defined, the check will ensure constant pointer parameter names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ConstantPointerParameterHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ConstantPointerParameterCase of ``lower_case``
    - ConstantPointerParameterPrefix of ``pre_``
    - ConstantPointerParameterSuffix of ``_post``
+   - ConstantPointerParameterHungarianPrefix of ``true``
 
 Identifies and/or transforms constant pointer parameter names as follows:
 
@@ -637,11 +645,17 @@ After:
     When defined, the check will ensure constexpr variable names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ConstexprVariableHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ConstexprVariableCase of ``lower_case``
    - ConstexprVariablePrefix of ``pre_``
    - ConstexprVariableSuffix of ``_post``
+   - ConstexprVariableHungarianPrefix of ``true``
 
 Identifies and/or transforms constexpr variable names as follows:
 
@@ -707,11 +721,17 @@ After:
     When defined, the check will ensure enumeration constant names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: EnumConstantHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - EnumConstantCase of ``lower_case``
    - EnumConstantPrefix of ``pre_``
    - EnumConstantSuffix of ``_post``
+   - EnumConstantHungarianPrefix of ``true``
 
 Identifies and/or transforms enumeration constant names as follows:
 
@@ -765,8 +785,8 @@ After:
 .. option:: GetConfigPerFile
 
     When `true` the check will look for the configuration for where an
-    identifier is declared. Useful for when included header files use a 
-    different style. 
+    identifier is declared. Useful for when included header files use a
+    different style.
     Default value is `true`.
 
 .. option:: GlobalConstantCase
@@ -784,11 +804,17 @@ After:
     When defined, the check will ensure global constant names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: GlobalConstantHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - GlobalConstantCase of ``lower_case``
    - GlobalConstantPrefix of ``pre_``
    - GlobalConstantSuffix of ``_post``
+   - GlobalConstantHungarianPrefix of ``true``
 
 Identifies and/or transforms global constant names as follows:
 
@@ -819,11 +845,17 @@ After:
     When defined, the check will ensure global constant pointer names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: GlobalConstantPointerHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - GlobalConstantPointerCase of ``lower_case``
    - GlobalConstantPointerPrefix of ``pre_``
    - GlobalConstantPointerSuffix of ``_post``
+   - GlobalConstantPointerHungarianPrefix of ``true``
 
 Identifies and/or transforms global constant pointer names as follows:
 
@@ -889,11 +921,17 @@ After:
     When defined, the check will ensure global pointer names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: GlobalPointerHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - GlobalPointerCase of ``lower_case``
    - GlobalPointerPrefix of ``pre_``
    - GlobalPointerSuffix of ``_post``
+   - GlobalPointerHungarianPrefix of ``true``
 
 Identifies and/or transforms global pointer names as follows:
 
@@ -924,11 +962,17 @@ After:
     When defined, the check will ensure global variable names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: GlobalVariableHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - GlobalVariableCase of ``lower_case``
    - GlobalVariablePrefix of ``pre_``
    - GlobalVariableSuffix of ``_post``
+   - GlobalVariableHungarianPrefix of ``true``
 
 Identifies and/or transforms global variable names as follows:
 
@@ -946,7 +990,7 @@ After:
 
 .. option:: IgnoreMainLikeFunctions
 
-    When set to `1` functions that have a similar signature to ``main`` or 
+    When set to `1` functions that have a similar signature to ``main`` or
     ``wmain`` won't enforce checks on the names of their parameters.
     Default value is `0`.
 
@@ -1008,11 +1052,17 @@ After:
     When defined, the check will ensure local constant names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: LocalConstantHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - LocalConstantCase of ``lower_case``
    - LocalConstantPrefix of ``pre_``
    - LocalConstantSuffix of ``_post``
+   - LocalConstantHungarianPrefix of ``true``
 
 Identifies and/or transforms local constant names as follows:
 
@@ -1043,11 +1093,17 @@ After:
     When defined, the check will ensure local constant pointer names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: LocalConstantPointerHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - LocalConstantPointerCase of ``lower_case``
    - LocalConstantPointerPrefix of ``pre_``
    - LocalConstantPointerSuffix of ``_post``
+   - LocalConstantPointerHungarianPrefix of ``true``
 
 Identifies and/or transforms local constant pointer names as follows:
 
@@ -1078,11 +1134,17 @@ After:
     When defined, the check will ensure local pointer names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: LocalPointerHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - LocalPointerCase of ``lower_case``
    - LocalPointerPrefix of ``pre_``
    - LocalPointerSuffix of ``_post``
+   - LocalPointerHungarianPrefix of ``true``
 
 Identifies and/or transforms local pointer names as follows:
 
@@ -1113,11 +1175,17 @@ After:
     When defined, the check will ensure local variable names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: LocalVariableHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - LocalVariableCase of ``lower_case``
    - LocalVariablePrefix of ``pre_``
    - LocalVariableSuffix of ``_post``
+   - LocalVariableHungarianPrefix of ``true``
 
 Identifies and/or transforms local variable names as follows:
 
@@ -1186,11 +1254,17 @@ using the ``-D`` flag.
     When defined, the check will ensure member names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: MemberHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - MemberCase of ``lower_case``
    - MemberPrefix of ``pre_``
    - MemberSuffix of ``_post``
+   - MemberHungarianPrefix of ``true``
 
 Identifies and/or transforms member names as follows:
 
@@ -1303,11 +1377,17 @@ After:
     When defined, the check will ensure parameter names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ParameterHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ParameterCase of ``lower_case``
    - ParameterPrefix of ``pre_``
    - ParameterSuffix of ``_post``
+   - ParameterHungarianPrefix of ``true``
 
 Identifies and/or transforms parameter names as follows:
 
@@ -1377,11 +1457,17 @@ After:
     When defined, the check will ensure pointer parameter names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: PointerParameterHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - PointerParameterCase of ``lower_case``
    - PointerParameterPrefix of ``pre_``
    - PointerParameterSuffix of ``_post``
+   - PointerParameterHungarianPrefix of ``true``
 
 Identifies and/or transforms pointer parameter names as follows:
 
@@ -1412,11 +1498,17 @@ After:
     When defined, the check will ensure private member names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: PrivateMemberHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - PrivateMemberCase of ``lower_case``
    - PrivateMemberPrefix of ``pre_``
    - PrivateMemberSuffix of ``_post``
+   - PrivateMemberHungarianPrefix of ``true``
 
 Identifies and/or transforms private member names as follows:
 
@@ -1453,11 +1545,17 @@ After:
     When defined, the check will ensure private method names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: PrivateMethodHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - PrivateMethodCase of ``lower_case``
    - PrivateMethodPrefix of ``pre_``
    - PrivateMethodSuffix of ``_post``
+   - PrivateMethodHungarianPrefix of ``true``
 
 Identifies and/or transforms private method names as follows:
 
@@ -1494,11 +1592,17 @@ After:
     When defined, the check will ensure protected member names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ProtectedMemberHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - ProtectedMemberCase of ``lower_case``
    - ProtectedMemberPrefix of ``pre_``
    - ProtectedMemberSuffix of ``_post``
+   - ProtectedMemberHungarianPrefix of ``true``
 
 Identifies and/or transforms protected member names as follows:
 
@@ -1576,11 +1680,17 @@ After:
     When defined, the check will ensure public member names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: PublicMemberHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - PublicMemberCase of ``lower_case``
    - PublicMemberPrefix of ``pre_``
    - PublicMemberSuffix of ``_post``
+   - PublicMemberHungarianPrefix of ``true``
 
 Identifies and/or transforms public member names as follows:
 
@@ -1658,11 +1768,17 @@ After:
     When defined, the check will ensure static constant names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: StaticConstantHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - StaticConstantCase of ``lower_case``
    - StaticConstantPrefix of ``pre_``
    - StaticConstantSuffix of ``_post``
+   - StaticConstantHungarianPrefix of ``true``
 
 Identifies and/or transforms static constant names as follows:
 
@@ -1693,11 +1809,17 @@ After:
     When defined, the check will ensure static variable names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: StaticVariableHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - StaticVariableCase of ``lower_case``
    - StaticVariablePrefix of ``pre_``
    - StaticVariableSuffix of ``_post``
+   - StaticVariableHungarianPrefix of ``true``
 
 Identifies and/or transforms static variable names as follows:
 
@@ -2026,11 +2148,17 @@ After:
     When defined, the check will ensure variable names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: VariableHungarianPrefix
+
+    When set to `true` the check will ensure the name will add Hungarian Notation
+    prefix for the given data type. The default value is `false`.
+
 For example using values of:
 
    - VariableCase of ``lower_case``
    - VariablePrefix of ``pre_``
    - VariableSuffix of ``_post``
+   - VariableHungarianPrefix of ``true``
 
 Identifies and/or transforms variable names as follows:
 
@@ -2088,46 +2216,114 @@ After:
     }
 
 
+The default mapping table of Hungarian Notation
+-----------------------------------------------
+
+In Hungarian notation, a variable name starts with a group of lower-case
+letters which are mnemonics for the type or purpose of that variable, followed
+by whatever name the programmer has chosen; this last part is sometimes
+distinguished as the given name. The first character of the given name can be
+capitalized to separate it from the type indicators (see also CamelCase).
+Otherwise the case of this character denotes scope.
+
+This tool supports all casing types that means not only CamelCase starts with
+Hungarian Notation, others either.
+
+The following table is the default mapping table of Hungarian Notation which
+maps Decl to its prefix string. You can also have your own style in config file.
+
+================= ============== ====================== ============== =========== ==============
+Primitive Types                                                        Microsoft data types
+---------------------------------------------------------------------- --------------------------
+    Type          Prefix         Type                   Prefix         Type        Prefix
+================= ============== ====================== ============== =========== ==============
+int8_t            i8             signed int             si             BOOL        b
+int16_t           i16            signed short           ss             BOOLEAN     b
+int32_t           i32            signed short int       ssi            BYTE        by
+int64_t           i64            signed long long int   slli           CHAR        c
+uint8_t           u8             signed long long       sll            UCHAR       uc
+uint16_t          u16            signed long int        sli            SHORT       s
+uint32_t          u32            signed long            sl             USHORT      us
+uint64_t          u64            signed                 s              WORD        w
+char8_t           c8             unsigned long long int ulli           DWORD       dw
+char16_t          c16            unsigned long long     ull            DWORD32     dw32
+char32_t          c32            unsigned long int      uli            DWORD64     dw64
+float             f              unsigned long          ul             LONG        l
+double            d              unsigned short int     usi            ULONG       ul
+char              c              unsigned short         us             ULONG32     ul32
+bool              b              unsigned int           ui             ULONG64     ul64
+_Bool             b              unsigned               u              ULONGLONG   ull
+int               i              long long int          lli            HANDLE      h
+size_t            n              long double            ld             INT         i
+short             s              long long              ll             INT8        i8
+signed            i              long int               li             INT16       i16
+unsigned          u              long                   l              INT32       i32
+long              l              ptrdiff_t              p              INT64       i64
+long long         ll                                                   UINT        ui
+unsigned long     ul                                                   UINT8       u8
+long double       ld                                                   UINT16      u16
+ptrdiff_t         p                                                    UINT32      u32
+wchar_t           wc                                                   UINT64      u64
+short int         si                                                   PVOID       p
+short             s
+================= ============== ====================== ============== =========== ==============
+
+**There are more trivial options for Hungarian Notation:**
+
+**HungarianNotation.General.***
+  Options are not belonging to any specific Decl.
+
+**HungarianNotation.CString.***
+  Options for NULL terminated string, you can customized your prefix here.
+
+**HungarianNotation.DerivedType.***
+ Options for derived types, you can customized your prefix here.
+
+**HungarianNotation.PrimitiveType.***
+  Options for primitive types, you can customized your prefix here.
+
+**HungarianNotation.UserDefinedType.***
+  Options for redefined types(Microsoft data types), you can customized your
+  prefix here.
+
+
 Options for Hungarian Notation
------------------------------
+------------------------------
 
-The following options(readability-identifier-naming.HungarianNotation.Options.) are describe below:
+- :option:`HungarianNotation.General.TreatStructAsClass`
 
- - :option:`ClassPrefixWithC`, :option:`VirtualClassPrefixWithI`
+- :option:`HungarianNotation.DerivedType.Array`
+- :option:`HungarianNotation.DerivedType.Pointer`
+- :option:`HungarianNotation.DerivedType.FunctionPointer`
 
-.. option:: ClassPrefixWithC
+- :option:`HungarianNotation.CString.CharPrinter`
+- :option:`HungarianNotation.CString.CharArray`
+- :option:`HungarianNotation.CString.WideCharPrinter`
+- :option:`HungarianNotation.CString.WideCharArray`
 
-    When set to `1` it makes the name of class starting with a `C` character. Default value is `0`.
+- :option:`HungarianNotation.PrimitiveType.*`
+- :option:`HungarianNotation.UserDefinedType.*`
 
-.. option:: VirtualClassPrefixWithI
+.. option:: HungarianNotation.General.TreatStructAsClass
 
-    When set to `1` it makes the name of abstract class starting with a `I` character. Default value is `0`.
+    When defined, the check will treat naming of struct as a class.
+    The default value is `false`.
 
+.. option:: HungarianNotation.DerivedType.Array
 
-The following options(readability-identifier-naming.HungarianNotation.DerivedType.) are describe below:
+    When defined, the check will ensure variable name will add the prefix with
+    the given string. The default prefix is `a`.
 
- - :option:`Array`, :option:`Pointer`, :option:`FunctionPointer`
+.. option:: HungarianNotation.DerivedType.Pointer
 
-.. option:: Array
+    When defined, the check will ensure variable name will add the prefix with
+    the given string. The default prefix is `p`.
 
-    When defined, the check will ensure variable names will add the
-    prefix with the given value.
+.. option:: HungarianNotation.DerivedType.FunctionPointer
 
-.. option:: Pointer
+    When defined, the check will ensure variable name will add the prefix with
+    the given string. The default prefix is `fn`.
 
-    When defined, the check will ensure variable names will add the
-    prefix with the given value.
-
-.. option:: FunctionPointer
-
-    When defined, the check will ensure variable names will add the
-    prefix with the given value.
-
-For example using values of:
-
-   - Array of ``a``
-   - Pointer of ``p``
-   - FunctionPointer of ``fn``
 
 Before:
 
@@ -2158,36 +2354,26 @@ After:
     FUNC_PTR fnFuncPtr = NULL;
 
 
-The following options(readability-identifier-naming.HungarianNotation.CString.) are describe below:
+.. option:: HungarianNotation.CString.CharPrinter
 
- - :option:`CharPrinter`, :option:`CharArray`, :option:`WideCharPrinter`, :option:`WideCharArray`
+    When defined, the check will ensure variable name will add the prefix with
+    the given string. The default prefix is `sz`.
 
-.. option:: CharPrinter
+.. option:: HungarianNotation.CString.CharArray
 
-    When defined, the check will ensure variable names will add the
-    prefix with the given value.
+    When defined, the check will ensure variable name will add the prefix with
+    the given string. The default prefix is `sz`.
 
-.. option:: CharArray
+.. option:: HungarianNotation.CString.WideCharPrinter
 
-    When defined, the check will ensure variable names will add the
-    prefix with the given value.
+    When defined, the check will ensure variable name will add the prefix with
+    the given string. The default prefix is `wsz`.
 
-.. option:: WideCharPrinter
+.. option:: HungarianNotation.CString.WideCharArray
 
-    When defined, the check will ensure variable names will add the
-    prefix with the given value.
+    When defined, the check will ensure variable name will add the prefix with
+    the given string. The default prefix is `wsz`.
 
-.. option:: WideCharArray
-
-    When defined, the check will ensure variable names will add the
-    prefix with the given value.
-
-For example using values of:
-
-   - CharPrinter of ``sz``
-   - CharArray of ``sz``
-   - WideCharPrinter of ``wsz``
-   - WideCharArray of ``wsz``
 
 Before:
 
@@ -2222,43 +2408,49 @@ After:
     const wchar_t wszWideNameArray[] = L"Name";
 
 
-The following options(readability-identifier-naming.HungarianNotation.PrimitiveType.) are describe below:
+.. option:: HungarianNotation.PrimitiveType.*
 
- - :option:`int8_t`, :option:`int16_t`, :option:`int32_t`, :option:`int64_t`, :option:`uint8_t`, :option:`uint16_t`, :option:`uint32_t`, :option:`uint64_t`, :option:`char8_t`, :option:`char16_t`, :option:`char32_t`
- - :option:`char`, :option:`wchar_t`, :option:`float`, :option:`double`, :option:`bool`, :option:`_Bool`, :option:`int`, :option:`size_t`, :option:`short`, :option:`long`, :option:`ptrdiff_t`
- - :option:`short-int`, :option:`signed-int`, :option:`signed-short`, :option:`signed-short-int`, :option:`signed-long-long-int`, :option:`signed-long-long`, :option:`signed-long-int`, :option:`signed-long`, :option:`signed`, :option:`unsigned-long-long-int`, :option:`unsigned-long-long`, :option:`unsigned-long-int`, :option:`unsigned-long`, :option:`unsigned-short-int`, :option:`unsigned-short`, :option:`unsigned-int`, :option:`unsigned`, :option:`long-long-int`, :option:`long-double`, :option:`long-long`, :option:`long-int`
- - :option:`BOOL`, :option:`BOOLEAN`, :option:`BYTE`, :option:`CHAR`, :option:`UCHAR`, :option:`SHORT`, :option:`USHORT`, :option:`WORD`, :option:`DWORD`, :option:`DWORD32`, :option:`DWORD64`, :option:`LONG`, :option:`ULONG`, :option:`ULONG32`, :option:`ULONG64`, :option:`ULONGLONG`, :option:`HANDLE`, :option:`INT`, :option:`INT8`, :option:`INT16`, :option:`INT32`, :option:`INT64`, :option:`UINT`, :option:`UINT8`, :option:`UINT16`, :option:`UINT32`, :option:`UINT64`, :option:`PVOID`
+    When defined, the check will ensure variable name of involved primitive
+    types will add the prefix with the given string. The default prefixes are
+    defined in the default mapping table.
+
+.. option:: HungarianNotation.UserDefinedType.*
+
+    When defined, the check will ensure variable name of involved primitive
+    types will add the prefix with the given string. The default prefixes are
+    defined in the default mapping table.
+
 
 Before:
 
 .. code-block:: c++
 
-    int8_t   ValueI8;
-    int16_t  ValueI16;
-    int32_t  ValueI32;
-    int64_t  ValueI64;
-    uint8_t  ValueU8;
-    uint16_t ValueU16;
-    uint32_t ValueU32;
-    uint64_t ValueU64;
-    float    ValueFloat;
-    double   ValueDouble;
-    ULONG    ValueUlong;
-    DWORD    ValueDword;
+    int8_t   ValueI8      = 0;
+    int16_t  ValueI16     = 0;
+    int32_t  ValueI32     = 0;
+    int64_t  ValueI64     = 0;
+    uint8_t  ValueU8      = 0;
+    uint16_t ValueU16     = 0;
+    uint32_t ValueU32     = 0;
+    uint64_t ValueU64     = 0;
+    float    ValueFloat   = 0.0;
+    double   ValueDouble  = 0.0;
+    ULONG    ValueUlong   = 0;
+    DWORD    ValueDword   = 0;
 
 After:
 
 .. code-block:: c++
 
-    int8_t   i8ValueI8;
-    int16_t  i16ValueI16;
-    int32_t  i32ValueI32;
-    int64_t  i64ValueI64;
-    uint8_t  u8ValueU8;
-    uint16_t u16ValueU16;
-    uint32_t u32ValueU32;
-    uint64_t u64ValueU64;
-    float    fValueFloat;
-    double   dValueDouble;
-    ULONG    ulValueUlong;
-    DWORD    dwValueDword;
+    int8_t   i8ValueI8    = 0;
+    int16_t  i16ValueI16  = 0;
+    int32_t  i32ValueI32  = 0;
+    int64_t  i64ValueI64  = 0;
+    uint8_t  u8ValueU8    = 0;
+    uint16_t u16ValueU16  = 0;
+    uint32_t u32ValueU32  = 0;
+    uint64_t u64ValueU64  = 0;
+    float    fValueFloat  = 0.0;
+    double   dValueDouble = 0.0;
+    ULONG    ulValueUlong = 0;
+    DWORD    dwValueDword = 0;
