@@ -48,6 +48,13 @@ public:
     CT_CamelSnakeBack
   };
 
+  enum HungarianPrefixOption {
+    HPO_Off = 0,
+    HPO_On,
+    HPO_LowerCase,
+    HPO_CamelCase,
+  };
+
   struct HungarianNotationOption {
     llvm::Optional<CaseType> Case;
     llvm::StringMap<std::string> General;
@@ -65,17 +72,18 @@ public:
         : Case(Case), Prefix(Prefix), Suffix(Suffix) {}
 
     NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
-                const std::string &Suffix, bool HungarianPrefixEnabled,
+                const std::string &Suffix,
+                HungarianPrefixOption HungarianPrefixOpt,
                 const std::shared_ptr<HungarianNotationOption> HNOption)
         : Case(Case), Prefix(Prefix), Suffix(Suffix),
-          HungarianPrefixEnabled(HungarianPrefixEnabled),
+          HungarianPrefixOpt(HungarianPrefixOpt),
           HungarianNotationOption(HNOption) {}
 
     llvm::Optional<CaseType> Case;
     std::string Prefix;
     std::string Suffix;
 
-    bool HungarianPrefixEnabled;
+    HungarianPrefixOption HungarianPrefixOpt;
     std::shared_ptr<IdentifierNamingCheck::HungarianNotationOption>
         HungarianNotationOption;
   };

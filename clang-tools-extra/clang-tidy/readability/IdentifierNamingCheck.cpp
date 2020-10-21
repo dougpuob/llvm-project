@@ -48,6 +48,29 @@ OptionEnumMapping<
   return llvm::makeArrayRef(Mapping);
 }
 
+template <>
+struct OptionEnumMapping<
+    readability::IdentifierNamingCheck::HungarianPrefixOption> {
+  static llvm::ArrayRef<std::pair<
+      readability::IdentifierNamingCheck::HungarianPrefixOption, StringRef>>
+  getEnumMapping() {
+    static constexpr std::pair<
+        readability::IdentifierNamingCheck::HungarianPrefixOption, StringRef>
+        Mapping[] = {
+            {readability::IdentifierNamingCheck::HungarianPrefixOption::HPO_Off,
+             "Off"},
+            {readability::IdentifierNamingCheck::HungarianPrefixOption::HPO_On,
+             "On"},
+            {readability::IdentifierNamingCheck::HungarianPrefixOption::
+                 HPO_LowerCase,
+             "sz_LowerCase"},
+            {readability::IdentifierNamingCheck::HungarianPrefixOption::
+                 HPO_CamelCase,
+             "szCamelCase"}};
+    return llvm::makeArrayRef(Mapping);
+  }
+};
+
 namespace readability {
 
 // clang-format off
@@ -397,8 +420,13 @@ static void getHungarianNotationFileConfig(
   }
 }
 
-static bool isOptionEnabled(std::string OptionVal) {
+static bool
+isHungarianNotationOptionEnabled(const std::string OptionKey,
+                                 llvm::StringMap<std::string> StrMap) {
+  if (OptionKey.empty())
+    return false;
 
+  std::string OptionVal = StrMap.lookup(OptionKey);
   for (auto &C : OptionVal) {
     C = toupper(C);
   }
@@ -410,15 +438,21 @@ static bool isOptionEnabled(std::string OptionVal) {
   return false;
 }
 
-static bool
-isHungarianNotationOptionEnabled(const std::string OptionKey,
-                                 llvm::StringMap<std::string> StrMap) {
+static IdentifierNamingCheck::HungarianPrefixOption
+parseHungarianPrefix(std::string OptionVal) {
+  for (auto &C : OptionVal)
+    C = toupper(C);
 
-  if (OptionKey.empty())
-    return false;
+  if (std::string::npos != OptionVal.find("LOWER_CASE"))
+    return IdentifierNamingCheck::HungarianPrefixOption::HPO_LowerCase;
 
-  std::string OptionVal = StrMap.lookup(OptionKey);
-  return isOptionEnabled(OptionVal);
+  if (std::string::npos != OptionVal.find("CAMELCASE"))
+    return IdentifierNamingCheck::HungarianPrefixOption::HPO_CamelCase;
+
+  if (OptionVal == "1" || OptionVal == "TRUE" || OptionVal == "ON")
+    return IdentifierNamingCheck::HungarianPrefixOption::HPO_On;
+
+  return IdentifierNamingCheck::HungarianPrefixOption::HPO_Off;
 }
 
 static std::vector<llvm::Optional<IdentifierNamingCheck::NamingStyle>>
@@ -441,10 +475,11 @@ getNamingStyles(const ClangTidyCheck::OptionsView &Options) {
     if (CaseOptional || !Prefix.empty() || !Postfix.empty() ||
         !HungarianPrefix.empty()) {
       HNOption->Case = CaseOptional;
-      bool HungarianPrefixEnabled = isOptionEnabled(HungarianPrefix);
+      IdentifierNamingCheck::HungarianPrefixOption HPOpt =
+          parseHungarianPrefix(HungarianPrefix);
       Styles.emplace_back(IdentifierNamingCheck::NamingStyle{
           std::move(CaseOptional), std::move(Prefix), std::move(Postfix),
-          std::move(HungarianPrefixEnabled), HNOption});
+          std::move(HPOpt), HNOption});
     } else {
       Styles.emplace_back(llvm::None);
     }
@@ -486,7 +521,7 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
     Options.store(Opts, (StyleNames[I] + "Suffix").str(),
                   NamingStyles[I]->Suffix);
     Options.store(Opts, (StyleNames[I] + "HungarianPrefix").str(),
-                  NamingStyles[I]->HungarianPrefixEnabled);
+                  NamingStyles[I]->HungarianPrefixOpt);
   }
   Options.store(Opts, "GetConfigPerFile", GetConfigPerFile);
   Options.store(Opts, "IgnoreFailedSplit", IgnoreFailedSplit);
@@ -603,8 +638,7 @@ static std::string getHungarianNotationClassPrefix(
     }
   }
 
-  // A class is made abstract by declaring at least one of
-  // its functions as pure virtual function.
+  // An abstract class has at least one pure virutal function.
   bool IsAbstractClass = false;
   for (const auto *Method : CRD->methods()) {
     if (Method->isPure()) {
@@ -847,7 +881,8 @@ static bool matchesStyle(StringRef Type, StringRef Name,
     return false;
   if (!Name.consume_back(Style.Suffix))
     return false;
-  if (Style.HungarianPrefixEnabled) {
+  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off !=
+      Style.HungarianPrefixOpt) {
     auto HNPrefix =
         getHungarianNotationPrefix(Decl, *Style.HungarianNotationOption);
     if (!Name.consume_front(HNPrefix))
@@ -866,8 +901,7 @@ static bool matchesStyle(StringRef Type, StringRef Name,
 }
 
 static std::string
-fixupWithCase(const StringRef &Type, const StringRef &Name,
-              const Decl *InputDecl,
+fixupWithCase(const StringRef &Type, const StringRef &Name, const Decl *D,
               const IdentifierNamingCheck::NamingStyle &Style,
               IdentifierNamingCheck::CaseType Case) {
   static llvm::Regex Splitter(
@@ -900,7 +934,8 @@ fixupWithCase(const StringRef &Type, const StringRef &Name,
   if (Words.empty())
     return Name.str();
 
-  if (Style.HungarianPrefixEnabled)
+  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off !=
+      Style.HungarianPrefixOpt)
     removeDuplicatedHungarianNotationPrefix(Words,
                                             *Style.HungarianNotationOption);
 
@@ -1032,27 +1067,32 @@ static bool isParamInMainLikeFunction(const ParmVarDecl &ParmDecl,
 
 static std::string
 fixupWithStyle(const StringRef &Type, const StringRef &Name,
-               const IdentifierNamingCheck::NamingStyle &Style,
-               const Decl *InputDecl) {
-  const std::string Fixed = fixupWithCase(
-      Type, Name, InputDecl, Style,
+               const IdentifierNamingCheck::NamingStyle &Style, const Decl *D) {
+  std::string Fixed = fixupWithCase(
+      Type, Name, D, Style,
       Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
+
+  std::string HungarianPrefix;
+  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off !=
+      Style.HungarianPrefixOpt) {
+    HungarianPrefix =
+        getHungarianNotationPrefix(D, *Style.HungarianNotationOption);
+    if (!HungarianPrefix.empty()) {
+      if (Style.HungarianPrefixOpt ==
+          IdentifierNamingCheck::HungarianPrefixOption::HPO_LowerCase) {
+        HungarianPrefix += "_";
+      }
+      if (Style.HungarianPrefixOpt ==
+          IdentifierNamingCheck::HungarianPrefixOption::HPO_CamelCase) {
+        Fixed[0] = toupper(Fixed[0]);
+      }
+    }
+  }
+
   StringRef Mid = StringRef(Fixed).trim("_");
   if (Mid.empty())
     Mid = "_";
 
-  std::string HungarianPrefix;
-  if (Style.HungarianPrefixEnabled) {
-    HungarianPrefix =
-        getHungarianNotationPrefix(InputDecl, *Style.HungarianNotationOption);
-    if (!HungarianPrefix.empty()) {
-      if (Style.Case == IdentifierNamingCheck::CT_LowerCase ||
-          Style.Case == IdentifierNamingCheck::CT_CamelBack ||
-          Style.Case == IdentifierNamingCheck::CT_CamelSnakeBack) {
-        HungarianPrefix += "_";
-      }
-    }
-  }
   return (Style.Prefix + HungarianPrefix + Mid + Style.Suffix).str();
 }
 

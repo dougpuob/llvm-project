@@ -31,6 +31,108 @@ but not where they are overridden, as it can't be fixed locally there.
 This also applies for pseudo-override patterns like CRTP.
 
 
+Hungarian prefix options include:
+
+ - ``Off``,
+ - ``On``,
+ - ``sz_lower_case``,
+ - ``szCamelCase``.
+
+Example1 (CamelCase):
+
+    Config:
+
+    .. code-block:: python
+
+        VariableCase: CamelCase
+        VariablePrefix: PRE_
+        VariableSuffix: _POST
+        VariableHungarianPrefix: (`Off`|`On`|`sz_lower_case`|`szCamelCase`)
+
+    Before:
+
+    .. code-block:: c++
+
+        bool lower_case = true;
+        bool UPPER_CASE = true;
+        bool CamelCase = true;
+
+    After:
+
+    .. code-block:: c++
+
+        // VariableCase: CamelCase
+        // VariableHungarianPrefix: Off
+        bool PRE_LowerCase_POST = true;
+        bool PRE_UpperCase_POST = true;
+        bool PRE_CamelCase_POST = true;
+
+        // VariableCase: CamelCase
+        // VariableHungarianPrefix: On
+        bool PRE_bLowerCase_POST = true;
+        bool PRE_bUpperCase_POST = true;
+        bool PRE_bCamelCase_POST = true;
+
+        // VariableCase: CamelCase
+        // VariableHungarianPrefix: sz_lower_case
+        bool PRE_b_LowerCase_POST = true;
+        bool PRE_b_UpperCase_POST = true;
+        bool PRE_b_CamelCase_POST = true;
+
+        // VariableCase: CamelCase
+        // VariableHungarianPrefix: szCamelCase
+        bool PRE_bLowerCase_POST = true;
+        bool PRE_bUpperCase_POST = true;
+        bool PRE_bCamelCase_POST = true;
+
+
+Example2 (lower_case):
+
+    Config:
+
+    .. code-block:: python
+
+        VariableCase: lower_case
+        VariablePrefix: PRE_
+        VariableSuffix: _POST
+        VariableHungarianPrefix: (`Off`|`On`|`sz_lower_case`|`szCamelCase`)
+
+    Before:
+
+    .. code-block:: c++
+
+        bool lower_case = true;
+        bool UPPER_CASE = true;
+        bool CamelCase = true;
+
+    After:
+
+    .. code-block:: c++
+
+        // VariableCase: lower_case
+        // VariableHungarianPrefix: Off
+        bool PRE_lower_case_POST = true;
+        bool PRE_upper_case_POST = true;
+        bool PRE_camel_case_POST = true;
+
+        // VariableCase: lower_case
+        // VariableHungarianPrefix: On
+        bool PRE_blower_case_POST = true;
+        bool PRE_bupper_case_POST = true;
+        bool PRE_bcamel_case_POST = true;
+
+        // VariableCase: lower_case
+        // VariableHungarianPrefix: sz_lower_case
+        bool PRE_b_lower_case_POST = true;
+        bool PRE_b_upper_case_POST = true;
+        bool PRE_b_camel_case_POST = true;
+
+        // VariableCase: lower_case
+        // VariableHungarianPrefix: szCamelCase
+        bool PRE_bLower_case_POST = true;
+        bool PRE_bUpper_case_POST = true;
+        bool PRE_bCamel_case_POST = true;
+
 Options
 -------
 
@@ -108,14 +210,14 @@ The following options are describe below:
 .. option:: AbstractClassHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - AbstractClassCase of ``lower_case``
    - AbstractClassPrefix of ``pre_``
    - AbstractClassSuffix of ``_post``
-   - AbstractClassHungarianPrefix of ``true``
+   - AbstractClassHungarianPrefix of ``On``
 
 
 Identifies and/or transforms abstract class names as follows:
@@ -214,14 +316,14 @@ After if AggressiveDependentMemberLookup is ``1``:
 .. option:: ClassHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ClassCase of ``lower_case``
    - ClassPrefix of ``pre_``
    - ClassSuffix of ``_post``
-   - ClassHungarianPrefix of ``true``
+   - ClassHungarianPrefix of ``On``
 
 Identifies and/or transforms class names as follows:
 
@@ -263,14 +365,14 @@ After:
 .. option:: ClassConstantHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ClassConstantCase of ``lower_case``
    - ClassConstantPrefix of ``pre_``
    - ClassConstantSuffix of ``_post``
-   - ClassConstantHungarianPrefix of ``true``
+   - ClassConstantHungarianPrefix of ``On``
 
 Identifies and/or transforms class constant names as follows:
 
@@ -310,14 +412,14 @@ After:
 .. option:: ClassMemberHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ClassMemberCase of ``lower_case``
    - ClassMemberPrefix of ``pre_``
    - ClassMemberSuffix of ``_post``
-   - ClassMemberHungarianPrefix of ``true``
+   - ClassMemberHungarianPrefix of ``On``
 
 Identifies and/or transforms class member names as follows:
 
@@ -357,14 +459,14 @@ After:
 .. option:: ClassMethodHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ClassMethodCase of ``lower_case``
    - ClassMethodPrefix of ``pre_``
    - ClassMethodSuffix of ``_post``
-   - ClassMethodHungarianPrefix of ``true``
+   - ClassMethodHungarianPrefix of ``On``
 
 Identifies and/or transforms class method names as follows:
 
@@ -404,14 +506,14 @@ After:
 .. option:: ConstantHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ConstantCase of ``lower_case``
    - ConstantPrefix of ``pre_``
    - ConstantSuffix of ``_post``
-   - ConstantHungarianPrefix of ``true``
+   - ConstantHungarianPrefix of ``On``
 
 Identifies and/or transforms constant names as follows:
 
@@ -445,14 +547,14 @@ After:
 .. option:: ConstantMemberHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ConstantMemberCase of ``lower_case``
    - ConstantMemberPrefix of ``pre_``
    - ConstantMemberSuffix of ``_post``
-   - ConstantMemberHungarianPrefix of ``true``
+   - ConstantMemberHungarianPrefix of ``On``
 
 Identifies and/or transforms constant member names as follows:
 
@@ -490,14 +592,14 @@ After:
 .. option:: ConstantParameterHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ConstantParameterCase of ``lower_case``
    - ConstantParameterPrefix of ``pre_``
    - ConstantParameterSuffix of ``_post``
-   - ConstantParameterHungarianPrefix of ``true``
+   - ConstantParameterHungarianPrefix of ``On``
 
 Identifies and/or transforms constant parameter names as follows:
 
@@ -531,14 +633,14 @@ After:
 .. option:: ConstantPointerParameterHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ConstantPointerParameterCase of ``lower_case``
    - ConstantPointerParameterPrefix of ``pre_``
    - ConstantPointerParameterSuffix of ``_post``
-   - ConstantPointerParameterHungarianPrefix of ``true``
+   - ConstantPointerParameterHungarianPrefix of ``On``
 
 Identifies and/or transforms constant pointer parameter names as follows:
 
@@ -648,14 +750,14 @@ After:
 .. option:: ConstexprVariableHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ConstexprVariableCase of ``lower_case``
    - ConstexprVariablePrefix of ``pre_``
    - ConstexprVariableSuffix of ``_post``
-   - ConstexprVariableHungarianPrefix of ``true``
+   - ConstexprVariableHungarianPrefix of ``On``
 
 Identifies and/or transforms constexpr variable names as follows:
 
@@ -724,14 +826,14 @@ After:
 .. option:: EnumConstantHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - EnumConstantCase of ``lower_case``
    - EnumConstantPrefix of ``pre_``
    - EnumConstantSuffix of ``_post``
-   - EnumConstantHungarianPrefix of ``true``
+   - EnumConstantHungarianPrefix of ``On``
 
 Identifies and/or transforms enumeration constant names as follows:
 
@@ -807,14 +909,14 @@ After:
 .. option:: GlobalConstantHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - GlobalConstantCase of ``lower_case``
    - GlobalConstantPrefix of ``pre_``
    - GlobalConstantSuffix of ``_post``
-   - GlobalConstantHungarianPrefix of ``true``
+   - GlobalConstantHungarianPrefix of ``On``
 
 Identifies and/or transforms global constant names as follows:
 
@@ -848,14 +950,14 @@ After:
 .. option:: GlobalConstantPointerHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - GlobalConstantPointerCase of ``lower_case``
    - GlobalConstantPointerPrefix of ``pre_``
    - GlobalConstantPointerSuffix of ``_post``
-   - GlobalConstantPointerHungarianPrefix of ``true``
+   - GlobalConstantPointerHungarianPrefix of ``On``
 
 Identifies and/or transforms global constant pointer names as follows:
 
@@ -924,14 +1026,14 @@ After:
 .. option:: GlobalPointerHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - GlobalPointerCase of ``lower_case``
    - GlobalPointerPrefix of ``pre_``
    - GlobalPointerSuffix of ``_post``
-   - GlobalPointerHungarianPrefix of ``true``
+   - GlobalPointerHungarianPrefix of ``On``
 
 Identifies and/or transforms global pointer names as follows:
 
@@ -965,14 +1067,14 @@ After:
 .. option:: GlobalVariableHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - GlobalVariableCase of ``lower_case``
    - GlobalVariablePrefix of ``pre_``
    - GlobalVariableSuffix of ``_post``
-   - GlobalVariableHungarianPrefix of ``true``
+   - GlobalVariableHungarianPrefix of ``On``
 
 Identifies and/or transforms global variable names as follows:
 
@@ -1055,14 +1157,14 @@ After:
 .. option:: LocalConstantHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - LocalConstantCase of ``lower_case``
    - LocalConstantPrefix of ``pre_``
    - LocalConstantSuffix of ``_post``
-   - LocalConstantHungarianPrefix of ``true``
+   - LocalConstantHungarianPrefix of ``On``
 
 Identifies and/or transforms local constant names as follows:
 
@@ -1096,14 +1198,14 @@ After:
 .. option:: LocalConstantPointerHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - LocalConstantPointerCase of ``lower_case``
    - LocalConstantPointerPrefix of ``pre_``
    - LocalConstantPointerSuffix of ``_post``
-   - LocalConstantPointerHungarianPrefix of ``true``
+   - LocalConstantPointerHungarianPrefix of ``On``
 
 Identifies and/or transforms local constant pointer names as follows:
 
@@ -1137,14 +1239,14 @@ After:
 .. option:: LocalPointerHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - LocalPointerCase of ``lower_case``
    - LocalPointerPrefix of ``pre_``
    - LocalPointerSuffix of ``_post``
-   - LocalPointerHungarianPrefix of ``true``
+   - LocalPointerHungarianPrefix of ``On``
 
 Identifies and/or transforms local pointer names as follows:
 
@@ -1178,14 +1280,14 @@ After:
 .. option:: LocalVariableHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - LocalVariableCase of ``lower_case``
    - LocalVariablePrefix of ``pre_``
    - LocalVariableSuffix of ``_post``
-   - LocalVariableHungarianPrefix of ``true``
+   - LocalVariableHungarianPrefix of ``On``
 
 Identifies and/or transforms local variable names as follows:
 
@@ -1257,14 +1359,14 @@ using the ``-D`` flag.
 .. option:: MemberHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - MemberCase of ``lower_case``
    - MemberPrefix of ``pre_``
    - MemberSuffix of ``_post``
-   - MemberHungarianPrefix of ``true``
+   - MemberHungarianPrefix of ``On``
 
 Identifies and/or transforms member names as follows:
 
@@ -1380,14 +1482,14 @@ After:
 .. option:: ParameterHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ParameterCase of ``lower_case``
    - ParameterPrefix of ``pre_``
    - ParameterSuffix of ``_post``
-   - ParameterHungarianPrefix of ``true``
+   - ParameterHungarianPrefix of ``On``
 
 Identifies and/or transforms parameter names as follows:
 
@@ -1460,14 +1562,14 @@ After:
 .. option:: PointerParameterHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - PointerParameterCase of ``lower_case``
    - PointerParameterPrefix of ``pre_``
    - PointerParameterSuffix of ``_post``
-   - PointerParameterHungarianPrefix of ``true``
+   - PointerParameterHungarianPrefix of ``On``
 
 Identifies and/or transforms pointer parameter names as follows:
 
@@ -1501,14 +1603,14 @@ After:
 .. option:: PrivateMemberHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - PrivateMemberCase of ``lower_case``
    - PrivateMemberPrefix of ``pre_``
    - PrivateMemberSuffix of ``_post``
-   - PrivateMemberHungarianPrefix of ``true``
+   - PrivateMemberHungarianPrefix of ``On``
 
 Identifies and/or transforms private member names as follows:
 
@@ -1548,14 +1650,14 @@ After:
 .. option:: PrivateMethodHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - PrivateMethodCase of ``lower_case``
    - PrivateMethodPrefix of ``pre_``
    - PrivateMethodSuffix of ``_post``
-   - PrivateMethodHungarianPrefix of ``true``
+   - PrivateMethodHungarianPrefix of ``On``
 
 Identifies and/or transforms private method names as follows:
 
@@ -1595,14 +1697,14 @@ After:
 .. option:: ProtectedMemberHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - ProtectedMemberCase of ``lower_case``
    - ProtectedMemberPrefix of ``pre_``
    - ProtectedMemberSuffix of ``_post``
-   - ProtectedMemberHungarianPrefix of ``true``
+   - ProtectedMemberHungarianPrefix of ``On``
 
 Identifies and/or transforms protected member names as follows:
 
@@ -1683,14 +1785,14 @@ After:
 .. option:: PublicMemberHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - PublicMemberCase of ``lower_case``
    - PublicMemberPrefix of ``pre_``
    - PublicMemberSuffix of ``_post``
-   - PublicMemberHungarianPrefix of ``true``
+   - PublicMemberHungarianPrefix of ``On``
 
 Identifies and/or transforms public member names as follows:
 
@@ -1771,14 +1873,14 @@ After:
 .. option:: StaticConstantHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - StaticConstantCase of ``lower_case``
    - StaticConstantPrefix of ``pre_``
    - StaticConstantSuffix of ``_post``
-   - StaticConstantHungarianPrefix of ``true``
+   - StaticConstantHungarianPrefix of ``On``
 
 Identifies and/or transforms static constant names as follows:
 
@@ -1812,14 +1914,14 @@ After:
 .. option:: StaticVariableHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - StaticVariableCase of ``lower_case``
    - StaticVariablePrefix of ``pre_``
    - StaticVariableSuffix of ``_post``
-   - StaticVariableHungarianPrefix of ``true``
+   - StaticVariableHungarianPrefix of ``On``
 
 Identifies and/or transforms static variable names as follows:
 
@@ -2151,14 +2253,14 @@ After:
 .. option:: VariableHungarianPrefix
 
     When set to `true` the check will ensure the name will add Hungarian Notation
-    prefix for the given data type. The default value is `false`.
+    prefix for the given data type. The default value is `Off`.
 
 For example using values of:
 
    - VariableCase of ``lower_case``
    - VariablePrefix of ``pre_``
    - VariableSuffix of ``_post``
-   - VariableHungarianPrefix of ``true``
+   - VariableHungarianPrefix of ``On``
 
 Identifies and/or transforms variable names as follows:
 
