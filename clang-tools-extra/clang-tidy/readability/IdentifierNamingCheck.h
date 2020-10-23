@@ -56,7 +56,17 @@ public:
   };
 
   struct HungarianNotationOption {
+    void clearAll() {
+      PrefixOption = HungarianPrefixOption::HPO_Off;
+      Case.reset();
+      General.clear();
+      CString.clear();
+      PrimitiveType.clear();
+      UserDefinedType.clear();
+      DerivedType.clear();
+    }
     llvm::Optional<CaseType> Case;
+    HungarianPrefixOption PrefixOption;
     llvm::StringMap<std::string> General;
     llvm::StringMap<std::string> CString;
     llvm::StringMap<std::string> PrimitiveType;
@@ -68,24 +78,19 @@ public:
     NamingStyle() = default;
 
     NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
-                const std::string &Suffix)
-        : Case(Case), Prefix(Prefix), Suffix(Suffix) {}
-
-    NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
                 const std::string &Suffix,
                 HungarianPrefixOption HungarianPrefixOpt,
-                const std::shared_ptr<HungarianNotationOption> HNOption)
+                HungarianNotationOption &HNOption)
         : Case(Case), Prefix(Prefix), Suffix(Suffix),
           HungarianPrefixOpt(HungarianPrefixOpt),
-          HungarianNotationOption(HNOption) {}
+          HungarianNotationOption(&HNOption) {}
 
     llvm::Optional<CaseType> Case;
     std::string Prefix;
     std::string Suffix;
 
     HungarianPrefixOption HungarianPrefixOpt;
-    std::shared_ptr<IdentifierNamingCheck::HungarianNotationOption>
-        HungarianNotationOption;
+    IdentifierNamingCheck::HungarianNotationOption *HungarianNotationOption;
   };
 
 private:

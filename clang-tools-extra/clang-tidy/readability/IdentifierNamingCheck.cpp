@@ -234,15 +234,15 @@ static StringRef const HungarainNotationUserDefinedTypes[] = {
 // clang-format on
 
 static void getHungarianNotationDefaultConfig(
-    std::shared_ptr<IdentifierNamingCheck::HungarianNotationOption> HNOption) {
+    IdentifierNamingCheck::HungarianNotationOption &HNOption) {
 
   // Options
   const static llvm::StringMap<std::string> Options = {
       {"TreatStructAsClass", "false"}};
   for (auto &Opt : Options) {
-    std::string Val = HNOption->General.lookup(Opt.getKey());
+    std::string Val = HNOption.General.lookup(Opt.getKey());
     if (Val.empty()) {
-      HNOption->General.insert({Opt.getKey(), Opt.getValue()});
+      HNOption.General.insert({Opt.getKey(), Opt.getValue()});
     }
   }
 
@@ -250,9 +250,9 @@ static void getHungarianNotationDefaultConfig(
   const static llvm::StringMap<std::string> DerivedTypes = {
       {"Array", "a"}, {"Pointer", "p"}, {"FunctionPointer", "fn"}};
   for (auto &Other : DerivedTypes) {
-    std::string Val = HNOption->DerivedType.lookup(Other.getKey());
+    std::string Val = HNOption.DerivedType.lookup(Other.getKey());
     if (Val.empty()) {
-      HNOption->DerivedType.insert({Other.getKey(), Other.getValue()});
+      HNOption.DerivedType.insert({Other.getKey(), Other.getValue()});
     }
   }
 
@@ -260,9 +260,9 @@ static void getHungarianNotationDefaultConfig(
   const static llvm::StringMap<std::string> CStrings = {
       {"char*", "sz"}, {"char", "sz"}, {"wchar_t*", "wsz"}, {"wchar_t", "wsz"}};
   for (auto &CStr : CStrings) {
-    std::string Val = HNOption->CString.lookup(CStr.getKey());
+    std::string Val = HNOption.CString.lookup(CStr.getKey());
     if (Val.empty()) {
-      HNOption->CString.insert({CStr.getKey(), CStr.getValue()});
+      HNOption.CString.insert({CStr.getKey(), CStr.getValue()});
     }
   }
 
@@ -313,9 +313,9 @@ static void getHungarianNotationDefaultConfig(
         {"ptrdiff_t",               "p"   }};
   // clang-format on
   for (auto &Type : PrimitiveTypes) {
-    std::string Val = HNOption->PrimitiveType.lookup(Type.getKey());
+    std::string Val = HNOption.PrimitiveType.lookup(Type.getKey());
     if (Val.empty()) {
-      HNOption->PrimitiveType.insert({Type.getKey(), Type.getValue()});
+      HNOption.PrimitiveType.insert({Type.getKey(), Type.getValue()});
     }
   }
 
@@ -352,16 +352,16 @@ static void getHungarianNotationDefaultConfig(
       {"PVOID",                   "p"   } };
   // clang-format on
   for (auto &Type : UserDefinedTypes) {
-    std::string Val = HNOption->UserDefinedType.lookup(Type.getKey());
+    std::string Val = HNOption.UserDefinedType.lookup(Type.getKey());
     if (Val.empty()) {
-      HNOption->UserDefinedType.insert({Type.getKey(), Type.getValue()});
+      HNOption.UserDefinedType.insert({Type.getKey(), Type.getValue()});
     }
   }
 }
 
 static void getHungarianNotationFileConfig(
     const ClangTidyCheck::OptionsView &Options,
-    std::shared_ptr<IdentifierNamingCheck::HungarianNotationOption> HNOption) {
+    IdentifierNamingCheck::HungarianNotationOption &HNOption) {
   std::string Section = "HungarianNotation.";
 
   std::vector<std::string> HNOpts = {"TreatStructAsClass"};
@@ -370,7 +370,7 @@ static void getHungarianNotationFileConfig(
 
     std::string Val = Options.get(Key, "");
     if (!Val.empty())
-      HNOption->General[Opt] = Val;
+      HNOption.General[Opt] = Val;
   }
 
   std::vector<std::string> HNDerivedTypes = {"Array", "Pointer",
@@ -379,7 +379,7 @@ static void getHungarianNotationFileConfig(
     std::string Key = Section + "DerivedType." + Type;
     std::string Val = Options.get(Key, "");
     if (!Val.empty())
-      HNOption->DerivedType[Type] = Val;
+      HNOption.DerivedType[Type] = Val;
   }
 
   std::vector<std::pair<std::string, std::string>> HNCStrings = {
@@ -392,7 +392,7 @@ static void getHungarianNotationFileConfig(
     std::string Key = Section + "CString." + CStr.first;
     std::string Val = Options.get(Key, "");
     if (!Val.empty())
-      HNOption->CString[CStr.first] = Val;
+      HNOption.CString[CStr.first] = Val;
   }
 
   for (auto const &PrimType : HungarainNotationPrimitiveTypes) {
@@ -407,7 +407,7 @@ static void getHungarianNotationFileConfig(
           }
         }
       }
-      HNOption->PrimitiveType[Type] = Val;
+      HNOption.PrimitiveType[Type] = Val;
     }
   }
 
@@ -416,7 +416,7 @@ static void getHungarianNotationFileConfig(
     std::string Val = Options.get(Key, "");
     std::string Type = WDType.str();
     if (!Val.empty())
-      HNOption->UserDefinedType[Type] = Val;
+      HNOption.UserDefinedType[Type] = Val;
   }
 }
 
@@ -457,8 +457,9 @@ parseHungarianPrefix(std::string OptionVal) {
 
 static std::vector<llvm::Optional<IdentifierNamingCheck::NamingStyle>>
 getNamingStyles(const ClangTidyCheck::OptionsView &Options) {
-  auto HNOption =
-      std::make_shared<IdentifierNamingCheck::HungarianNotationOption>();
+  static IdentifierNamingCheck::HungarianNotationOption HNOption;
+  HNOption.clearAll();
+
   getHungarianNotationDefaultConfig(HNOption);
   getHungarianNotationFileConfig(Options, HNOption);
 
@@ -474,7 +475,7 @@ getNamingStyles(const ClangTidyCheck::OptionsView &Options) {
 
     if (CaseOptional || !Prefix.empty() || !Postfix.empty() ||
         !HungarianPrefix.empty()) {
-      HNOption->Case = CaseOptional;
+      HNOption.Case = CaseOptional;
       IdentifierNamingCheck::HungarianPrefixOption HPOpt =
           parseHungarianPrefix(HungarianPrefix);
       Styles.emplace_back(IdentifierNamingCheck::NamingStyle{
@@ -803,7 +804,7 @@ static std::string getDeclTypeName(const clang::NamedDecl *ND) {
 
 static std::string getHungarianNotationPrefix(
     const clang::Decl *D,
-    const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+    IdentifierNamingCheck::HungarianNotationOption &HNOption) {
   const auto ND = dyn_cast<NamedDecl>(D);
   if (!ND) {
     return "";
