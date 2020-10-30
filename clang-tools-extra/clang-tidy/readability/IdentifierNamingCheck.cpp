@@ -633,23 +633,7 @@ static std::string getHungarianNotationClassPrefix(
                                           HNOption.General))
       return "";
 
-  // An abstract class has at least one pure virutal function.
-  bool IsAbstractClass = false;
-  for (const auto *Method : CRD->methods()) {
-    if (Method->isPure()) {
-      IsAbstractClass = true;
-      break;
-    }
-  }
-
-  std::string Prefix;
-  if (IsAbstractClass) {
-      Prefix = "I";
-  } else {
-      Prefix = "C";
-  }
-
-  return Prefix;
+  return (CRD->isAbstract() ? "I" : "C");
 }
 
 static std::string getHungarianNotationEnumPrefix(const EnumConstantDecl *ECD) {
