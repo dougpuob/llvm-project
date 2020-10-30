@@ -544,7 +544,7 @@ static const std::string getHungarianNotationDataTypePrefix(
       PrefixStr = HNOption.DerivedType.lookup("FunctionPointer");
     } else if (QT->isPointerType()) {
       for (const auto &CStr : HNOption.CString) {
-        auto Key = CStr.getKey().str();
+        std::string Key = CStr.getKey().str();
         if (ModifiedTypeName.find(Key) == 0) {
           PrefixStr = CStr.getValue();
           ModifiedTypeName = ModifiedTypeName.substr(
@@ -554,7 +554,7 @@ static const std::string getHungarianNotationDataTypePrefix(
       }
     } else if (QT->isArrayType()) {
       for (const auto &CStr : HNOption.CString) {
-        auto Key = CStr.getKey().str();
+          std::string Key = CStr.getKey().str();
         if (ModifiedTypeName.find(Key) == 0) {
           PrefixStr = CStr.getValue();
           break;
