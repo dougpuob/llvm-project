@@ -107,6 +107,8 @@ private:
   const bool GetConfigPerFile;
   const bool IgnoreFailedSplit;
   const bool IgnoreMainLikeFunctions;
+
+  IdentifierNamingCheck::HungarianNotationOption HNOption;
 };
 
 } // namespace readability

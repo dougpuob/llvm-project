@@ -456,8 +456,8 @@ parseHungarianPrefix(std::string OptionVal) {
 }
 
 static std::vector<llvm::Optional<IdentifierNamingCheck::NamingStyle>>
-getNamingStyles(const ClangTidyCheck::OptionsView &Options) {
-  static IdentifierNamingCheck::HungarianNotationOption HNOption;
+getNamingStyles(const ClangTidyCheck::OptionsView &Options,
+                IdentifierNamingCheck::HungarianNotationOption &HNOption) {
 
   getHungarianNotationDefaultConfig(HNOption);
   getHungarianNotationFileConfig(Options, HNOption);
@@ -494,10 +494,9 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
       GetConfigPerFile(Options.get("GetConfigPerFile", true)),
       IgnoreFailedSplit(Options.get("IgnoreFailedSplit", false)),
       IgnoreMainLikeFunctions(Options.get("IgnoreMainLikeFunctions", false)) {
-
   auto IterAndInserted = NamingStylesCache.try_emplace(
       llvm::sys::path::parent_path(Context->getCurrentFile()),
-      getNamingStyles(Options));
+      getNamingStyles(Options, HNOption));
   assert(IterAndInserted.second && "Couldn't insert Style");
   // Holding a reference to the data in the vector is safe as it should never
   // move.
@@ -1443,9 +1442,10 @@ IdentifierNamingCheck::getStyleForFile(StringRef FileName) const {
     return MainFileStyle;
   auto &Styles = NamingStylesCache[llvm::sys::path::parent_path(FileName)];
   if (Styles.empty()) {
+    IdentifierNamingCheck::HungarianNotationOption HNOption;
     ClangTidyOptions Options = Context->getOptionsForFile(FileName);
     if (Options.Checks && GlobList(*Options.Checks).contains(CheckName))
-      Styles = getNamingStyles({CheckName, Options.CheckOptions});
+      Styles = getNamingStyles({CheckName, Options.CheckOptions}, HNOption);
     else
       Styles.resize(SK_Count, None);
   }
