@@ -626,16 +626,12 @@ static std::string getHungarianNotationClassPrefix(
     const CXXRecordDecl *CRD,
     const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
 
-  if (CRD->isUnion()) {
+  if (CRD->isUnion())
     return "";
-  }
 
-  if (CRD->isStruct()) {
-    if (!isHungarianNotationOptionEnabled("TreatStructAsClass",
-                                          HNOption.General)) {
+  if (CRD->isStruct() && !isHungarianNotationOptionEnabled("TreatStructAsClass",
+                                          HNOption.General))
       return "";
-    }
-  }
 
   // An abstract class has at least one pure virutal function.
   bool IsAbstractClass = false;
