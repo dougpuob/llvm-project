@@ -678,7 +678,7 @@ static std::string getHungarianNotationEnumPrefix(const EnumConstantDecl *ECD) {
   return Initial;
 }
 
-static std::string getDeclTypeName(const clang::NamedDecl *ND) {
+static std::string getDeclTypeName(const NamedDecl *ND) {
   const auto* VD = dyn_cast<ValueDecl>(ND);
   if (!VD) {
     return "";
@@ -781,7 +781,7 @@ static std::string getDeclTypeName(const clang::NamedDecl *ND) {
 }
 
 static std::string getHungarianNotationPrefix(
-    const clang::Decl *D,
+    const Decl *D,
     IdentifierNamingCheck::HungarianNotationOption &HNOption) {
   const auto* ND = dyn_cast<NamedDecl>(D);
   if (!ND) {
