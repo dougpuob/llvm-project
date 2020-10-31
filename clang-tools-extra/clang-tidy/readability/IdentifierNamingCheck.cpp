@@ -679,7 +679,7 @@ static std::string getHungarianNotationEnumPrefix(const EnumConstantDecl *ECD) {
 }
 
 static std::string getDeclTypeName(const clang::NamedDecl *ND) {
-  const auto VD = dyn_cast<ValueDecl>(ND);
+  const auto* VD = dyn_cast<ValueDecl>(ND);
   if (!VD) {
     return "";
   }
@@ -783,7 +783,7 @@ static std::string getDeclTypeName(const clang::NamedDecl *ND) {
 static std::string getHungarianNotationPrefix(
     const clang::Decl *D,
     IdentifierNamingCheck::HungarianNotationOption &HNOption) {
-  const auto ND = dyn_cast<NamedDecl>(D);
+  const auto* ND = dyn_cast<NamedDecl>(D);
   if (!ND) {
     return "";
   }
@@ -803,14 +803,14 @@ static std::string getHungarianNotationPrefix(
 
   case clang::Decl::Kind::EnumConstant:
     if (ND) {
-      const auto ECD = dyn_cast<EnumConstantDecl>(ND);
+      const auto* ECD = dyn_cast<EnumConstantDecl>(ND);
       Prefix = getHungarianNotationEnumPrefix(ECD);
     }
     break;
 
   case clang::Decl::Kind::CXXRecord:
     if (ND) {
-      const auto CRD = dyn_cast<CXXRecordDecl>(ND);
+      const auto* CRD = dyn_cast<CXXRecordDecl>(ND);
       Prefix = getHungarianNotationClassPrefix(CRD, HNOption);
     }
     break;
