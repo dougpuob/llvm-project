@@ -781,8 +781,7 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
 }
 
 static std::string getHungarianNotationPrefix(
-    const Decl *D,
-    IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+    const Decl *D, IdentifierNamingCheck::HungarianNotationOption &HNOption) {
   const auto* ND = dyn_cast<NamedDecl>(D);
   if (!ND) {
     return "";
