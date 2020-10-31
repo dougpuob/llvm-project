@@ -725,7 +725,8 @@ enum REVINFO_TYPE { RevValid };
 // CHECK-MESSAGES: :[[@LINE-1]]:21: warning: invalid case style for constant 'RevValid' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}enum REVINFO_TYPE { rtRevValid };
 
-enum DataType { OneByte };
+enum DataType { OneByte, TwoByte };
 // CHECK-MESSAGES: :[[@LINE-1]]:17: warning: invalid case style for constant 'OneByte' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}enum DataType { dtOneByte };
+// CHECK-MESSAGES: :[[@LINE-2]]:26: warning: invalid case style for constant 'TwoByte' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}enum DataType { dtOneByte, dtTwoByte };
 // clang-format on

@@ -74,14 +74,14 @@ public:
                 const std::string &Suffix, HungarianPrefixOption HPOption,
                 HungarianNotationOption &HNOption)
         : Case(Case), Prefix(Prefix), Suffix(Suffix),
-          HungarianPrefixOpt(HPOption), HungarianNotationOpt(&HNOption) {}
+          HPOption(HPOption), HNOption(&HNOption) {}
 
     llvm::Optional<CaseType> Case;
     std::string Prefix;
     std::string Suffix;
 
-    HungarianPrefixOption HungarianPrefixOpt;
-    IdentifierNamingCheck::HungarianNotationOption *HungarianNotationOpt;
+    IdentifierNamingCheck::HungarianPrefixOption HPOption;
+    IdentifierNamingCheck::HungarianNotationOption *HNOption;
   };
 
 private:
