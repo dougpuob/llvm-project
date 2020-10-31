@@ -73,8 +73,8 @@ public:
     NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
                 const std::string &Suffix, HungarianPrefixOption HPOption,
                 HungarianNotationOption &HNOption)
-        : Case(Case), Prefix(Prefix), Suffix(Suffix),
-          HPOption(HPOption), HNOption(&HNOption) {}
+        : Case(Case), Prefix(Prefix), Suffix(Suffix), HPOption(HPOption),
+          HNOption(&HNOption) {}
 
     llvm::Optional<CaseType> Case;
     std::string Prefix;

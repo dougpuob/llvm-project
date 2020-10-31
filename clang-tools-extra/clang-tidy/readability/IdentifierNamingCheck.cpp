@@ -626,8 +626,8 @@ static std::string getHungarianNotationClassPrefix(
     return "";
 
   if (CRD->isStruct() && !isHungarianNotationOptionEnabled("TreatStructAsClass",
-                                          HNOption.General)) {
-      return "";
+                                                           HNOption.General)) {
+    return "";
   }
 
   return CRD->isAbstract() ? "I" : "C";
@@ -679,7 +679,6 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
   const auto* VD = dyn_cast<ValueDecl>(ND);
   if (!VD)
     return "";
-  
 
   if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
       clang::Decl::Kind::CXXMethod == ND->getKind() ||
@@ -854,10 +853,8 @@ static bool matchesStyle(StringRef Type, StringRef Name,
     return false;
   if (!Name.consume_back(Style.Suffix))
     return false;
-  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off !=
-      Style.HPOption) {
-      std::string HNPrefix =
-        getHungarianNotationPrefix(Decl, *Style.HNOption);
+  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off != Style.HPOption) {
+    std::string HNPrefix = getHungarianNotationPrefix(Decl, *Style.HNOption);
     if (!Name.consume_front(HNPrefix))
       return false;
   }
@@ -907,8 +904,7 @@ fixupWithCase(const StringRef &Type, const StringRef &Name, const Decl *D,
   if (Words.empty())
     return Name.str();
 
-  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off !=
-      Style.HPOption)
+  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off != Style.HPOption)
     removeDuplicatedHungarianNotationPrefix(Words, *Style.HNOption);
 
   SmallString<128> Fixup;
@@ -1045,10 +1041,8 @@ fixupWithStyle(const StringRef &Type, const StringRef &Name,
       Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
 
   std::string HungarianPrefix;
-  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off !=
-      Style.HPOption) {
-    HungarianPrefix =
-        getHungarianNotationPrefix(D, *Style.HNOption);
+  if (IdentifierNamingCheck::HungarianPrefixOption::HPO_Off != Style.HPOption) {
+    HungarianPrefix = getHungarianNotationPrefix(D, *Style.HNOption);
     if (!HungarianPrefix.empty()) {
       if (Style.HPOption ==
           IdentifierNamingCheck::HungarianPrefixOption::HPO_LowerCase) {
