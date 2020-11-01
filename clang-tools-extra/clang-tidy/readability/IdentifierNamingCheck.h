@@ -48,18 +48,18 @@ public:
     CT_CamelSnakeBack
   };
 
-  enum HungarianPrefixOption {
-    HPO_Off = 0,
-    HPO_On,
-    HPO_LowerCase,
-    HPO_CamelCase,
+  enum HungarianPrefixType {
+    HPT_Off = 0,
+    HPT_On,
+    HPT_LowerCase,
+    HPT_CamelCase,
   };
 
   struct HungarianNotationOption {
-    HungarianNotationOption() : PrefixOption(HungarianPrefixOption::HPO_Off) {}
+    HungarianNotationOption() : HPType(HungarianPrefixType::HPT_Off) {}
 
     llvm::Optional<CaseType> Case;
-    HungarianPrefixOption PrefixOption;
+    HungarianPrefixType HPType;
     llvm::StringMap<std::string> General;
     llvm::StringMap<std::string> CString;
     llvm::StringMap<std::string> PrimitiveType;
@@ -71,17 +71,14 @@ public:
     NamingStyle() = default;
 
     NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
-                const std::string &Suffix, HungarianPrefixOption HPOption,
-                HungarianNotationOption &HNOption)
-        : Case(Case), Prefix(Prefix), Suffix(Suffix), HPOption(HPOption),
-          HNOption(&HNOption) {}
+                const std::string &Suffix, HungarianPrefixType HPType)
+        : Case(Case), Prefix(Prefix), Suffix(Suffix), HPType(HPType) {}
 
     llvm::Optional<CaseType> Case;
     std::string Prefix;
     std::string Suffix;
 
-    IdentifierNamingCheck::HungarianPrefixOption HPOption;
-    IdentifierNamingCheck::HungarianNotationOption *HNOption;
+    HungarianPrefixType HPType;
   };
 
 private:
