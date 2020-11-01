@@ -131,6 +131,12 @@ Changes in existing checks
   Added support for specifying the style of scoped ``enum`` constants. If 
   unspecified, will fall back to the style for regular ``enum`` constants.
 
+- Improved :doc:`readability-identifier-naming
+  <clang-tidy/checks/readability-identifier-naming>` check.  
+
+  Added new options HungarianPrefix for variable decls to check variable with 
+  Hungarian Notation which the prefix encodes the actual data type of the variable.
+  
 - Removed `google-runtime-references` check because the rule it checks does
   not exist in the Google Style Guide anymore.
 
