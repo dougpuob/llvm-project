@@ -401,9 +401,9 @@ static void getHungarianNotationFileConfig(
     std::string Type = PrimType.str();
     if (!Val.empty()) {
       if (Type.find('-') != std::string::npos) {
-        for (size_t i = 0; i < Type.length(); ++i) {
-          if (Type[i] == '-') {
-            Type.replace(i, 1, " ");
+        for (size_t I = 0; I < Type.length(); ++I) {
+          if (Type[I] == '-') {
+            Type.replace(I, 1, " ");
           }
         }
       }
@@ -598,8 +598,8 @@ static const std::string getHungarianNotationDataTypePrefix(
   // Primitive types
   if (PrefixStr.empty()) {
     for (const auto &Type : HNOption.PrimitiveType) {
-      std::string key = Type.getKey().str();
-      if (ModifiedTypeName == key) {
+      std::string Key = Type.getKey().str();
+      if (ModifiedTypeName == Key) {
         PrefixStr = Type.getValue();
         break;
       }
@@ -609,8 +609,8 @@ static const std::string getHungarianNotationDataTypePrefix(
   // User-Defined types
   if (PrefixStr.empty()) {
     for (const auto &Type : HNOption.UserDefinedType) {
-      std::string key = Type.getKey().str();
-      if (ModifiedTypeName == key) {
+      std::string Key = Type.getKey().str();
+      if (ModifiedTypeName == Key) {
         PrefixStr = Type.getValue();
         break;
       }
@@ -708,7 +708,7 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
   const std::vector<const char *> PosList = {
       strchr(Begin, '='), strchr(Begin, ';'), strchr(Begin, ','),
       strchr(Begin, ')'), EOL};
-  for (auto &Pos : PosList) {
+  for (const auto &Pos : PosList) {
     if (Pos > Begin) {
       EOL = std::min(EOL, const_cast<char *>(Pos));
     }
