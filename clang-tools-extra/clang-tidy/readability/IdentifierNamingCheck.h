@@ -48,16 +48,37 @@ public:
     CT_CamelSnakeBack
   };
 
+  enum HungarianPrefixType {
+    HPT_Off = 0,
+    HPT_On,
+    HPT_LowerCase,
+    HPT_CamelCase,
+  };
+
+  struct HungarianNotationOption {
+    HungarianNotationOption() : HPType(HungarianPrefixType::HPT_Off) {}
+
+    llvm::Optional<CaseType> Case;
+    HungarianPrefixType HPType;
+    llvm::StringMap<std::string> General;
+    llvm::StringMap<std::string> CString;
+    llvm::StringMap<std::string> PrimitiveType;
+    llvm::StringMap<std::string> UserDefinedType;
+    llvm::StringMap<std::string> DerivedType;
+  };
+
   struct NamingStyle {
     NamingStyle() = default;
 
     NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
-                const std::string &Suffix)
-        : Case(Case), Prefix(Prefix), Suffix(Suffix) {}
+                const std::string &Suffix, HungarianPrefixType HPType)
+        : Case(Case), Prefix(Prefix), Suffix(Suffix), HPType(HPType) {}
 
     llvm::Optional<CaseType> Case;
     std::string Prefix;
     std::string Suffix;
+
+    HungarianPrefixType HPType;
   };
 
   struct FileStyle {
@@ -100,6 +121,8 @@ private:
   const std::string CheckName;
   const bool GetConfigPerFile;
   const bool IgnoreFailedSplit;
+
+  IdentifierNamingCheck::HungarianNotationOption HNOption;
 };
 
 } // namespace readability

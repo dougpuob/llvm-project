@@ -48,6 +48,22 @@ OptionEnumMapping<
   return llvm::makeArrayRef(Mapping);
 }
 
+template <>
+struct OptionEnumMapping<
+    readability::IdentifierNamingCheck::HungarianPrefixType> {
+  using HungarianPrefixType =
+      readability::IdentifierNamingCheck::HungarianPrefixType;
+  static llvm::ArrayRef<std::pair<HungarianPrefixType, StringRef>>
+  getEnumMapping() {
+    static constexpr std::pair<HungarianPrefixType, StringRef> Mapping[] = {
+        {HungarianPrefixType::HPT_Off, "Off"},
+        {HungarianPrefixType::HPT_On, "On"},
+        {HungarianPrefixType::HPT_LowerCase, "LowerCase"},
+        {HungarianPrefixType::HPT_CamelCase, "CamelCase"}};
+    return llvm::makeArrayRef(Mapping);
+  }
+};
+
 namespace readability {
 
 // clang-format off
@@ -119,17 +135,320 @@ static StringRef const StyleNames[] = {
 #undef STRINGIZE
 };
 
+#define HUNGARIAN_NOTATION_PRIMITIVE_TYPES(m) \
+     m(int8_t) \
+     m(int16_t) \
+     m(int32_t) \
+     m(int64_t) \
+     m(uint8_t) \
+     m(uint16_t) \
+     m(uint32_t) \
+     m(uint64_t) \
+     m(char8_t) \
+     m(char16_t) \
+     m(char32_t) \
+     m(float) \
+     m(double) \
+     m(char) \
+     m(bool) \
+     m(_Bool) \
+     m(int) \
+     m(size_t) \
+     m(wchar_t) \
+     m(short-int) \
+     m(short) \
+     m(signed-int) \
+     m(signed-short) \
+     m(signed-short-int) \
+     m(signed-long-long-int) \
+     m(signed-long-long) \
+     m(signed-long-int) \
+     m(signed-long) \
+     m(signed) \
+     m(unsigned-long-long-int) \
+     m(unsigned-long-long) \
+     m(unsigned-long-int) \
+     m(unsigned-long) \
+     m(unsigned-short-int) \
+     m(unsigned-short) \
+     m(unsigned-int) \
+     m(unsigned) \
+     m(long-long-int) \
+     m(long-double) \
+     m(long-long) \
+     m(long-int) \
+     m(long) \
+     m(ptrdiff_t) \
+
+static StringRef const HungarainNotationPrimitiveTypes[] = {
+#define STRINGIZE(v) #v,
+  HUNGARIAN_NOTATION_PRIMITIVE_TYPES(STRINGIZE)
+#undef STRINGIZE
+};
+
+#define HUNGARIAN_NOTATION_USER_DEFINED_TYPES(m) \
+     m(BOOL) \
+     m(BOOLEAN) \
+     m(BYTE) \
+     m(CHAR) \
+     m(UCHAR) \
+     m(SHORT) \
+     m(USHORT) \
+     m(WORD) \
+     m(DWORD) \
+     m(DWORD32) \
+     m(DWORD64) \
+     m(LONG) \
+     m(ULONG) \
+     m(ULONG32) \
+     m(ULONG64) \
+     m(ULONGLONG) \
+     m(HANDLE) \
+     m(INT) \
+     m(INT8) \
+     m(INT16) \
+     m(INT32) \
+     m(INT64) \
+     m(UINT) \
+     m(UINT8) \
+     m(UINT16) \
+     m(UINT32) \
+     m(UINT64) \
+     m(PVOID) \
+
+static StringRef const HungarainNotationUserDefinedTypes[] = {
+#define STRINGIZE(v) #v,
+  HUNGARIAN_NOTATION_USER_DEFINED_TYPES(STRINGIZE)
+#undef STRINGIZE
+};
+
+
 #undef NAMING_KEYS
 // clang-format on
 
-static IdentifierNamingCheck::FileStyle
-getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
+static void getHungarianNotationDefaultConfig(
+    IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+
+  // Options
+  static constexpr std::pair<StringRef, StringRef> Options[] = {
+      {"TreatStructAsClass", "false"}};
+  for (const auto &Opt : Options) {
+    std::string Val = HNOption.General.lookup(Opt.first);
+    if (Val.empty()) {
+      HNOption.General.insert({Opt.first, Opt.second.str()});
+    }
+  }
+
+  // Derived types
+  static constexpr std::pair<StringRef, StringRef> DerivedTypes[] = {
+      {"Array", "a"}, {"Pointer", "p"}, {"FunctionPointer", "fn"}};
+  for (const auto &Other : DerivedTypes) {
+    std::string Val = HNOption.DerivedType.lookup(Other.first);
+    if (Val.empty()) {
+      HNOption.DerivedType.insert({Other.first, Other.second.str()});
+    }
+  }
+
+  // C strings
+  static constexpr std::pair<StringRef, StringRef> CStrings[] = {
+      {"char*", "sz"}, {"char", "sz"}, {"wchar_t*", "wsz"}, {"wchar_t", "wsz"}};
+  for (const auto &CStr : CStrings) {
+    std::string Val = HNOption.CString.lookup(CStr.first);
+    if (Val.empty()) {
+      HNOption.CString.insert({CStr.first, CStr.second.str()});
+    }
+  }
+
+  // clang-format off
+  static constexpr std::pair<StringRef, StringRef> PrimitiveTypes[] = {
+        {"int8_t",                  "i8"  },
+        {"int16_t",                 "i16" },
+        {"int32_t",                 "i32" },
+        {"int64_t",                 "i64" },
+        {"uint8_t",                 "u8"  },
+        {"uint16_t",                "u16" },
+        {"uint32_t",                "u32" },
+        {"uint64_t",                "u64" },
+        {"char8_t",                 "c8"  },
+        {"char16_t",                "c16" },
+        {"char32_t",                "c32" },
+        {"float",                   "f"   },
+        {"double",                  "d"   },
+        {"char",                    "c"   },
+        {"bool",                    "b"   },
+        {"_Bool",                   "b"   },
+        {"int",                     "i"   },
+        {"size_t",                  "n"   },
+        {"wchar_t",                 "wc"  },
+        {"short int",               "si"  },
+        {"short",                   "s"   },
+        {"signed int",              "si"  },
+        {"signed short",            "ss"  },
+        {"signed short int",        "ssi" },
+        {"signed long long int",    "slli"},
+        {"signed long long",        "sll" },
+        {"signed long int",         "sli" },
+        {"signed long",             "sl"  },
+        {"signed",                  "s"   },
+        {"unsigned long long int",  "ulli"},
+        {"unsigned long long",      "ull" },
+        {"unsigned long int",       "uli" },
+        {"unsigned long",           "ul"  },
+        {"unsigned short int",      "usi" },
+        {"unsigned short",          "us"  },
+        {"unsigned int",            "ui"  },
+        {"unsigned",                "u"   },
+        {"long long int",           "lli" },
+        {"long double",             "ld"  },
+        {"long long",               "ll"  },
+        {"long int",                "li"  },
+        {"long",                    "l"   },
+        {"ptrdiff_t",               "p"   }};
+  // clang-format on
+  for (const auto &Type : PrimitiveTypes) {
+    std::string Val = HNOption.PrimitiveType.lookup(Type.first);
+    if (Val.empty())
+      HNOption.PrimitiveType.insert({Type.first, Type.second.str()});
+  }
+
+  // clang-format off
+  static constexpr std::pair<StringRef, StringRef> UserDefinedTypes[] = {
+      // Windows data types
+      {"BOOL",                    "b"   },
+      {"BOOLEAN",                 "b"   },
+      {"BYTE",                    "by"  },
+      {"CHAR",                    "c"   },
+      {"UCHAR",                   "uc"  },
+      {"SHORT",                   "s"   },
+      {"USHORT",                  "us"  },
+      {"WORD",                    "w"   },
+      {"DWORD",                   "dw"  },
+      {"DWORD32",                 "dw32"},
+      {"DWORD64",                 "dw64"},
+      {"LONG",                    "l"   },
+      {"ULONG",                   "ul"  },
+      {"ULONG32",                 "ul32"},
+      {"ULONG64",                 "ul64"},
+      {"ULONGLONG",               "ull" },
+      {"HANDLE",                  "h"   },
+      {"INT",                     "i"   },
+      {"INT8",                    "i8"  },
+      {"INT16",                   "i16" },
+      {"INT32",                   "i32" },
+      {"INT64",                   "i64" },
+      {"UINT",                    "ui"  },
+      {"UINT8",                   "u8"  },
+      {"UINT16",                  "u16" },
+      {"UINT32",                  "u32" },
+      {"UINT64",                  "u64" },
+      {"PVOID",                   "p"   } };
+  // clang-format on
+  for (const auto &Type : UserDefinedTypes) {
+    std::string Val = HNOption.UserDefinedType.lookup(Type.first);
+    if (Val.empty())
+      HNOption.UserDefinedType.insert({Type.first, Type.second.str()});
+  }
+}
+
+static constexpr StringRef HNOpts[] = {"TreatStructAsClass"};
+static constexpr StringRef HNDerivedTypes[] = {"Array", "Pointer",
+                                               "FunctionPointer"};
+static void getHungarianNotationFileConfig(
+    const ClangTidyCheck::OptionsView &Options,
+    IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+  StringRef Section = "HungarianNotation.";
+
+  SmallString<128> Buffer;
+  for (const auto &Opt : HNOpts) {
+    Buffer.assign({Section, "General.", Opt});
+    std::string Val = Options.get(Buffer, "");
+    if (!Val.empty())
+      HNOption.General[Opt] = Val;
+  }
+
+  for (const auto &Type : HNDerivedTypes) {
+    Buffer.assign({Section, "DerivedType.", Type});
+    std::string Val = Options.get(Buffer, "");
+    if (!Val.empty())
+      HNOption.DerivedType[Type] = Val;
+  }
+
+  static constexpr std::pair<StringRef, StringRef> HNCStrings[] = {
+      {"CharPrinter", "char*"},
+      {"CharArray", "char"},
+      {"WideCharPrinter", "wchar_t*"},
+      {"WideCharArray", "wchar_t"}};
+
+  for (const auto &CStr : HNCStrings) {
+    Buffer.assign({Section, "CString.", CStr.first});
+    std::string Val = Options.get(Buffer, "");
+    if (!Val.empty())
+      HNOption.CString[CStr.first] = Val;
+  }
+
+  for (const auto &PrimType : HungarainNotationPrimitiveTypes) {
+    Buffer.assign({Section, "PrimitiveType.", PrimType});
+    std::string Val = Options.get(Buffer, "");
+    std::string Type = PrimType.str();
+    if (!Val.empty()) {
+      if (Type.find('-') != std::string::npos) {
+        for (size_t I = 0; I < Type.length(); ++I) {
+          if (Type[I] == '-') {
+            Type.replace(I, 1, " ");
+          }
+        }
+      }
+      HNOption.PrimitiveType[Type] = Val;
+    }
+  }
+
+  for (const auto &WDType : HungarainNotationUserDefinedTypes) {
+    Buffer.assign({Section, "UserDefinedType.", WDType});
+    std::string Val = Options.get(Buffer, "");
+    std::string Type = WDType.str();
+    if (!Val.empty())
+      HNOption.UserDefinedType[Type] = Val;
+  }
+}
+
+static bool
+isHungarianNotationOptionEnabled(const std::string OptionKey,
+                                 const llvm::StringMap<std::string> &StrMap) {
+  if (OptionKey.empty())
+    return false;
+
+  std::string OptionVal = StrMap.lookup(OptionKey);
+  for (auto &C : OptionVal)
+    C = toupper(C);
+
+  if (OptionVal == "1" || OptionVal == "TRUE" || OptionVal == "ON")
+    return true;
+
+  return false;
+}
+
+static IdentifierNamingCheck::FileStyle getFileStyleFromOptions(
+    const ClangTidyCheck::OptionsView &Options,
+    IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+  getHungarianNotationDefaultConfig(HNOption);
+  getHungarianNotationFileConfig(Options, HNOption);
+
   SmallVector<llvm::Optional<IdentifierNamingCheck::NamingStyle>, 0> Styles(
       SK_Count);
   SmallString<64> StyleString;
   for (unsigned I = 0; I < SK_Count; ++I) {
     StyleString = StyleNames[I];
     size_t StyleSize = StyleString.size();
+    std::string HPrefixKey = (StyleString + "HungarianPrefix").str();
+    using HungarianPrefixType = IdentifierNamingCheck::HungarianPrefixType;
+    auto HPTVal = HungarianPrefixType::HPT_Off;
+    std::string HPrefixVal = Options.get(HPrefixKey, "");
+    if (!HPrefixVal.empty()) {
+      if (auto HPTypeVal = Options.get<HungarianPrefixType>(HPrefixKey)) {
+        HPTVal = HPTypeVal.get();
+      }
+    }
+
     StyleString.append("Prefix");
     std::string Prefix(Options.get(StyleString, ""));
     // Fast replacement of [Pre]fix -> [Suf]fix.
@@ -138,12 +457,16 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
     memcpy(&StyleString[StyleSize], "Case", 4);
     StyleString.pop_back();
     StyleString.pop_back();
+
     auto CaseOptional =
         Options.getOptional<IdentifierNamingCheck::CaseType>(StyleString);
+    HNOption.Case = CaseOptional;
 
-    if (CaseOptional || !Prefix.empty() || !Postfix.empty())
+    if (CaseOptional || !Prefix.empty() || !Postfix.empty() ||
+        !HPrefixVal.empty()) {
       Styles[I].emplace(std::move(CaseOptional), std::move(Prefix),
-                        std::move(Postfix));
+                        std::move(Postfix), HPTVal);
+    }
   }
   bool IgnoreMainLike = Options.get("IgnoreMainLikeFunctions", false);
   return {std::move(Styles), IgnoreMainLike};
@@ -157,7 +480,7 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
 
   auto IterAndInserted = NamingStylesCache.try_emplace(
       llvm::sys::path::parent_path(Context->getCurrentFile()),
-      getFileStyleFromOptions(Options));
+      getFileStyleFromOptions(Options, HNOption));
   assert(IterAndInserted.second && "Couldn't insert Style");
   // Holding a reference to the data in the vector is safe as it should never
   // move.
@@ -175,6 +498,10 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
       continue;
     StyleString = StyleNames[I];
     size_t StyleSize = StyleString.size();
+
+    Options.store(Opts, (StyleString + "HungarianPrefix").str(),
+                  Styles[I]->HPType);
+
     StyleString.append("Prefix");
     Options.store(Opts, StyleString, Styles[I]->Prefix);
     // Fast replacement of [Pre]fix -> [Suf]fix.
@@ -193,8 +520,325 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
                 MainFileStyle->isIgnoringMainLikeFunction());
 }
 
-static bool matchesStyle(StringRef Name,
-                         IdentifierNamingCheck::NamingStyle Style) {
+static const std::string getHungarianNotationDataTypePrefix(
+    const std::string &TypeName, const NamedDecl *ND,
+    const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+  if (!ND || TypeName.empty())
+    return TypeName;
+
+  std::string ModifiedTypeName = TypeName;
+
+  // Derived types
+  std::string PrefixStr;
+  if (const auto *TD = dyn_cast<ValueDecl>(ND)) {
+    QualType QT = TD->getType();
+    if (QT->isFunctionPointerType()) {
+      PrefixStr = HNOption.DerivedType.lookup("FunctionPointer");
+    } else if (QT->isPointerType()) {
+      for (const auto &CStr : HNOption.CString) {
+        std::string Key = CStr.getKey().str();
+        if (ModifiedTypeName.find(Key) == 0) {
+          PrefixStr = CStr.getValue();
+          ModifiedTypeName = ModifiedTypeName.substr(
+              Key.size(), ModifiedTypeName.size() - Key.size());
+          break;
+        }
+      }
+    } else if (QT->isArrayType()) {
+      for (const auto &CStr : HNOption.CString) {
+        std::string Key = CStr.getKey().str();
+        if (ModifiedTypeName.find(Key) == 0) {
+          PrefixStr = CStr.getValue();
+          break;
+        }
+      }
+      if (PrefixStr.empty()) {
+        PrefixStr = HNOption.DerivedType.lookup("Array");
+      }
+    } else if (QT->isReferenceType()) {
+      size_t Pos = ModifiedTypeName.find_last_of("&");
+      if (Pos != std::string::npos) {
+        ModifiedTypeName = ModifiedTypeName.substr(0, Pos);
+      }
+    }
+  }
+
+  // Pointers
+  size_t PtrCount = [&](std::string TypeName) -> size_t {
+    size_t Pos = TypeName.find('*');
+    size_t Count = 0;
+    for (; Pos < TypeName.length(); Pos++, Count++) {
+      if ('*' != TypeName[Pos])
+        break;
+    }
+    return Count;
+  }(ModifiedTypeName);
+  if (PtrCount > 0) {
+    ModifiedTypeName = [&](std::string Str, const std::string &From,
+                           const std::string &To) {
+      size_t StartPos = 0;
+      while ((StartPos = Str.find(From, StartPos)) != std::string::npos) {
+        Str.replace(StartPos, From.length(), To);
+        StartPos += To.length();
+      }
+      return Str;
+    }(ModifiedTypeName, "*", "");
+  }
+
+  // Primitive types
+  if (PrefixStr.empty()) {
+    for (const auto &Type : HNOption.PrimitiveType) {
+      std::string Key = Type.getKey().str();
+      if (ModifiedTypeName == Key) {
+        PrefixStr = Type.getValue();
+        break;
+      }
+    }
+  }
+
+  // User-Defined types
+  if (PrefixStr.empty()) {
+    for (const auto &Type : HNOption.UserDefinedType) {
+      std::string Key = Type.getKey().str();
+      if (ModifiedTypeName == Key) {
+        PrefixStr = Type.getValue();
+        break;
+      }
+    }
+  }
+
+  for (size_t Idx = 0; Idx < PtrCount; Idx++)
+    PrefixStr.insert(0, HNOption.DerivedType.lookup("Pointer"));
+
+  return PrefixStr;
+}
+
+static std::string getHungarianNotationClassPrefix(
+    const CXXRecordDecl *CRD,
+    const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+
+  if (CRD->isUnion())
+    return "";
+
+  if (CRD->isStruct() && !isHungarianNotationOptionEnabled("TreatStructAsClass",
+                                                           HNOption.General)) {
+    return "";
+  }
+
+  return CRD->isAbstract() ? "I" : "C";
+}
+
+static std::string getHungarianNotationEnumPrefix(const EnumConstantDecl *ECD) {
+  std::string Name = ECD->getType().getAsString();
+  if (std::string::npos != Name.find("enum")) {
+    Name = Name.substr(strlen("enum"), Name.length() - strlen("enum"));
+    Name = Name.erase(0, Name.find_first_not_of(" "));
+  }
+
+  static llvm::Regex Splitter(
+      "([a-z0-9A-Z]*)(_+)|([A-Z]?[a-z0-9]+)([A-Z]|$)|([A-Z]+)([A-Z]|$)");
+
+  StringRef EnumName(Name);
+  SmallVector<StringRef, 8> Substrs;
+  EnumName.split(Substrs, "_", -1, false);
+
+  SmallVector<StringRef, 8> Words;
+  SmallVector<StringRef, 8> Groups;
+  for (auto Substr : Substrs) {
+    while (!Substr.empty()) {
+      Groups.clear();
+      if (!Splitter.match(Substr, &Groups))
+        break;
+
+      if (Groups[2].size() > 0) {
+        Words.push_back(Groups[1]);
+        Substr = Substr.substr(Groups[0].size());
+      } else if (Groups[3].size() > 0) {
+        Words.push_back(Groups[3]);
+        Substr = Substr.substr(Groups[0].size() - Groups[4].size());
+      } else if (Groups[5].size() > 0) {
+        Words.push_back(Groups[5]);
+        Substr = Substr.substr(Groups[0].size() - Groups[6].size());
+      }
+    }
+  }
+
+  std::string Initial;
+  for (auto const &Word : Words) {
+    Initial += tolower(Word[0]);
+  }
+  return Initial;
+}
+
+static std::string getDeclTypeName(const NamedDecl *ND) {
+  const auto *VD = dyn_cast<ValueDecl>(ND);
+  if (!VD)
+    return "";
+
+  if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
+      clang::Decl::Kind::CXXMethod == ND->getKind() ||
+      clang::Decl::Kind::Function == ND->getKind()) {
+    return "";
+  }
+
+  // Get type text of variable declarations.
+  auto &SM = VD->getASTContext().getSourceManager();
+  const char *Begin = SM.getCharacterData(VD->getBeginLoc());
+  const char *End = SM.getCharacterData(VD->getEndLoc());
+  intptr_t StrLen = End - Begin;
+
+  // FIXME: Sometimes the value that returns from ValDecl->getEndLoc()
+  // is wrong(out of location of Decl). This causes `StrLen` will be assigned
+  // an unexpected large value. Current workaround to find the terminated
+  // character instead of the `getEndLoc()` function.
+  char *EOL = const_cast<char *>(strchr(Begin, '\n'));
+  if (!EOL) {
+    EOL = const_cast<char *>(Begin) + strlen(Begin);
+  }
+  const std::vector<const char *> PosList = {
+      strchr(Begin, '='), strchr(Begin, ';'), strchr(Begin, ','),
+      strchr(Begin, ')'), EOL};
+  for (const auto &Pos : PosList) {
+    if (Pos > Begin) {
+      EOL = std::min(EOL, const_cast<char *>(Pos));
+    }
+  }
+
+  StrLen = EOL - Begin;
+  std::string TypeName;
+  if (StrLen > 0) {
+    std::string Type(Begin, StrLen);
+
+    const static std::list<std::string> Keywords = {
+        // Constexpr specifiers
+        "constexpr", "constinit", "consteval",
+        // Qualifier
+        "const", "volatile", "restrict", "mutable",
+        // Storage class specifiers
+        "register", "static", "extern", "thread_local",
+        // Other keywords
+        "virtual"};
+
+    // Remove keywords
+    for (const std::string &Kw : Keywords) {
+      for (size_t Pos = 0; (Pos = Type.find(Kw, Pos)) != std::string::npos;) {
+        Type.replace(Pos, Kw.length(), "");
+      }
+    }
+    TypeName = Type.erase(0, Type.find_first_not_of(" "));
+
+    // Replace spaces with single space.
+    for (size_t Pos = 0; (Pos = Type.find("  ", Pos)) != std::string::npos;
+         Pos += strlen(" ")) {
+      Type.replace(Pos, strlen("  "), " ");
+    }
+
+    // Replace " &" with "&".
+    for (size_t Pos = 0; (Pos = Type.find(" &", Pos)) != std::string::npos;
+         Pos += strlen("&")) {
+      Type.replace(Pos, strlen(" &"), "&");
+    }
+
+    // Replace " *" with "* ".
+    for (size_t Pos = 0; (Pos = Type.find(" *", Pos)) != std::string::npos;
+         Pos += strlen("*")) {
+      Type.replace(Pos, strlen(" *"), "* ");
+    }
+
+    // Remove redundant tailing.
+    const static std::list<std::string> TailsOfMultiWordType = {
+        " int", " char", " double", " long", " short"};
+    bool RedundantRemoved = false;
+    for (const auto &Kw : TailsOfMultiWordType) {
+      size_t Pos = Type.rfind(Kw);
+      if (Pos != std::string::npos) {
+        Type = Type.substr(0, Pos + Kw.length());
+        RedundantRemoved = true;
+        break;
+      }
+    }
+    TypeName = Type.erase(0, Type.find_first_not_of(" "));
+    if (!RedundantRemoved) {
+      std::size_t FoundSpace = Type.find(" ");
+      if (FoundSpace != std::string::npos)
+        Type = Type.substr(0, FoundSpace);
+    }
+
+    TypeName = Type.erase(0, Type.find_first_not_of(" "));
+  }
+
+  return TypeName;
+}
+
+static std::string getHungarianNotationPrefix(
+    const Decl *D,
+    const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+  const auto *ND = dyn_cast<NamedDecl>(D);
+  if (!ND)
+    return "";
+
+  std::string Prefix;
+  switch (ND->getKind()) {
+  case clang::Decl::Kind::Var:
+  case clang::Decl::Kind::Field:
+  case clang::Decl::Kind::ParmVar:
+  case clang::Decl::Kind::Record:
+    if (ND) {
+      std::string TypeName = getDeclTypeName(ND);
+      if (!TypeName.empty())
+        Prefix = getHungarianNotationDataTypePrefix(TypeName, ND, HNOption);
+    }
+    break;
+
+  case clang::Decl::Kind::EnumConstant:
+    if (ND) {
+      const auto *ECD = dyn_cast<EnumConstantDecl>(ND);
+      Prefix = getHungarianNotationEnumPrefix(ECD);
+    }
+    break;
+
+  case clang::Decl::Kind::CXXRecord:
+    if (ND) {
+      const auto *CRD = dyn_cast<CXXRecordDecl>(ND);
+      Prefix = getHungarianNotationClassPrefix(CRD, HNOption);
+    }
+    break;
+
+  default:
+    break;
+  }
+  return Prefix;
+}
+
+static bool removeDuplicatedHungarianNotationPrefix(
+    SmallVector<StringRef, 8> &Words,
+    const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
+  if (Words.size() <= 1)
+    return true;
+
+  std::string CorrectName = Words[0].str();
+  std::vector<llvm::StringMap<std::string>> MapList = {
+      HNOption.CString, HNOption.DerivedType, HNOption.PrimitiveType,
+      HNOption.UserDefinedType};
+
+  for (const auto &Map : MapList) {
+    for (const auto &Str : Map) {
+      bool Found = (Str.getValue() == CorrectName);
+      if (Found) {
+        Words.erase(Words.begin(), Words.begin() + 1);
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+static bool
+matchesStyle(StringRef Type, StringRef Name,
+             IdentifierNamingCheck::NamingStyle Style,
+             const IdentifierNamingCheck::HungarianNotationOption &HNOption,
+             const NamedDecl *Decl) {
   static llvm::Regex Matchers[] = {
       llvm::Regex("^.*$"),
       llvm::Regex("^[a-z][a-z0-9_]*$"),
@@ -209,6 +853,11 @@ static bool matchesStyle(StringRef Name,
     return false;
   if (!Name.consume_back(Style.Suffix))
     return false;
+  if (IdentifierNamingCheck::HungarianPrefixType::HPT_Off != Style.HPType) {
+    std::string HNPrefix = getHungarianNotationPrefix(Decl, HNOption);
+    if (!Name.consume_front(HNPrefix))
+      return false;
+  }
 
   // Ensure the name doesn't have any extra underscores beyond those specified
   // in the prefix and suffix.
@@ -221,8 +870,11 @@ static bool matchesStyle(StringRef Name,
   return true;
 }
 
-static std::string fixupWithCase(StringRef Name,
-                                 IdentifierNamingCheck::CaseType Case) {
+static std::string
+fixupWithCase(const StringRef &Type, const StringRef &Name, const Decl *D,
+              const IdentifierNamingCheck::NamingStyle &Style,
+              const IdentifierNamingCheck::HungarianNotationOption &HNOption,
+              IdentifierNamingCheck::CaseType Case) {
   static llvm::Regex Splitter(
       "([a-z0-9A-Z]*)(_+)|([A-Z]?[a-z0-9]+)([A-Z]|$)|([A-Z]+)([A-Z]|$)");
 
@@ -252,6 +904,9 @@ static std::string fixupWithCase(StringRef Name,
 
   if (Words.empty())
     return Name.str();
+
+  if (IdentifierNamingCheck::HungarianPrefixType::HPT_Off != Style.HPType)
+    removeDuplicatedHungarianNotationPrefix(Words, HNOption);
 
   SmallString<128> Fixup;
   switch (Case) {
@@ -380,14 +1035,30 @@ static bool isParamInMainLikeFunction(const ParmVarDecl &ParmDecl,
 }
 
 static std::string
-fixupWithStyle(StringRef Name,
-               const IdentifierNamingCheck::NamingStyle &Style) {
-  const std::string Fixed = fixupWithCase(
-      Name, Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
+fixupWithStyle(const StringRef &Type, const StringRef &Name,
+               const IdentifierNamingCheck::NamingStyle &Style,
+               const IdentifierNamingCheck::HungarianNotationOption &HNOption,
+               const Decl *D) {
+  std::string Fixed = fixupWithCase(
+      Type, Name, D, Style, HNOption,
+      Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
+  std::string HungarianPrefix;
+  using HungarianPrefixType = IdentifierNamingCheck::HungarianPrefixType;
+  if (HungarianPrefixType::HPT_Off != Style.HPType) {
+    HungarianPrefix = getHungarianNotationPrefix(D, HNOption);
+    if (!HungarianPrefix.empty()) {
+      if (Style.HPType == HungarianPrefixType::HPT_LowerCase)
+        HungarianPrefix += "_";
+
+      if (Style.HPType == HungarianPrefixType::HPT_CamelCase)
+        Fixed[0] = toupper(Fixed[0]);
+    }
+  }
   StringRef Mid = StringRef(Fixed).trim("_");
   if (Mid.empty())
     Mid = "_";
-  return (Style.Prefix + Mid + Style.Suffix).str();
+
+  return (Style.Prefix + HungarianPrefix + Mid + Style.Suffix).str();
 }
 
 static StyleKind findStyleKind(
@@ -566,7 +1237,7 @@ static StyleKind findStyleKind(
 
     if (Decl->isStaticLocal() && NamingStyles[SK_StaticVariable])
       return SK_StaticVariable;
- 
+
     if (Decl->isLocalVarDecl() && Type.getTypePtr()->isAnyPointerType() && NamingStyles[SK_LocalPointer])
       return SK_LocalPointer;
 
@@ -674,21 +1345,24 @@ static StyleKind findStyleKind(
 }
 
 static llvm::Optional<RenamerClangTidyCheck::FailureInfo> getFailureInfo(
-    StringRef Name, SourceLocation Location,
+    const StringRef &Type, const StringRef &Name, const NamedDecl *ND,
+    SourceLocation Location,
     ArrayRef<llvm::Optional<IdentifierNamingCheck::NamingStyle>> NamingStyles,
+    const IdentifierNamingCheck::HungarianNotationOption &HNOption,
     StyleKind SK, const SourceManager &SM, bool IgnoreFailedSplit) {
   if (SK == SK_Invalid || !NamingStyles[SK])
     return None;
 
   const IdentifierNamingCheck::NamingStyle &Style = *NamingStyles[SK];
-  if (matchesStyle(Name, Style))
+  if (matchesStyle(Type, Name, Style, HNOption, ND))
     return None;
 
   std::string KindName =
-      fixupWithCase(StyleNames[SK], IdentifierNamingCheck::CT_LowerCase);
+      fixupWithCase(Type, StyleNames[SK], ND, Style, HNOption,
+                    IdentifierNamingCheck::CT_LowerCase);
   std::replace(KindName.begin(), KindName.end(), '_', ' ');
 
-  std::string Fixup = fixupWithStyle(Name, Style);
+  std::string Fixup = fixupWithStyle(Type, Name, Style, HNOption, ND);
   if (StringRef(Fixup).equals(Name)) {
     if (!IgnoreFailedSplit) {
       LLVM_DEBUG(Location.print(llvm::dbgs(), SM);
@@ -710,7 +1384,9 @@ IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
   if (!FileStyle.isActive())
     return llvm::None;
 
-  return getFailureInfo(Decl->getName(), Loc, FileStyle.getStyles(),
+  std::string TypeName = getDeclTypeName(Decl);
+  return getFailureInfo(TypeName, Decl->getName(), Decl, Loc,
+                        FileStyle.getStyles(), HNOption,
                         findStyleKind(Decl, FileStyle.getStyles(),
                                       FileStyle.isIgnoringMainLikeFunction()),
                         SM, IgnoreFailedSplit);
@@ -724,9 +1400,9 @@ IdentifierNamingCheck::GetMacroFailureInfo(const Token &MacroNameTok,
   if (!Style.isActive())
     return llvm::None;
 
-  return getFailureInfo(MacroNameTok.getIdentifierInfo()->getName(), Loc,
-                        Style.getStyles(), SK_MacroDefinition, SM,
-                        IgnoreFailedSplit);
+  return getFailureInfo("", MacroNameTok.getIdentifierInfo()->getName(), NULL,
+                        Loc, Style.getStyles(), HNOption, SK_MacroDefinition,
+                        SM, IgnoreFailedSplit);
 }
 
 RenamerClangTidyCheck::DiagInfo
@@ -749,8 +1425,10 @@ IdentifierNamingCheck::getStyleForFile(StringRef FileName) const {
 
   ClangTidyOptions Options = Context->getOptionsForFile(FileName);
   if (Options.Checks && GlobList(*Options.Checks).contains(CheckName)) {
+    HungarianNotationOption HNOption;
     auto It = NamingStylesCache.try_emplace(
-        Parent, getFileStyleFromOptions({CheckName, Options.CheckOptions}));
+        Parent,
+        getFileStyleFromOptions({CheckName, Options.CheckOptions}, HNOption));
     assert(It.second);
     return It.first->getValue();
   }
