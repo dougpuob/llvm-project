@@ -107,8 +107,8 @@ The following options are describe below:
 
 .. option:: AbstractClassHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -213,8 +213,8 @@ After if AggressiveDependentMemberLookup is ``1``:
 
 .. option:: ClassHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -262,8 +262,8 @@ After:
 
 .. option:: ClassConstantHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -309,8 +309,8 @@ After:
 
 .. option:: ClassMemberHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -356,8 +356,8 @@ After:
 
 .. option:: ClassMethodHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -403,8 +403,8 @@ After:
 
 .. option:: ConstantHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -444,8 +444,8 @@ After:
 
 .. option:: ConstantMemberHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -489,8 +489,8 @@ After:
 
 .. option:: ConstantParameterHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -530,8 +530,8 @@ After:
 
 .. option:: ConstantPointerParameterHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -647,8 +647,8 @@ After:
 
 .. option:: ConstexprVariableHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -723,8 +723,8 @@ After:
 
 .. option:: EnumConstantHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -806,8 +806,8 @@ After:
 
 .. option:: GlobalConstantHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -847,8 +847,8 @@ After:
 
 .. option:: GlobalConstantPointerHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -923,8 +923,8 @@ After:
 
 .. option:: GlobalPointerHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -964,8 +964,8 @@ After:
 
 .. option:: GlobalVariableHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1054,8 +1054,8 @@ After:
 
 .. option:: LocalConstantHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1095,8 +1095,8 @@ After:
 
 .. option:: LocalConstantPointerHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1136,8 +1136,8 @@ After:
 
 .. option:: LocalPointerHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1177,8 +1177,8 @@ After:
 
 .. option:: LocalVariableHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1256,8 +1256,8 @@ using the ``-D`` flag.
 
 .. option:: MemberHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1379,8 +1379,8 @@ After:
 
 .. option:: ParameterHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1459,8 +1459,8 @@ After:
 
 .. option:: PointerParameterHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1500,8 +1500,8 @@ After:
 
 .. option:: PrivateMemberHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1547,8 +1547,8 @@ After:
 
 .. option:: PrivateMethodHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1594,8 +1594,8 @@ After:
 
 .. option:: ProtectedMemberHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1682,8 +1682,8 @@ After:
 
 .. option:: PublicMemberHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1805,8 +1805,8 @@ After:
 
 .. option:: StaticConstantHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -1846,8 +1846,8 @@ After:
 
 .. option:: StaticVariableHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -2185,8 +2185,8 @@ After:
 
 .. option:: VariableHungarianPrefix
 
-    When set to `true` the check will ensure the name will add Hungarian
-    Notation prefix for the given data type. The default value is `Off`.
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
 
 For example using values of:
 
@@ -2261,9 +2261,6 @@ distinguished as the given name. The first character of the given name can be
 capitalized to separate it from the type indicators (see also CamelCase).
 Otherwise the case of this character denotes scope.
 
-This tool supports all casing types that means not only CamelCase starts with
-Hungarian Notation, others either.
-
 The following table is the default mapping table of Hungarian Notation which
 maps Decl to its prefix string. You can also have your own style in config file.
 
@@ -2309,17 +2306,16 @@ short             s
   Options are not belonging to any specific Decl.
 
 **HungarianNotation.CString.***
-  Options for NULL terminated string, you can customized your prefix here.
+  Options for NULL-terminated string.
 
 **HungarianNotation.DerivedType.***
- Options for derived types, you can customized your prefix here.
+ Options for derived types.
 
 **HungarianNotation.PrimitiveType.***
-  Options for primitive types, you can customized your prefix here.
+  Options for primitive types.
 
 **HungarianNotation.UserDefinedType.***
-  Options for redefined types(Microsoft data types), you can customized your
-  prefix here.
+  Options for user-defined types.
 
 
 Options for Hungarian Notation

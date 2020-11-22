@@ -234,9 +234,8 @@ static void getHungarianNotationDefaultConfig(
       {"TreatStructAsClass", "false"}};
   for (const auto &Opt : Options) {
     std::string Val = HNOption.General.lookup(Opt.first);
-    if (Val.empty()) {
+    if (Val.empty())
       HNOption.General.insert({Opt.first, Opt.second.str()});
-    }
   }
 
   // Derived types
@@ -244,19 +243,20 @@ static void getHungarianNotationDefaultConfig(
       {"Array", "a"}, {"Pointer", "p"}, {"FunctionPointer", "fn"}};
   for (const auto &Other : DerivedTypes) {
     std::string Val = HNOption.DerivedType.lookup(Other.first);
-    if (Val.empty()) {
+    if (Val.empty())
       HNOption.DerivedType.insert({Other.first, Other.second.str()});
-    }
   }
 
   // C strings
   static constexpr std::pair<StringRef, StringRef> CStrings[] = {
-      {"char*", "sz"}, {"char", "sz"}, {"wchar_t*", "wsz"}, {"wchar_t", "wsz"}};
+      {"char*", "sz"},
+      {"char[]", "sz"},
+      {"wchar_t*", "wsz"},
+      {"wchar_t[]", "wsz"}};
   for (const auto &CStr : CStrings) {
     std::string Val = HNOption.CString.lookup(CStr.first);
-    if (Val.empty()) {
+    if (Val.empty())
       HNOption.CString.insert({CStr.first, CStr.second.str()});
-    }
   }
 
   // clang-format off
@@ -375,9 +375,9 @@ static void getHungarianNotationFileConfig(
 
   static constexpr std::pair<StringRef, StringRef> HNCStrings[] = {
       {"CharPrinter", "char*"},
-      {"CharArray", "char"},
+      {"CharArray", "char[]"},
       {"WideCharPrinter", "wchar_t*"},
-      {"WideCharArray", "wchar_t"}};
+      {"WideCharArray", "wchar_t[]"}};
 
   for (const auto &CStr : HNCStrings) {
     Buffer.assign({Section, "CString.", CStr.first});
@@ -393,9 +393,8 @@ static void getHungarianNotationFileConfig(
     if (!Val.empty()) {
       if (Type.find('-') != std::string::npos) {
         for (size_t I = 0; I < Type.length(); ++I) {
-          if (Type[I] == '-') {
+          if (Type[I] == '-')
             Type.replace(I, 1, " ");
-          }
         }
       }
       HNOption.PrimitiveType[Type] = Val;
@@ -412,14 +411,13 @@ static void getHungarianNotationFileConfig(
 }
 
 static bool
-isHungarianNotationOptionEnabled(const std::string OptionKey,
+isHungarianNotationOptionEnabled(StringRef OptionKey,
                                  const llvm::StringMap<std::string> &StrMap) {
   if (OptionKey.empty())
     return false;
 
   std::string OptionVal = StrMap.lookup(OptionKey);
-  for (auto &C : OptionVal)
-    C = toupper(C);
+  llvm::transform(OptionVal, OptionVal.begin(), toupper);
 
   if (OptionVal == "1" || OptionVal == "TRUE" || OptionVal == "ON")
     return true;
@@ -444,9 +442,8 @@ static IdentifierNamingCheck::FileStyle getFileStyleFromOptions(
     auto HPTVal = HungarianPrefixType::HPT_Off;
     std::string HPrefixVal = Options.get(HPrefixKey, "");
     if (!HPrefixVal.empty()) {
-      if (auto HPTypeVal = Options.get<HungarianPrefixType>(HPrefixKey)) {
+      if (auto HPTypeVal = Options.get<HungarianPrefixType>(HPrefixKey))
         HPTVal = HPTypeVal.get();
-      }
     }
 
     StyleString.append("Prefix");
@@ -521,12 +518,12 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
 }
 
 static const std::string getHungarianNotationDataTypePrefix(
-    const std::string &TypeName, const NamedDecl *ND,
+    StringRef TypeName, const NamedDecl *ND,
     const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
   if (!ND || TypeName.empty())
-    return TypeName;
+    return TypeName.str();
 
-  std::string ModifiedTypeName = TypeName;
+  std::string ModifiedTypeName(TypeName);
 
   // Derived types
   std::string PrefixStr;
@@ -552,14 +549,12 @@ static const std::string getHungarianNotationDataTypePrefix(
           break;
         }
       }
-      if (PrefixStr.empty()) {
+      if (PrefixStr.empty())
         PrefixStr = HNOption.DerivedType.lookup("Array");
-      }
     } else if (QT->isReferenceType()) {
       size_t Pos = ModifiedTypeName.find_last_of("&");
-      if (Pos != std::string::npos) {
+      if (Pos != std::string::npos)
         ModifiedTypeName = ModifiedTypeName.substr(0, Pos);
-      }
     }
   }
 
@@ -588,8 +583,7 @@ static const std::string getHungarianNotationDataTypePrefix(
   // Primitive types
   if (PrefixStr.empty()) {
     for (const auto &Type : HNOption.PrimitiveType) {
-      std::string Key = Type.getKey().str();
-      if (ModifiedTypeName == Key) {
+      if (ModifiedTypeName == Type.getKey()) {
         PrefixStr = Type.getValue();
         break;
       }
@@ -599,8 +593,7 @@ static const std::string getHungarianNotationDataTypePrefix(
   // User-Defined types
   if (PrefixStr.empty()) {
     for (const auto &Type : HNOption.UserDefinedType) {
-      std::string Key = Type.getKey().str();
-      if (ModifiedTypeName == Key) {
+      if (ModifiedTypeName == Type.getKey()) {
         PrefixStr = Type.getValue();
         break;
       }
@@ -664,7 +657,7 @@ static std::string getHungarianNotationEnumPrefix(const EnumConstantDecl *ECD) {
   }
 
   std::string Initial;
-  for (auto const &Word : Words) {
+  for (StringRef Word : Words) {
     Initial += tolower(Word[0]);
   }
   return Initial;
@@ -676,7 +669,6 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
     return "";
 
   if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
-      clang::Decl::Kind::CXXMethod == ND->getKind() ||
       clang::Decl::Kind::Function == ND->getKind()) {
     return "";
   }
@@ -691,17 +683,16 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
   // is wrong(out of location of Decl). This causes `StrLen` will be assigned
   // an unexpected large value. Current workaround to find the terminated
   // character instead of the `getEndLoc()` function.
-  char *EOL = const_cast<char *>(strchr(Begin, '\n'));
-  if (!EOL) {
-    EOL = const_cast<char *>(Begin) + strlen(Begin);
-  }
+  const char *EOL = strchr(Begin, '\n');
+  if (!EOL)
+    EOL = Begin + strlen(Begin);
+
   const std::vector<const char *> PosList = {
       strchr(Begin, '='), strchr(Begin, ';'), strchr(Begin, ','),
       strchr(Begin, ')'), EOL};
   for (const auto &Pos : PosList) {
-    if (Pos > Begin) {
-      EOL = std::min(EOL, const_cast<char *>(Pos));
-    }
+    if (Pos > Begin)
+      EOL = std::min(EOL, Pos);
   }
 
   StrLen = EOL - Begin;
@@ -765,6 +756,10 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
     }
 
     TypeName = Type.erase(0, Type.find_first_not_of(" "));
+
+    QualType QT = VD->getType();
+    if (!QT.isNull() && QT->isArrayType())
+      TypeName.append("[]");
   }
 
   return TypeName;
@@ -778,35 +773,16 @@ static std::string getHungarianNotationPrefix(
     return "";
 
   std::string Prefix;
-  switch (ND->getKind()) {
-  case clang::Decl::Kind::Var:
-  case clang::Decl::Kind::Field:
-  case clang::Decl::Kind::ParmVar:
-  case clang::Decl::Kind::Record:
-    if (ND) {
-      std::string TypeName = getDeclTypeName(ND);
-      if (!TypeName.empty())
-        Prefix = getHungarianNotationDataTypePrefix(TypeName, ND, HNOption);
-    }
-    break;
-
-  case clang::Decl::Kind::EnumConstant:
-    if (ND) {
-      const auto *ECD = dyn_cast<EnumConstantDecl>(ND);
-      Prefix = getHungarianNotationEnumPrefix(ECD);
-    }
-    break;
-
-  case clang::Decl::Kind::CXXRecord:
-    if (ND) {
-      const auto *CRD = dyn_cast<CXXRecordDecl>(ND);
-      Prefix = getHungarianNotationClassPrefix(CRD, HNOption);
-    }
-    break;
-
-  default:
-    break;
+  if (const auto *ECD = dyn_cast<EnumConstantDecl>(ND)) {
+    Prefix = getHungarianNotationEnumPrefix(ECD);
+  } else if (const auto *CRD = dyn_cast<CXXRecordDecl>(ND)) {
+    Prefix = getHungarianNotationClassPrefix(CRD, HNOption);
+  } else if (isa<VarDecl, FieldDecl, RecordDecl>(ND)) {
+    std::string TypeName = getDeclTypeName(ND);
+    if (!TypeName.empty())
+      Prefix = getHungarianNotationDataTypePrefix(TypeName, ND, HNOption);
   }
+
   return Prefix;
 }
 
@@ -823,8 +799,7 @@ static bool removeDuplicatedHungarianNotationPrefix(
 
   for (const auto &Map : MapList) {
     for (const auto &Str : Map) {
-      bool Found = (Str.getValue() == CorrectName);
-      if (Found) {
+      if (Str.getValue() == CorrectName) {
         Words.erase(Words.begin(), Words.begin() + 1);
         return true;
       }
@@ -871,7 +846,7 @@ matchesStyle(StringRef Type, StringRef Name,
 }
 
 static std::string
-fixupWithCase(const StringRef &Type, const StringRef &Name, const Decl *D,
+fixupWithCase(StringRef Type, StringRef Name, const Decl *D,
               const IdentifierNamingCheck::NamingStyle &Style,
               const IdentifierNamingCheck::HungarianNotationOption &HNOption,
               IdentifierNamingCheck::CaseType Case) {
@@ -1035,7 +1010,7 @@ static bool isParamInMainLikeFunction(const ParmVarDecl &ParmDecl,
 }
 
 static std::string
-fixupWithStyle(const StringRef &Type, const StringRef &Name,
+fixupWithStyle(StringRef Type, StringRef Name,
                const IdentifierNamingCheck::NamingStyle &Style,
                const IdentifierNamingCheck::HungarianNotationOption &HNOption,
                const Decl *D) {
@@ -1345,7 +1320,7 @@ static StyleKind findStyleKind(
 }
 
 static llvm::Optional<RenamerClangTidyCheck::FailureInfo> getFailureInfo(
-    const StringRef &Type, const StringRef &Name, const NamedDecl *ND,
+    StringRef Type, StringRef Name, const NamedDecl *ND,
     SourceLocation Location,
     ArrayRef<llvm::Optional<IdentifierNamingCheck::NamingStyle>> NamingStyles,
     const IdentifierNamingCheck::HungarianNotationOption &HNOption,
@@ -1384,8 +1359,7 @@ IdentifierNamingCheck::GetDeclFailureInfo(const NamedDecl *Decl,
   if (!FileStyle.isActive())
     return llvm::None;
 
-  std::string TypeName = getDeclTypeName(Decl);
-  return getFailureInfo(TypeName, Decl->getName(), Decl, Loc,
+  return getFailureInfo(getDeclTypeName(Decl), Decl->getName(), Decl, Loc,
                         FileStyle.getStyles(), HNOption,
                         findStyleKind(Decl, FileStyle.getStyles(),
                                       FileStyle.isIgnoringMainLikeFunction()),
