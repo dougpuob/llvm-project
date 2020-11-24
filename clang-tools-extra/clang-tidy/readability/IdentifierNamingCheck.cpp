@@ -460,10 +460,9 @@ static IdentifierNamingCheck::FileStyle getFileStyleFromOptions(
     HNOption.Case = CaseOptional;
 
     if (CaseOptional || !Prefix.empty() || !Postfix.empty() ||
-        !HPrefixVal.empty()) {
+        !HPrefixVal.empty())
       Styles[I].emplace(std::move(CaseOptional), std::move(Prefix),
                         std::move(Postfix), HPTVal);
-    }
   }
   bool IgnoreMainLike = Options.get("IgnoreMainLikeFunctions", false);
   return {std::move(Styles), IgnoreMainLike};
@@ -569,12 +568,12 @@ static const std::string getHungarianNotationDataTypePrefix(
     return Count;
   }(ModifiedTypeName);
   if (PtrCount > 0) {
-    ModifiedTypeName = [&](std::string Str, const std::string &From,
-                           const std::string &To) {
+    ModifiedTypeName = [&](std::string Str, StringRef From, StringRef To) {
       size_t StartPos = 0;
-      while ((StartPos = Str.find(From, StartPos)) != std::string::npos) {
-        Str.replace(StartPos, From.length(), To);
-        StartPos += To.length();
+      while ((StartPos = Str.find(From.data(), StartPos)) !=
+             std::string::npos) {
+        Str.replace(StartPos, From.size(), To.data());
+        StartPos += To.size();
       }
       return Str;
     }(ModifiedTypeName, "*", "");
@@ -611,12 +610,11 @@ static std::string getHungarianNotationClassPrefix(
     const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
 
   if (CRD->isUnion())
-    return "";
+    return {};
 
-  if (CRD->isStruct() && !isHungarianNotationOptionEnabled("TreatStructAsClass",
-                                                           HNOption.General)) {
-    return "";
-  }
+  if (CRD->isStruct() &&
+      !isHungarianNotationOptionEnabled("TreatStructAsClass", HNOption.General))
+    return {};
 
   return CRD->isAbstract() ? "I" : "C";
 }
@@ -657,21 +655,19 @@ static std::string getHungarianNotationEnumPrefix(const EnumConstantDecl *ECD) {
   }
 
   std::string Initial;
-  for (StringRef Word : Words) {
+  for (StringRef Word : Words)
     Initial += tolower(Word[0]);
-  }
+
   return Initial;
 }
 
 static std::string getDeclTypeName(const NamedDecl *ND) {
   const auto *VD = dyn_cast<ValueDecl>(ND);
   if (!VD)
-    return "";
+    return {};
 
-  if (clang::Decl::Kind::EnumConstant == ND->getKind() ||
-      clang::Decl::Kind::Function == ND->getKind()) {
-    return "";
-  }
+  if (isa<FunctionDecl, EnumConstantDecl>(ND))
+    return {};
 
   // Get type text of variable declarations.
   auto &SM = VD->getASTContext().getSourceManager();
@@ -700,7 +696,7 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
   if (StrLen > 0) {
     std::string Type(Begin, StrLen);
 
-    const static std::list<std::string> Keywords = {
+    static constexpr StringRef Keywords[] = {
         // Constexpr specifiers
         "constexpr", "constinit", "consteval",
         // Qualifier
@@ -711,9 +707,10 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
         "virtual"};
 
     // Remove keywords
-    for (const std::string &Kw : Keywords) {
-      for (size_t Pos = 0; (Pos = Type.find(Kw, Pos)) != std::string::npos;) {
-        Type.replace(Pos, Kw.length(), "");
+    for (StringRef Kw : Keywords) {
+      for (size_t Pos = 0;
+           (Pos = Type.find(Kw.data(), Pos)) != std::string::npos;) {
+        Type.replace(Pos, Kw.size(), "");
       }
     }
     TypeName = Type.erase(0, Type.find_first_not_of(" "));
@@ -737,13 +734,13 @@ static std::string getDeclTypeName(const NamedDecl *ND) {
     }
 
     // Remove redundant tailing.
-    const static std::list<std::string> TailsOfMultiWordType = {
+    static constexpr StringRef TailsOfMultiWordType[] = {
         " int", " char", " double", " long", " short"};
     bool RedundantRemoved = false;
-    for (const auto &Kw : TailsOfMultiWordType) {
-      size_t Pos = Type.rfind(Kw);
+    for (auto Kw : TailsOfMultiWordType) {
+      size_t Pos = Type.rfind(Kw.data());
       if (Pos != std::string::npos) {
-        Type = Type.substr(0, Pos + Kw.length());
+        Type = Type.substr(0, Pos + Kw.size());
         RedundantRemoved = true;
         break;
       }
@@ -770,7 +767,7 @@ static std::string getHungarianNotationPrefix(
     const IdentifierNamingCheck::HungarianNotationOption &HNOption) {
   const auto *ND = dyn_cast<NamedDecl>(D);
   if (!ND)
-    return "";
+    return {};
 
   std::string Prefix;
   if (const auto *ECD = dyn_cast<EnumConstantDecl>(ND)) {
