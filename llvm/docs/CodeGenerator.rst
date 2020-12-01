@@ -966,7 +966,7 @@ zero extension instructions.  We currently use ad-hoc techniques, but could move
 to more rigorous techniques in the future.  Here are some good papers on the
 subject:
 
-"`Widening integer arithmetic <http://www.eecs.harvard.edu/~nr/pubs/widen-abstract.html>`_" :raw-html:`<br>`
+"`Widening integer arithmetic <https://dash.harvard.edu/handle/1/23017123>`_" :raw-html:`<br>`
 Kevin Redwine and Norman Ramsey :raw-html:`<br>`
 International Conference on Compiler Construction (CC) 2004
 
