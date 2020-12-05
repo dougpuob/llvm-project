@@ -84,19 +84,26 @@ public:
   struct FileStyle {
     FileStyle() : IsActive(false), IgnoreMainLikeFunctions(false) {}
     FileStyle(SmallVectorImpl<Optional<NamingStyle>> &&Styles,
-              bool IgnoreMainLike)
-        : Styles(std::move(Styles)), IsActive(true),
-          IgnoreMainLikeFunctions(IgnoreMainLike) {}
+              HungarianNotationOption HNOption, bool IgnoreMainLike)
+        : Styles(std::move(Styles)), HNOption(std::move(HNOption)),
+          IsActive(true), IgnoreMainLikeFunctions(IgnoreMainLike) {}
 
     ArrayRef<Optional<NamingStyle>> getStyles() const {
       assert(IsActive);
       return Styles;
     }
+
+    const HungarianNotationOption &getHNOption() const {
+      assert(IsActive);
+      return HNOption;
+    }
+
     bool isActive() const { return IsActive; }
     bool isIgnoringMainLikeFunction() const { return IgnoreMainLikeFunctions; }
 
   private:
     SmallVector<Optional<NamingStyle>, 0> Styles;
+    HungarianNotationOption HNOption;
     bool IsActive;
     bool IgnoreMainLikeFunctions;
   };
@@ -121,8 +128,6 @@ private:
   const std::string CheckName;
   const bool GetConfigPerFile;
   const bool IgnoreFailedSplit;
-
-  IdentifierNamingCheck::HungarianNotationOption HNOption;
 };
 
 } // namespace readability
