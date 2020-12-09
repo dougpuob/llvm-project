@@ -190,6 +190,12 @@ Changes in existing checks
 - Removed `google-runtime-references` check because the rule it checks does
   not exist in the Google Style Guide anymore.
 
+- Improved :doc:`readability-identifier-naming
+  <clang-tidy/checks/readability-identifier-naming>` check.  
+
+  Added new options HungarianPrefix for variable decls to check variable with 
+  Hungarian Notation which the prefix encodes the actual data type of the variable.
+
 - Improved :doc:`readability-redundant-string-init
   <clang-tidy/checks/readability-redundant-string-init>` check.
 
