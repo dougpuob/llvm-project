@@ -35,19 +35,19 @@ Options
 
 The following options are describe below:
 
- - :option:`AbstractClassCase`, :option:`AbstractClassPrefix`, :option:`AbstractClassSuffix`, :option:`AbstractClassIgnoredRegexp`
+ - :option:`AbstractClassCase`, :option:`AbstractClassPrefix`, :option:`AbstractClassSuffix`, :option:`AbstractClassIgnoredRegexp`, :option:`AbstractClassHungarianPrefix`
  - :option:`AggressiveDependentMemberLookup`
- - :option:`ClassCase`, :option:`ClassPrefix`, :option:`ClassSuffix`, :option:`ClassIgnoredRegexp`
- - :option:`ClassConstantCase`, :option:`ClassConstantPrefix`, :option:`ClassConstantSuffix`, :option:`ClassConstantIgnoredRegexp`
- - :option:`ClassMemberCase`, :option:`ClassMemberPrefix`, :option:`ClassMemberSuffix`, :option:`ClassMemberIgnoredRegexp`
+ - :option:`ClassCase`, :option:`ClassPrefix`, :option:`ClassSuffix`, :option:`ClassIgnoredRegexp`, :option:`ClassHungarianPrefix`
+ - :option:`ClassConstantCase`, :option:`ClassConstantPrefix`, :option:`ClassConstantSuffix`, :option:`ClassConstantIgnoredRegexp`, :option:`ClassConstantHungarianPrefix`
+ - :option:`ClassMemberCase`, :option:`ClassMemberPrefix`, :option:`ClassMemberSuffix`, :option:`ClassMemberIgnoredRegexp`, :option:`ClassMemberHungarianPrefix`
  - :option:`ClassMethodCase`, :option:`ClassMethodPrefix`, :option:`ClassMethodSuffix`, :option:`ClassMethodIgnoredRegexp`
- - :option:`ConstantCase`, :option:`ConstantPrefix`, :option:`ConstantSuffix`, :option:`ConstantIgnoredRegexp`
- - :option:`ConstantMemberCase`, :option:`ConstantMemberPrefix`, :option:`ConstantMemberSuffix`, :option:`ConstantMemberIgnoredRegexp`
- - :option:`ConstantParameterCase`, :option:`ConstantParameterPrefix`, :option:`ConstantParameterSuffix`, :option:`ConstantParameterIgnoredRegexp`
- - :option:`ConstantPointerParameterCase`, :option:`ConstantPointerParameterPrefix`, :option:`ConstantPointerParameterSuffix`, :option:`ConstantPointerParameterIgnoredRegexp`
+ - :option:`ConstantCase`, :option:`ConstantPrefix`, :option:`ConstantSuffix`, :option:`ConstantIgnoredRegexp`, :option:`ConstantHungarianPrefix`
+ - :option:`ConstantMemberCase`, :option:`ConstantMemberPrefix`, :option:`ConstantMemberSuffix`, :option:`ConstantMemberIgnoredRegexp`, :option:`ConstantMemberHungarianPrefix`
+ - :option:`ConstantParameterCase`, :option:`ConstantParameterPrefix`, :option:`ConstantParameterSuffix`, :option:`ConstantParameterIgnoredRegexp`, :option:`ConstantParameterHungarianPrefix`
+ - :option:`ConstantPointerParameterCase`, :option:`ConstantPointerParameterPrefix`, :option:`ConstantPointerParameterSuffix`, :option:`ConstantPointerParameterIgnoredRegexp`, :option:`ConstantPointerParameterHungarianPrefix`
  - :option:`ConstexprFunctionCase`, :option:`ConstexprFunctionPrefix`, :option:`ConstexprFunctionSuffix`, :option:`ConstexprFunctionIgnoredRegexp`
  - :option:`ConstexprMethodCase`, :option:`ConstexprMethodPrefix`, :option:`ConstexprMethodSuffix`, :option:`ConstexprMethodIgnoredRegexp`
- - :option:`ConstexprVariableCase`, :option:`ConstexprVariablePrefix`, :option:`ConstexprVariableSuffix`, :option:`ConstexprVariableIgnoredRegexp`
+ - :option:`ConstexprVariableCase`, :option:`ConstexprVariablePrefix`, :option:`ConstexprVariableSuffix`, :option:`ConstexprVariableIgnoredRegexp`, :option:`ConstexprVariableHungarianPrefix`
  - :option:`EnumCase`, :option:`EnumPrefix`, :option:`EnumSuffix`, :option:`EnumIgnoredRegexp`
  - :option:`EnumConstantCase`, :option:`EnumConstantPrefix`, :option:`EnumConstantSuffix`, :option:`EnumConstantIgnoredRegexp`, :option:`EnumConstantHungarianPrefix`
  - :option:`FunctionCase`, :option:`FunctionPrefix`, :option:`FunctionSuffix`, :option:`FunctionIgnoredRegexp`
@@ -379,17 +379,11 @@ After:
     When defined, the check will ensure class method names will add the
     suffix with the given value (regardless of casing).
 
-.. option:: ClassMethodHungarianPrefix
-
-    When enabled, the check ensures that the declared identifier will
-    have a Hungarian notation prefix based on the declared type.
-
 For example using values of:
 
    - ClassMethodCase of ``lower_case``
    - ClassMethodPrefix of ``pre_``
    - ClassMethodSuffix of ``_post``
-   - ClassMethodHungarianPrefix of ``On``
 
 Identifies and/or transforms class method names as follows:
 
@@ -1723,17 +1717,11 @@ After:
     When defined, the check will ensure private method names will add the
     suffix with the given value (regardless of casing).
 
-.. option:: PrivateMethodHungarianPrefix
-
-    When enabled, the check ensures that the declared identifier will
-    have a Hungarian notation prefix based on the declared type.
-
 For example using values of:
 
    - PrivateMethodCase of ``lower_case``
    - PrivateMethodPrefix of ``pre_``
    - PrivateMethodSuffix of ``_post``
-   - PrivateMethodHungarianPrefix of ``On``
 
 Identifies and/or transforms private method names as follows:
 
@@ -1971,11 +1959,17 @@ After:
     When defined, the check will ensure scoped enum constant names will add the
     suffix with the given value (regardless of casing).
 
+.. option:: ScopedEnumConstantHungarianPrefix
+
+    When enabled, the check ensures that the declared identifier will
+    have a Hungarian notation prefix based on the declared type.
+
 For example using values of:
 
    - ScopedEnumConstantCase of ``lower_case``
    - ScopedEnumConstantPrefix of ``pre_``
    - ScopedEnumConstantSuffix of ``_post``
+   - ScopedEnumConstantHungarianPrefix of ``On``
 
 Identifies and/or transforms enumeration constant names as follows:
 
