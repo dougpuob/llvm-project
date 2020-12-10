@@ -395,13 +395,14 @@ isHungarianNotationOptionEnabled(StringRef OptionKey,
   if (OptionKey.empty())
     return false;
 
-  std::string OptionVal = StrMap.lookup(OptionKey);
-  llvm::transform(OptionVal, OptionVal.begin(), toupper);
+  auto Iter = StrMap.find(OptionKey);
+  if (Iter == StrMap.end())
+    return false;
 
-  if (OptionVal == "1" || OptionVal == "TRUE" || OptionVal == "ON")
-    return true;
+  StringRef OptionVal = Iter->getValue();
 
-  return false;
+  return OptionVal.equals_lower("1") || OptionVal.equals_lower("true") ||
+         OptionVal.equals_lower("on");
 }
 
 IdentifierNamingCheck::NamingStyle::NamingStyle(
