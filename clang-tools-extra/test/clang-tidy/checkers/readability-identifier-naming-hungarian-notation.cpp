@@ -1,15 +1,18 @@
 // RUN: %check_clang_tidy %s readability-identifier-naming %t -- \
 // RUN:   -config='{ CheckOptions: [ \
-// RUN:     { key: readability-identifier-naming.ClassCase                                               , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.AbstractClassCase                                       , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ClassCase                                               , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ClassConstantCase                                       , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.ClassMemberCase                                         , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.ConstantCase                                            , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.ConstantMemberCase                                      , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.ConstantParameterCase                                   , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.ConstantPointerParameterCase                            , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.ConstexprVariableCase                                   , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.EnumConstantCase                                        , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.GlobalConstantCase                                      , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.GlobalConstantPointerCase                               , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.GlobalPointerCase                                       , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.GlobalVariableCase                                      , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.LocalConstantCase                                       , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.LocalConstantPointerCase                                , value: CamelCase }, \
@@ -19,21 +22,25 @@
 // RUN:     { key: readability-identifier-naming.ParameterCase                                           , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.PointerParameterCase                                    , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.PrivateMemberCase                                       , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ProtectedMemberCase                                     , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.PublicMemberCase                                        , value: CamelCase }, \
+// RUN:     { key: readability-identifier-naming.ScopedEnumConstantCase                                  , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.StaticConstantCase                                      , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.StaticVariableCase                                      , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.StructCase                                              , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.UnionCase                                               , value: CamelCase }, \
 // RUN:     { key: readability-identifier-naming.VariableCase                                            , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ClassHungarianPrefix                                    , value: On        }, \
 // RUN:     { key: readability-identifier-naming.AbstractClassHungarianPrefix                            , value: On        }, \
+// RUN:     { key: readability-identifier-naming.ClassHungarianPrefix                                    , value: On        }, \
+// RUN:     { key: readability-identifier-naming.ClassConstantHungarianPrefix                            , value: On        }, \
 // RUN:     { key: readability-identifier-naming.ClassMemberHungarianPrefix                              , value: On        }, \
 // RUN:     { key: readability-identifier-naming.ConstantHungarianPrefix                                 , value: On        }, \
 // RUN:     { key: readability-identifier-naming.ConstantMemberHungarianPrefix                           , value: On        }, \
 // RUN:     { key: readability-identifier-naming.ConstantParameterHungarianPrefix                        , value: On        }, \
 // RUN:     { key: readability-identifier-naming.ConstantPointerParameterHungarianPrefix                 , value: On        }, \
 // RUN:     { key: readability-identifier-naming.ConstexprVariableHungarianPrefix                        , value: On        }, \
+// RUN:     { key: readability-identifier-naming.EnumConstantHungarianPrefix                             , value: On        }, \
 // RUN:     { key: readability-identifier-naming.GlobalConstantHungarianPrefix                           , value: On        }, \
 // RUN:     { key: readability-identifier-naming.GlobalConstantPointerHungarianPrefix                    , value: On        }, \
+// RUN:     { key: readability-identifier-naming.GlobalPointerHungarianPrefix                            , value: On        }, \
 // RUN:     { key: readability-identifier-naming.GlobalVariableHungarianPrefix                           , value: On        }, \
 // RUN:     { key: readability-identifier-naming.LocalConstantHungarianPrefix                            , value: On        }, \
 // RUN:     { key: readability-identifier-naming.LocalConstantPointerHungarianPrefix                     , value: On        }, \
@@ -43,10 +50,11 @@
 // RUN:     { key: readability-identifier-naming.ParameterHungarianPrefix                                , value: On        }, \
 // RUN:     { key: readability-identifier-naming.PointerParameterHungarianPrefix                         , value: On        }, \
 // RUN:     { key: readability-identifier-naming.PrivateMemberHungarianPrefix                            , value: On        }, \
+// RUN:     { key: readability-identifier-naming.ProtectedMemberHungarianPrefix                          , value: On        }, \
+// RUN:     { key: readability-identifier-naming.PublicMemberHungarianPrefix                             , value: On        }, \
+// RUN:     { key: readability-identifier-naming.ScopedEnumConstantHungarianPrefix                       , value: On        }, \
 // RUN:     { key: readability-identifier-naming.StaticConstantHungarianPrefix                           , value: On        }, \
 // RUN:     { key: readability-identifier-naming.StaticVariableHungarianPrefix                           , value: On        }, \
-// RUN:     { key: readability-identifier-naming.StructHungarianPrefix                                   , value: On        }, \
-// RUN:     { key: readability-identifier-naming.UnionHungarianPrefix                                    , value: On        }, \
 // RUN:     { key: readability-identifier-naming.VariableHungarianPrefix                                 , value: On        }, \
 // RUN:   ]}'
 
@@ -131,8 +139,12 @@ const int GlobalConstantCase = 0;
 // CHECK-FIXES: {{^}}const int iGlobalConstantCase = 0;
 
 const int* GlobalConstantPointerCase = nullptr;
-// CHECK-MESSAGES: :[[@LINE-1]]:12: warning: invalid case style for global variable 'GlobalConstantPointerCase' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:12: warning: invalid case style for global pointer 'GlobalConstantPointerCase' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}const int* piGlobalConstantPointerCase = nullptr;
+
+int* GlobalPointerCase = nullptr;
+// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global pointer 'GlobalPointerCase' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}int* piGlobalPointerCase = nullptr;
 
 int GlobalVariableCase = 0;
 // CHECK-MESSAGES: :[[@LINE-1]]:5: warning: invalid case style for global variable 'GlobalVariableCase' [readability-identifier-naming]
@@ -142,6 +154,10 @@ void Func1(){
   int const LocalConstantCase = 3;
   // CHECK-MESSAGES: :[[@LINE-1]]:13: warning: invalid case style for local constant 'LocalConstantCase' [readability-identifier-naming]
   // CHECK-FIXES: {{^}}  int const iLocalConstantCase = 3;
+
+  unsigned const ConstantCase = 1;
+  // CHECK-MESSAGES: :[[@LINE-1]]:18: warning: invalid case style for local constant 'ConstantCase' [readability-identifier-naming]
+  // CHECK-FIXES: {{^}}  unsigned const uConstantCase = 1;
 
   int* const LocalConstantPointerCase = nullptr;
   // CHECK-MESSAGES: :[[@LINE-1]]:14: warning: invalid case style for local constant pointer 'LocalConstantPointerCase' [readability-identifier-naming]
@@ -179,6 +195,16 @@ private:
   char PrivateMemberCase;
   // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for private member 'PrivateMemberCase' [readability-identifier-naming]
   // CHECK-FIXES: {{^}}  char cPrivateMemberCase;
+
+protected:
+  char ProtectedMemberCase;
+  // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for protected member 'ProtectedMemberCase' [readability-identifier-naming]
+  // CHECK-FIXES: {{^}}  char cProtectedMemberCase;
+
+public:
+  char PublicMemberCase;
+  // CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for public member 'PublicMemberCase' [readability-identifier-naming]
+  // CHECK-FIXES: {{^}}  char cPublicMemberCase;
 };
 
 static const int StaticConstantCase = 3;
@@ -190,18 +216,18 @@ static int StaticVariableCase = 3;
 // CHECK-FIXES: {{^}}static int iStaticVariableCase = 3;
 
 struct MyStruct { int StructCase; };
-// CHECK-MESSAGES: :[[@LINE-1]]:23: warning: invalid case style for member 'StructCase' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:23: warning: invalid case style for public member 'StructCase' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}struct MyStruct { int iStructCase; };
 
-union MyUnion { int UnionCase1; long lUnionCase2; };
-// CHECK-MESSAGES: :[[@LINE-1]]:21: warning: invalid case style for member 'UnionCase1' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}union MyUnion { int iUnionCase1; long lUnionCase2; };
+union MyUnion { int UnionCase; long lUnionCase; };
+// CHECK-MESSAGES: :[[@LINE-1]]:21: warning: invalid case style for public member 'UnionCase' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}union MyUnion { int iUnionCase; long lUnionCase; };
 
 //===----------------------------------------------------------------------===//
 // C string
 //===----------------------------------------------------------------------===//
 const char *NamePtr = "Name";
-// CHECK-MESSAGES: :[[@LINE-1]]:13: warning: invalid case style for global variable 'NamePtr' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:13: warning: invalid case style for global pointer 'NamePtr' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}const char *szNamePtr = "Name";
 
 const char NameArray[] = "Name";
@@ -213,7 +239,7 @@ const char *NamePtrArray[] = {"AA", "BB"};
 // CHECK-FIXES: {{^}}const char *pszNamePtrArray[] = {"AA", "BB"};
 
 const wchar_t *WideNamePtr = L"Name";
-// CHECK-MESSAGES: :[[@LINE-1]]:16: warning: invalid case style for global variable 'WideNamePtr' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:16: warning: invalid case style for global pointer 'WideNamePtr' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}const wchar_t *wszWideNamePtr = L"Name";
 
 const wchar_t WideNameArray[] = L"Name";
@@ -321,7 +347,7 @@ ULONGLONG MsValueUlongLong = 0;
 // CHECK-FIXES: {{^}}ULONGLONG ullMsValueUlongLong = 0;
 
 HANDLE MsValueHandle = 0;
-// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'MsValueHandle' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global pointer 'MsValueHandle' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}HANDLE hMsValueHandle = 0;
 
 INT MsValueInt = 0;
@@ -365,7 +391,7 @@ UINT64 MsValueUint64 = 0;
 // CHECK-FIXES: {{^}}UINT64 u64MsValueUint64 = 0;
 
 PVOID MsValuePvoid = NULL;
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'MsValuePvoid' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global pointer 'MsValuePvoid' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}PVOID pMsValuePvoid = NULL;
 
 
@@ -397,28 +423,28 @@ int *DataIntPtr[1] = {0};
 // CHECK-FIXES: {{^}}int *paDataIntPtr[1] = {0};
 
 void *BufferPtr1;
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'BufferPtr1' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global pointer 'BufferPtr1' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}void *pBufferPtr1;
 
 void **BufferPtr2;
-// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'BufferPtr2' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global pointer 'BufferPtr2' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}void **ppBufferPtr2;
 
 void **pBufferPtr3;
-// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global variable 'pBufferPtr3' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:8: warning: invalid case style for global pointer 'pBufferPtr3' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}void **ppBufferPtr3;
 
 int *pBufferPtr4;
-// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global variable 'pBufferPtr4' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:6: warning: invalid case style for global pointer 'pBufferPtr4' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}int *piBufferPtr4;
 
 typedef void (*FUNC_PTR_HELLO)();
 FUNC_PTR_HELLO Hello = NULL;
-// CHECK-MESSAGES: :[[@LINE-1]]:16: warning: invalid case style for global variable 'Hello' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:16: warning: invalid case style for global pointer 'Hello' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}FUNC_PTR_HELLO fnHello = NULL;
 
 void *ValueVoidPtr = NULL;
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global variable 'ValueVoidPtr' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for global pointer 'ValueVoidPtr' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}void *pValueVoidPtr = NULL;
 
 ptrdiff_t PtrDiff = NULL;
@@ -426,11 +452,11 @@ ptrdiff_t PtrDiff = NULL;
 // CHECK-FIXES: {{^}}ptrdiff_t pPtrDiff = NULL;
 
 int8_t *ValueI8Ptr;
-// CHECK-MESSAGES: :[[@LINE-1]]:9: warning: invalid case style for global variable 'ValueI8Ptr' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:9: warning: invalid case style for global pointer 'ValueI8Ptr' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}int8_t *pi8ValueI8Ptr;
 
 uint8_t *ValueU8Ptr;
-// CHECK-MESSAGES: :[[@LINE-1]]:10: warning: invalid case style for global variable 'ValueU8Ptr' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-1]]:10: warning: invalid case style for global pointer 'ValueU8Ptr' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}uint8_t *pu8ValueU8Ptr;
 
 void MyFunc2(void* Val){}
@@ -622,7 +648,7 @@ extern int ExternValueInt;
 struct DataBuffer {
     mutable size_t Size;
 };
-// CHECK-MESSAGES: :[[@LINE-2]]:20: warning: invalid case style for member 'Size' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-2]]:20: warning: invalid case style for public member 'Size' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}    mutable size_t nSize;
 
 static constexpr int const &ConstExprInt = 42;
@@ -642,18 +668,21 @@ INDEX iIndex = 0;
 //===----------------------------------------------------------------------===//
 // Class
 //===----------------------------------------------------------------------===//
-class GenericClass { int Func(); };
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for class 'GenericClass' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}class CGenericClass { int Func(); };
+class ClassCase { int Func(); };
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for class 'ClassCase' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}class CClassCase { int Func(); };
 
-class AbstractClass { virtual int Func() = 0; };
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for abstract class 'AbstractClass' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}class IAbstractClass { virtual int Func() = 0; };
+class AbstractClassCase { virtual int Func() = 0; };
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for abstract class 'AbstractClassCase' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}class IAbstractClassCase { virtual int Func() = 0; };
 
-class AbstractClass1 { virtual int Func1() = 0; int Func2(); };
-// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for abstract class 'AbstractClass1' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}class IAbstractClass1 { virtual int Func1() = 0; int Func2(); };
+class AbstractClassCase1 { virtual int Func1() = 0; int Func2(); };
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for abstract class 'AbstractClassCase1' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}class IAbstractClassCase1 { virtual int Func1() = 0; int Func2(); };
 
+class ClassConstantCase { public: static const int iConstantCase; };
+// CHECK-MESSAGES: :[[@LINE-1]]:7: warning: invalid case style for class 'ClassConstantCase' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}class CClassConstantCase { public: static const int iConstantCase; };
 
 //===----------------------------------------------------------------------===//
 // Other Cases
@@ -721,12 +750,16 @@ int Camel_Snake_Case_1 = 0;
 //===----------------------------------------------------------------------===//
 // Enum
 //===----------------------------------------------------------------------===//
-enum REVINFO_TYPE { RevValid };
-// CHECK-MESSAGES: :[[@LINE-1]]:21: warning: invalid case style for constant 'RevValid' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}enum REVINFO_TYPE { rtRevValid };
+enum REV_TYPE { RevValid };
+// CHECK-MESSAGES: :[[@LINE-1]]:17: warning: invalid case style for enum constant 'RevValid' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}enum REV_TYPE { rtRevValid };
 
-enum DataType { OneByte, TwoByte };
-// CHECK-MESSAGES: :[[@LINE-1]]:17: warning: invalid case style for constant 'OneByte' [readability-identifier-naming]
-// CHECK-MESSAGES: :[[@LINE-2]]:26: warning: invalid case style for constant 'TwoByte' [readability-identifier-naming]
-// CHECK-FIXES: {{^}}enum DataType { dtOneByte, dtTwoByte };
+enum EnumConstantCase { OneByte, TwoByte };
+// CHECK-MESSAGES: :[[@LINE-1]]:25: warning: invalid case style for enum constant 'OneByte' [readability-identifier-naming]
+// CHECK-MESSAGES: :[[@LINE-2]]:34: warning: invalid case style for enum constant 'TwoByte' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}enum EnumConstantCase { eccOneByte, eccTwoByte };
 // clang-format on
+
+enum class ScopedEnumConstantCase { Case1 };
+// CHECK-MESSAGES: :[[@LINE-1]]:37: warning: invalid case style for scoped enum constant 'Case1' [readability-identifier-naming]
+// CHECK-FIXES: {{^}}enum class ScopedEnumConstantCase { seccCase1 };
