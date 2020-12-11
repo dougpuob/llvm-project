@@ -440,7 +440,7 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
       if (auto HPTypeVal = Options.get<HungarianPrefixType>(HPrefixKey))
         HPTVal = HPTypeVal.get();
     }
-	
+
     StyleString.append("IgnoredRegexp");
     std::string IgnoredRegexpStr = Options.get(StyleString, "");
     StyleString.resize(StyleSize);
@@ -490,7 +490,7 @@ void IdentifierNamingCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
       continue;
     StyleString = StyleNames[I];
     size_t StyleSize = StyleString.size();
-	
+
     Options.store(Opts, (StyleString + "HungarianPrefix").str(),
                   Styles[I]->HPType);
 

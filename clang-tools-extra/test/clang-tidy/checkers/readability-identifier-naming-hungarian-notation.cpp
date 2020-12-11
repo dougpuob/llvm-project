@@ -758,8 +758,8 @@ enum EnumConstantCase { OneByte, TwoByte };
 // CHECK-MESSAGES: :[[@LINE-1]]:25: warning: invalid case style for enum constant 'OneByte' [readability-identifier-naming]
 // CHECK-MESSAGES: :[[@LINE-2]]:34: warning: invalid case style for enum constant 'TwoByte' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}enum EnumConstantCase { eccOneByte, eccTwoByte };
-// clang-format on
 
 enum class ScopedEnumConstantCase { Case1 };
 // CHECK-MESSAGES: :[[@LINE-1]]:37: warning: invalid case style for scoped enum constant 'Case1' [readability-identifier-naming]
 // CHECK-FIXES: {{^}}enum class ScopedEnumConstantCase { seccCase1 };
+// clang-format on
