@@ -84,7 +84,7 @@ public:
     // serialized
     llvm::Regex IgnoredRegexp;
     std::string IgnoredRegexpStr;
-	
+
     HungarianPrefixType HPType;
   };
 
