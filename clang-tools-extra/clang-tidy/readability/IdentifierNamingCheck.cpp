@@ -19,6 +19,8 @@
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Regex.h"
+#include "llvm/Support/YAMLParser.h"
+
 
 #define DEBUG_TYPE "clang-tidy"
 
@@ -399,10 +401,8 @@ isHungarianNotationOptionEnabled(StringRef OptionKey,
   if (Iter == StrMap.end())
     return false;
 
-  StringRef OptionVal = Iter->getValue();
-
-  return OptionVal.equals_lower("1") || OptionVal.equals_lower("true") ||
-         OptionVal.equals_lower("on");
+  llvm::Optional<bool> Parsed = llvm::yaml::parseBool(Iter->getValue());
+  return *Parsed;
 }
 
 IdentifierNamingCheck::NamingStyle::NamingStyle(
