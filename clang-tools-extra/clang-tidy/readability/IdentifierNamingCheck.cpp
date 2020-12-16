@@ -21,7 +21,6 @@
 #include "llvm/Support/Regex.h"
 #include "llvm/Support/YAMLParser.h"
 
-
 #define DEBUG_TYPE "clang-tidy"
 
 // FixItHint
@@ -432,14 +431,11 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
     StyleString = StyleNames[I];
     size_t StyleSize = StyleString.size();
 
-    std::string HPrefixKey = (StyleString + "HungarianPrefix").str();
-    using HungarianPrefixType = IdentifierNamingCheck::HungarianPrefixType;
-    auto HPTVal = HungarianPrefixType::HPT_Off;
-    std::string HPrefixVal = Options.get(HPrefixKey, "");
-    if (!HPrefixVal.empty()) {
-      if (auto HPTypeVal = Options.get<HungarianPrefixType>(HPrefixKey))
-        HPTVal = HPTypeVal.get();
-    }
+    StyleString.append("HungarianPrefix");
+    auto HPTOpt =
+        Options.getOptional<IdentifierNamingCheck::HungarianPrefixType>(
+            StyleString);
+    StyleString.resize(StyleSize);
 
     StyleString.append("IgnoredRegexp");
     std::string IgnoredRegexpStr = Options.get(StyleString, "");
@@ -456,10 +452,10 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
         Options.getOptional<IdentifierNamingCheck::CaseType>(StyleString);
 
     if (CaseOptional || !Prefix.empty() || !Postfix.empty() ||
-        !IgnoredRegexpStr.empty() || !HPrefixVal.empty())
+        !IgnoredRegexpStr.empty() || HPTOpt)
       Styles[I].emplace(std::move(CaseOptional), std::move(Prefix),
                         std::move(Postfix), std::move(IgnoredRegexpStr),
-                        HPTVal);
+                        HPTOpt.getValueOr(IdentifierNamingCheck::HPT_Off));
   }
   bool IgnoreMainLike = Options.get("IgnoreMainLikeFunctions", false);
   return {std::move(Styles), std::move(HNOption), IgnoreMainLike};
