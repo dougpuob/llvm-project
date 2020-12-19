@@ -404,6 +404,18 @@ isHungarianNotationOptionEnabled(StringRef OptionKey,
   return *Parsed;
 }
 
+static bool isHungarianNotationSupportedStyle(int StyleKindIndex) {
+
+  if ((StyleKindIndex >= SK_EnumConstant) &&
+      (StyleKindIndex <= SK_ConstantParameter))
+    return true;
+
+  if ((StyleKindIndex >= SK_Parameter) && (StyleKindIndex <= SK_Enum))
+    return true;
+
+  return false;
+}
+
 IdentifierNamingCheck::NamingStyle::NamingStyle(
     llvm::Optional<IdentifierNamingCheck::CaseType> Case,
     const std::string &Prefix, const std::string &Suffix,
@@ -432,9 +444,22 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
     size_t StyleSize = StyleString.size();
 
     StyleString.append("HungarianPrefix");
+    // auto HPTOpt =
+    //    Options.getOptional<IdentifierNamingCheck::HungarianPrefixType>(
+    //        StyleString, isHungarianNotationSupportedStyle(I));
+
     auto HPTOpt =
         Options.getOptional<IdentifierNamingCheck::HungarianPrefixType>(
-            StyleString);
+            StyleString, isHungarianNotationSupportedStyle(I));
+
+    // if (!isHungarianNotationSupportedStyle(I)) {
+    //    //llvm::Expected<llvm::Error> Val =
+    //    llvm::make_error<UnsupportedOptionError>(("OOOOOO" +
+    //    StyleString).str());
+    //    //llvm::consumeError(Val.takeError());
+    //    Options.reportOptionUnsupportError(StyleString);
+    //}
+
     StyleString.resize(StyleSize);
 
     StyleString.append("IgnoredRegexp");
