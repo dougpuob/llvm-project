@@ -92,6 +92,18 @@ private:
   const bool IsBoolean;
 };
 
+class UnsupportedOptionError : public OptionError<UnsupportedOptionError> {
+public:
+  explicit UnsupportedOptionError(std::string OptionName)
+      : OptionName(OptionName) {}
+
+  std::string message() const override;
+  static char ID;
+
+private:
+  const std::string OptionName;
+};
+
 /// Base class for all clang-tidy checks.
 ///
 /// To implement a ``ClangTidyCheck``, write a subclass and override some of the
@@ -418,6 +430,22 @@ public:
         return *ValueOr;
       else
         reportOptionParsingError(ValueOr.takeError());
+      return llvm::None;
+    }
+
+    template <typename T = std::string>
+    llvm::Optional<T> getOptional(StringRef LocalName, bool Supported) const {
+      auto ValueOr = get<T>(LocalName);
+      if (ValueOr) {
+        if (!Supported) {
+          reportOptionParsingError(llvm::make_error<UnsupportedOptionError>(
+              (NamePrefix + LocalName).str()));
+          return llvm::None;
+        }
+        return *ValueOr;
+      }
+
+      reportOptionParsingError(ValueOr.takeError());
       return llvm::None;
     }
 

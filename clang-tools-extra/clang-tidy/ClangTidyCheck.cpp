@@ -20,6 +20,7 @@ namespace tidy {
 char MissingOptionError::ID;
 char UnparseableEnumOptionError::ID;
 char UnparseableIntegerOptionError::ID;
+char UnsupportedOptionError::ID;
 
 std::string MissingOptionError::message() const {
   llvm::SmallString<128> Buffer({"option not found '", OptionName, "'"});
@@ -38,6 +39,11 @@ std::string UnparseableIntegerOptionError::message() const {
   llvm::SmallString<256> Buffer({"invalid configuration value '", LookupValue,
                                  "' for option '", LookupName, "'; expected ",
                                  (IsBoolean ? "a bool" : "an integer value")});
+  return std::string(Buffer);
+}
+
+std::string UnsupportedOptionError::message() const {
+  llvm::SmallString<256> Buffer({"unsupported option '", OptionName, "'"});
   return std::string(Buffer);
 }
 
