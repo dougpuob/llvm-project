@@ -44,13 +44,28 @@ public:
 
 class MissingOptionError : public OptionError<MissingOptionError> {
 public:
+  enum Catalog { OptionNotFound, OptionUnsupport };
+
   explicit MissingOptionError(std::string OptionName)
       : OptionName(OptionName) {}
-
+  explicit MissingOptionError(std::string OptionName, Catalog MessageCatalog)
+      : OptionName(OptionName), MesgCatalog(MessageCatalog) {}
   std::string message() const override;
   static char ID;
 private:
   const std::string OptionName;
+  Catalog MesgCatalog;
+};
+
+class UnsupportedOptionError : public OptionError<UnsupportedOptionError> {
+public:
+    explicit UnsupportedOptionError(std::string OptionName)
+        : OptionName(OptionName) {}
+
+    std::string message() const override;
+    static char ID;
+private:
+    const std::string OptionName;
 };
 
 class UnparseableEnumOptionError
@@ -203,6 +218,8 @@ public:
     OptionsView(StringRef CheckName,
                 const ClangTidyOptions::OptionMap &CheckOptions,
                 ClangTidyContext *Context);
+
+    void reportOptionUnsupportError(llvm::Error&& Err) const;
 
     /// Read a named option from the ``Context``.
     ///
@@ -421,6 +438,25 @@ public:
       return llvm::None;
     }
 
+    template <typename T = std::string>
+    llvm::Optional<T> getOptional(StringRef LocalName, bool Supported) const {        
+        auto ValueOr = get<T>(LocalName);
+        if (ValueOr) {
+            if (!Supported) {
+              llvm::Expected<llvm::Error> Err =
+                  llvm::make_error<MissingOptionError>(
+                      (NamePrefix + LocalName).str(),
+                      MissingOptionError::Catalog::OptionUnsupport);
+              reportOptionUnsupportError(Err.takeError());
+              return llvm::None;
+            }
+            return *ValueOr;
+        }
+
+        reportOptionParsingError(ValueOr.takeError());
+        return llvm::None;
+    }
+
     /// Returns the value for the local or global option \p LocalName
     /// represented as a ``T``.
     /// If the option is missing returns None, if the
@@ -432,6 +468,20 @@ public:
       else
         reportOptionParsingError(ValueOr.takeError());
       return llvm::None;
+    }
+
+    template <typename T = std::string>
+    llvm::Optional<T> getOptionalLocalOrGlobal(StringRef LocalName, bool Supported) const {
+        auto ValueOr = getLocalOrGlobal<T>(LocalName);
+        if (ValueOr) {
+            if (Supported)
+                return *ValueOr;
+            else 
+                reportOptionParsingError(ValueOr.takeError());
+        }
+        else
+            reportOptionParsingError(ValueOr.takeError());
+        return llvm::None;
     }
 
     /// Stores an option with the check-local name \p LocalName with
@@ -466,7 +516,6 @@ public:
       assert(Iter != Mapping.end() && "Unknown Case Value");
       store(Options, LocalName, Iter->second);
     }
-
   private:
     using NameAndValue = std::pair<int64_t, StringRef>;
 
@@ -566,6 +615,11 @@ void ClangTidyCheck::OptionsView::store<bool>(
 template <>
 Optional<std::string> ClangTidyCheck::OptionsView::getOptional<std::string>(
     StringRef LocalName) const;
+
+template <>
+Optional<std::string> ClangTidyCheck::OptionsView::getOptional<std::string>(
+    StringRef LocalName, bool Supported) const;
+
 
 /// Returns the value for the local or global option \p LocalName.
 /// If the option is missing returns None.

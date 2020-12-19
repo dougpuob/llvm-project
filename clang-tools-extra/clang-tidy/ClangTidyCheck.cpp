@@ -18,12 +18,22 @@ namespace clang {
 namespace tidy {
 
 char MissingOptionError::ID;
+char UnsupportedOptionError::ID;
 char UnparseableEnumOptionError::ID;
 char UnparseableIntegerOptionError::ID;
 
 std::string MissingOptionError::message() const {
-  llvm::SmallString<128> Buffer({"option not found '", OptionName, "'"});
+  llvm::SmallString<128> Buffer;
+  if (MesgCatalog == Catalog::OptionUnsupport)
+    Buffer.assign({"option unsupported '", OptionName, "'"});
+  else
+    Buffer.assign({"option not found '", OptionName, "'"});
   return std::string(Buffer);
+}
+
+std::string UnsupportedOptionError::message() const {
+    llvm::SmallString<128> Buffer({ "unsupported option found '", OptionName, "'" });
+    return std::string(Buffer);
 }
 
 std::string UnparseableEnumOptionError::message() const {
@@ -212,6 +222,21 @@ llvm::Expected<int64_t> ClangTidyCheck::OptionsView::getEnumInt(
         Iter->getKey().str(), Iter->getValue().Value, Closest.str());
   return llvm::make_error<UnparseableEnumOptionError>(Iter->getKey().str(),
                                                       Iter->getValue().Value);
+}
+
+//void ClangTidyCheck::OptionsView::reportOptionUnsupportError(llvm::Error&& Err,
+//    StringRef StyleString) const {
+//    llvm::Expected<std::string> Val = llvm::make_error<MissingOptionError>(NamePrefix + StyleString);
+//    if (auto RemainingErrors =
+//        llvm::handleErrors(std::move(Val.takeError()), [](const MissingOptionError&) {}))
+//        Context->configurationDiag(llvm::toString(std::move(RemainingErrors)));
+//}
+
+void ClangTidyCheck::OptionsView::reportOptionUnsupportError(
+    llvm::Error&& Err) const {
+    if (auto RemainingErrors =
+        llvm::handleErrors(std::move(Err), [](const UnsupportedOptionError&) {}))
+        Context->configurationDiag(llvm::toString(std::move(RemainingErrors)));
 }
 
 void ClangTidyCheck::OptionsView::reportOptionParsingError(
