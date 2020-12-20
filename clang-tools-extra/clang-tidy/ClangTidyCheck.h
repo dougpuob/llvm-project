@@ -57,17 +57,6 @@ private:
   Catalog MesgCatalog;
 };
 
-class UnsupportedOptionError : public OptionError<UnsupportedOptionError> {
-public:
-    explicit UnsupportedOptionError(std::string OptionName)
-        : OptionName(OptionName) {}
-
-    std::string message() const override;
-    static char ID;
-private:
-    const std::string OptionName;
-};
-
 class UnparseableEnumOptionError
     : public OptionError<UnparseableEnumOptionError> {
 public:
@@ -218,8 +207,6 @@ public:
     OptionsView(StringRef CheckName,
                 const ClangTidyOptions::OptionMap &CheckOptions,
                 ClangTidyContext *Context);
-
-    void reportOptionUnsupportError(llvm::Error&& Err) const;
 
     /// Read a named option from the ``Context``.
     ///
@@ -447,7 +434,7 @@ public:
                   llvm::make_error<MissingOptionError>(
                       (NamePrefix + LocalName).str(),
                       MissingOptionError::Catalog::OptionUnsupport);
-              reportOptionUnsupportError(Err.takeError());
+              reportOptionParsingError(Err.takeError());
               return llvm::None;
             }
             return *ValueOr;
