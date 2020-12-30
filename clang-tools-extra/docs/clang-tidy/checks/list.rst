@@ -139,6 +139,7 @@ Clang-Tidy Checks
    `clang-analyzer-valist.CopyToSelf <clang-analyzer-valist.CopyToSelf.html>`_,
    `clang-analyzer-valist.Uninitialized <clang-analyzer-valist.Uninitialized.html>`_,
    `clang-analyzer-valist.Unterminated <clang-analyzer-valist.Unterminated.html>`_,
+   `concurrency-async-blocking <concurrency-async-blocking.html>`_,
    `concurrency-mt-unsafe <concurrency-mt-unsafe.html>`_,
    `cppcoreguidelines-avoid-goto <cppcoreguidelines-avoid-goto.html>`_,
    `cppcoreguidelines-avoid-non-const-global-variables <cppcoreguidelines-avoid-non-const-global-variables.html>`_,

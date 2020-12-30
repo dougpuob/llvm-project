@@ -121,6 +121,12 @@ New checks
   Finds structs that are inefficiently packed or aligned, and recommends
   packing and/or aligning of said structs as needed.
 
+- New :doc:`concurrency-async-blocking
+  <clang-tidy/checks/concurrency-async-blocking>` check.
+
+  Checks for some blocking functions and types that volunteerly preempt
+  system thread.
+
 - New :doc:`cppcoreguidelines-prefer-member-initializer
   <clang-tidy/checks/cppcoreguidelines-prefer-member-initializer>` check.
 

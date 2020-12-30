@@ -9,6 +9,7 @@
 #include "../ClangTidy.h"
 #include "../ClangTidyModule.h"
 #include "../ClangTidyModuleRegistry.h"
+#include "AsyncBlockingCheck.h"
 #include "MtUnsafeCheck.h"
 
 namespace clang {
@@ -18,6 +19,8 @@ namespace concurrency {
 class ConcurrencyModule : public ClangTidyModule {
 public:
   void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+    CheckFactories.registerCheck<AsyncBlockingCheck>(
+        "concurrency-async-blocking");
     CheckFactories.registerCheck<concurrency::MtUnsafeCheck>(
         "concurrency-mt-unsafe");
   }
