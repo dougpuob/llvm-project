@@ -444,22 +444,9 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
     size_t StyleSize = StyleString.size();
 
     StyleString.append("HungarianPrefix");
-    // auto HPTOpt =
-    //    Options.getOptional<IdentifierNamingCheck::HungarianPrefixType>(
-    //        StyleString, isHungarianNotationSupportedStyle(I));
-
     auto HPTOpt =
         Options.getOptional<IdentifierNamingCheck::HungarianPrefixType>(
             StyleString, isHungarianNotationSupportedStyle(I));
-
-    // if (!isHungarianNotationSupportedStyle(I)) {
-    //    //llvm::Expected<llvm::Error> Val =
-    //    llvm::make_error<UnsupportedOptionError>(("OOOOOO" +
-    //    StyleString).str());
-    //    //llvm::consumeError(Val.takeError());
-    //    Options.reportOptionUnsupportError(StyleString);
-    //}
-
     StyleString.resize(StyleSize);
 
     StyleString.append("IgnoredRegexp");
