@@ -19,6 +19,7 @@
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Regex.h"
+#include "llvm/Support/YAMLParser.h"
 
 #define DEBUG_TYPE "clang-tidy"
 
@@ -399,10 +400,20 @@ isHungarianNotationOptionEnabled(StringRef OptionKey,
   if (Iter == StrMap.end())
     return false;
 
-  StringRef OptionVal = Iter->getValue();
+  llvm::Optional<bool> Parsed = llvm::yaml::parseBool(Iter->getValue());
+  return *Parsed;
+}
 
-  return OptionVal.equals_lower("1") || OptionVal.equals_lower("true") ||
-         OptionVal.equals_lower("on");
+static bool isHungarianNotationSupportedStyle(int StyleKindIndex) {
+
+  if ((StyleKindIndex >= SK_EnumConstant) &&
+      (StyleKindIndex <= SK_ConstantParameter))
+    return true;
+
+  if ((StyleKindIndex >= SK_Parameter) && (StyleKindIndex <= SK_Enum))
+    return true;
+
+  return false;
 }
 
 IdentifierNamingCheck::NamingStyle::NamingStyle(
@@ -432,14 +443,11 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
     StyleString = StyleNames[I];
     size_t StyleSize = StyleString.size();
 
-    std::string HPrefixKey = (StyleString + "HungarianPrefix").str();
-    using HungarianPrefixType = IdentifierNamingCheck::HungarianPrefixType;
-    auto HPTVal = HungarianPrefixType::HPT_Off;
-    std::string HPrefixVal = Options.get(HPrefixKey, "");
-    if (!HPrefixVal.empty()) {
-      if (auto HPTypeVal = Options.get<HungarianPrefixType>(HPrefixKey))
-        HPTVal = HPTypeVal.get();
-    }
+    StyleString.append("HungarianPrefix");
+    auto HPTOpt =
+        Options.getOptional<IdentifierNamingCheck::HungarianPrefixType>(
+            StyleString, isHungarianNotationSupportedStyle(I));
+    StyleString.resize(StyleSize);
 
     StyleString.append("IgnoredRegexp");
     std::string IgnoredRegexpStr = Options.get(StyleString, "");
@@ -456,10 +464,10 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
         Options.get<IdentifierNamingCheck::CaseType>(StyleString);
 
     if (CaseOptional || !Prefix.empty() || !Postfix.empty() ||
-        !IgnoredRegexpStr.empty() || !HPrefixVal.empty())
+        !IgnoredRegexpStr.empty() || HPTOpt)
       Styles[I].emplace(std::move(CaseOptional), std::move(Prefix),
                         std::move(Postfix), std::move(IgnoredRegexpStr),
-                        HPTVal);
+                        HPTOpt.getValueOr(IdentifierNamingCheck::HPT_Off));
   }
   bool IgnoreMainLike = Options.get("IgnoreMainLikeFunctions", false);
   return {std::move(Styles), std::move(HNOption), IgnoreMainLike};
