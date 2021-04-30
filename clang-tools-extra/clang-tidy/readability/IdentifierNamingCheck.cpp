@@ -445,8 +445,9 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
 
     StyleString.append("HungarianPrefix");
     auto HPTOpt =
-        Options.getOptional<IdentifierNamingCheck::HungarianPrefixType>(
-            StyleString, isHungarianNotationSupportedStyle(I));
+        Options.get<IdentifierNamingCheck::HungarianPrefixType>(StyleString);
+    if (!isHungarianNotationSupportedStyle(I) && HPTOpt.hasValue())
+      Options.diagnoseInvalidConfigOption(StyleString);
     StyleString.resize(StyleSize);
 
     StyleString.append("IgnoredRegexp");
@@ -1024,7 +1025,7 @@ fixupWithStyle(StringRef Type, StringRef Name,
                const Decl *D) {
   Name.consume_front(Style.Prefix);
   Name.consume_back(Style.Suffix);
-  const std::string Fixed = fixupWithCase(
+  std::string Fixed = fixupWithCase(
       Type, Name, D, Style, HNOption,
       Style.Case.getValueOr(IdentifierNamingCheck::CaseType::CT_AnyCase));
   std::string HungarianPrefix;
