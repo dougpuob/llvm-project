@@ -14,7 +14,6 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Basic/Diagnostic.h"
 #include "llvm/ADT/Optional.h"
-#include "llvm/Support/Error.h"
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -31,77 +30,6 @@ namespace tidy {
 template <class T> struct OptionEnumMapping {
   // Specializations of this struct must implement this function.
   static ArrayRef<std::pair<T, StringRef>> getEnumMapping() = delete;
-};
-
-template <typename T> class OptionError : public llvm::ErrorInfo<T> {
-  std::error_code convertToErrorCode() const override {
-    return llvm::inconvertibleErrorCode();
-  }
-
-public:
-  void log(raw_ostream &OS) const override { OS << this->message(); }
-};
-
-class MissingOptionError : public OptionError<MissingOptionError> {
-public:
-  explicit MissingOptionError(std::string OptionName)
-      : OptionName(OptionName) {}
-
-  std::string message() const override;
-  static char ID;
-private:
-  const std::string OptionName;
-};
-
-class UnparseableEnumOptionError
-    : public OptionError<UnparseableEnumOptionError> {
-public:
-  explicit UnparseableEnumOptionError(std::string LookupName,
-                                      std::string LookupValue)
-      : LookupName(LookupName), LookupValue(LookupValue) {}
-  explicit UnparseableEnumOptionError(std::string LookupName,
-                                      std::string LookupValue,
-                                      std::string SuggestedValue)
-      : LookupName(LookupName), LookupValue(LookupValue),
-        SuggestedValue(SuggestedValue) {}
-
-  std::string message() const override;
-  static char ID;
-
-private:
-  const std::string LookupName;
-  const std::string LookupValue;
-  const llvm::Optional<std::string> SuggestedValue;
-};
-
-class UnparseableIntegerOptionError
-    : public OptionError<UnparseableIntegerOptionError> {
-public:
-  explicit UnparseableIntegerOptionError(std::string LookupName,
-                                         std::string LookupValue,
-                                         bool IsBoolean = false)
-      : LookupName(LookupName), LookupValue(LookupValue), IsBoolean(IsBoolean) {
-  }
-
-  std::string message() const override;
-  static char ID;
-
-private:
-  const std::string LookupName;
-  const std::string LookupValue;
-  const bool IsBoolean;
-};
-
-class UnsupportedOptionError : public OptionError<UnsupportedOptionError> {
-public:
-  explicit UnsupportedOptionError(std::string OptionName)
-      : OptionName(OptionName) {}
-
-  std::string message() const override;
-  static char ID;
-
-private:
-  const std::string OptionName;
 };
 
 /// Base class for all clang-tidy checks.
@@ -222,6 +150,12 @@ public:
     OptionsView(StringRef CheckName,
                 const ClangTidyOptions::OptionMap &CheckOptions,
                 ClangTidyContext *Context);
+
+    /// Show an invalid configuration option.
+    ///
+    /// Emit a diagnostic if the configuration option with the check-local
+    /// name \p LocalName shoud not present.
+    void diagnoseInvalidConfigOption(StringRef LocalName) const;
 
     /// Read a named option from the ``Context``.
     ///
@@ -412,52 +346,7 @@ public:
     std::enable_if_t<std::is_enum<T>::value, T>
     getLocalOrGlobal(StringRef LocalName, T Default,
                      bool IgnoreCase = false) const {
-      if (auto ValueOr = getLocalOrGlobal<T>(LocalName, IgnoreCase))
-        return *ValueOr;
-      else
-        reportOptionParsingError(ValueOr.takeError());
-      return Default;
-    }
-
-    /// Returns the value for the option \p LocalName represented as a ``T``.
-    /// If the option is missing returns None, if the option can't be parsed
-    /// as a ``T``, log that to stderr and return None.
-    template <typename T = std::string>
-    llvm::Optional<T> getOptional(StringRef LocalName) const {
-      if (auto ValueOr = get<T>(LocalName))
-        return *ValueOr;
-      else
-        reportOptionParsingError(ValueOr.takeError());
-      return llvm::None;
-    }
-
-    template <typename T = std::string>
-    llvm::Optional<T> getOptional(StringRef LocalName, bool Supported) const {
-      auto ValueOr = get<T>(LocalName);
-      if (ValueOr) {
-        if (!Supported) {
-          reportOptionParsingError(llvm::make_error<UnsupportedOptionError>(
-              (NamePrefix + LocalName).str()));
-          return llvm::None;
-        }
-        return *ValueOr;
-      }
-
-      reportOptionParsingError(ValueOr.takeError());
-      return llvm::None;
-    }
-
-    /// Returns the value for the local or global option \p LocalName
-    /// represented as a ``T``.
-    /// If the option is missing returns None, if the
-    /// option can't be parsed as a ``T``, log that to stderr and return None.
-    template <typename T = std::string>
-    llvm::Optional<T> getOptionalLocalOrGlobal(StringRef LocalName) const {
-      if (auto ValueOr = getLocalOrGlobal<T>(LocalName))
-        return *ValueOr;
-      else
-        reportOptionParsingError(ValueOr.takeError());
-      return llvm::None;
+      return getLocalOrGlobal<T>(LocalName, IgnoreCase).getValueOr(Default);
     }
 
     /// Stores an option with the check-local name \p LocalName with
