@@ -48,11 +48,31 @@ public:
     CT_CamelSnakeBack
   };
 
+  enum HungarianPrefixType {
+    HPT_Off = 0,
+    HPT_On,
+    HPT_LowerCase,
+    HPT_CamelCase,
+  };
+
+  struct HungarianNotationOption {
+    HungarianNotationOption() : HPType(HungarianPrefixType::HPT_Off) {}
+
+    llvm::Optional<CaseType> Case;
+    HungarianPrefixType HPType;
+    llvm::StringMap<std::string> General;
+    llvm::StringMap<std::string> CString;
+    llvm::StringMap<std::string> PrimitiveType;
+    llvm::StringMap<std::string> UserDefinedType;
+    llvm::StringMap<std::string> DerivedType;
+  };
+
   struct NamingStyle {
     NamingStyle() = default;
 
     NamingStyle(llvm::Optional<CaseType> Case, const std::string &Prefix,
-                const std::string &Suffix, const std::string &IgnoredRegexpStr);
+                const std::string &Suffix, const std::string &IgnoredRegexpStr,
+                HungarianPrefixType HPType);
     NamingStyle(const NamingStyle &O) = delete;
     NamingStyle &operator=(NamingStyle &&O) = default;
     NamingStyle(NamingStyle &&O) = default;
@@ -64,24 +84,33 @@ public:
     // serialized
     llvm::Regex IgnoredRegexp;
     std::string IgnoredRegexpStr;
+
+    HungarianPrefixType HPType;
   };
 
   struct FileStyle {
     FileStyle() : IsActive(false), IgnoreMainLikeFunctions(false) {}
     FileStyle(SmallVectorImpl<Optional<NamingStyle>> &&Styles,
-              bool IgnoreMainLike)
-        : Styles(std::move(Styles)), IsActive(true),
-          IgnoreMainLikeFunctions(IgnoreMainLike) {}
+              HungarianNotationOption HNOption, bool IgnoreMainLike)
+        : Styles(std::move(Styles)), HNOption(std::move(HNOption)),
+          IsActive(true), IgnoreMainLikeFunctions(IgnoreMainLike) {}
 
     ArrayRef<Optional<NamingStyle>> getStyles() const {
       assert(IsActive);
       return Styles;
     }
+
+    const HungarianNotationOption &getHNOption() const {
+      assert(IsActive);
+      return HNOption;
+    }
+
     bool isActive() const { return IsActive; }
     bool isIgnoringMainLikeFunction() const { return IgnoreMainLikeFunctions; }
 
   private:
     SmallVector<Optional<NamingStyle>, 0> Styles;
+    HungarianNotationOption HNOption;
     bool IsActive;
     bool IgnoreMainLikeFunctions;
   };
