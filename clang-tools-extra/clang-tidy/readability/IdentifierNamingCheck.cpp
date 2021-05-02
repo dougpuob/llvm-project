@@ -432,7 +432,8 @@ IdentifierNamingCheck::NamingStyle::NamingStyle(
 }
 
 static IdentifierNamingCheck::FileStyle
-getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
+getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options,
+                        ClangTidyContext &Context) {
   IdentifierNamingCheck::HungarianNotationOption HNOption;
   getHungarianNotationDefaultConfig(HNOption);
   getHungarianNotationFileConfig(Options, HNOption);
@@ -447,7 +448,8 @@ getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) {
     auto HPTOpt =
         Options.get<IdentifierNamingCheck::HungarianPrefixType>(StyleString);
     if (!isHungarianNotationSupportedStyle(I) && HPTOpt.hasValue())
-      Options.diagnoseInvalidConfigOption(StyleString);
+      Context.configurationDiag("invalid identifier naming option '%0'")
+          << StyleString;
     StyleString.resize(StyleSize);
 
     StyleString.append("IgnoredRegexp");
@@ -482,7 +484,7 @@ IdentifierNamingCheck::IdentifierNamingCheck(StringRef Name,
 
   auto IterAndInserted = NamingStylesCache.try_emplace(
       llvm::sys::path::parent_path(Context->getCurrentFile()),
-      getFileStyleFromOptions(Options));
+      getFileStyleFromOptions(Options, *Context));
   assert(IterAndInserted.second && "Couldn't insert Style");
   // Holding a reference to the data in the vector is safe as it should never
   // move.
@@ -1412,8 +1414,8 @@ IdentifierNamingCheck::getStyleForFile(StringRef FileName) const {
   ClangTidyOptions Options = Context->getOptionsForFile(FileName);
   if (Options.Checks && GlobList(*Options.Checks).contains(CheckName)) {
     auto It = NamingStylesCache.try_emplace(
-        Parent,
-        getFileStyleFromOptions({CheckName, Options.CheckOptions, Context}));
+        Parent, getFileStyleFromOptions(
+                    {CheckName, Options.CheckOptions, Context}, *Context));
     assert(It.second);
     return It.first->getValue();
   }
