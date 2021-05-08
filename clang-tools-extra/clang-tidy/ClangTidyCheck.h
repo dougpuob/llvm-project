@@ -151,12 +151,6 @@ public:
                 const ClangTidyOptions::OptionMap &CheckOptions,
                 ClangTidyContext *Context);
 
-    /// Show an invalid configuration option.
-    ///
-    /// Emit a diagnostic if the configuration option with the check-local
-    /// name \p LocalName shoud not present.
-    void diagnoseInvalidConfigOption(StringRef LocalName) const;
-
     /// Read a named option from the ``Context``.
     ///
     /// Reads the option with the check-local name \p LocalName from the

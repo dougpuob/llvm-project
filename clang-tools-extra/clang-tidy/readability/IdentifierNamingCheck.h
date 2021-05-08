@@ -137,6 +137,41 @@ private:
   const bool IgnoreFailedSplit;
 };
 
+struct HungarianNotation {
+public:
+  HungarianNotation(ClangTidyContext *Context = nullptr);
+
+  bool checkOptionValid(int StyleKindIndex, StringRef StyleString,
+                        bool HasValue);
+  bool isOptionEnabled(StringRef OptionKey,
+                       const llvm::StringMap<std::string> &StrMap);
+  void
+  loadDefaultConfig(IdentifierNamingCheck::HungarianNotationOption &HNOption);
+  void loadFileConfig(const ClangTidyCheck::OptionsView &Options,
+                      IdentifierNamingCheck::HungarianNotationOption &HNOption);
+
+  bool removeDuplicatedPrefix(
+      SmallVector<StringRef, 8> &Words,
+      const IdentifierNamingCheck::HungarianNotationOption &HNOption);
+
+  std::string
+  getPrefix(const Decl *D,
+            const IdentifierNamingCheck::HungarianNotationOption &HNOption);
+
+  const std::string getDataTypePrefix(
+      StringRef TypeName, const NamedDecl *ND,
+      const IdentifierNamingCheck::HungarianNotationOption &HNOption);
+
+  std::string getClassPrefix(
+      const CXXRecordDecl *CRD,
+      const IdentifierNamingCheck::HungarianNotationOption &HNOption);
+
+  std::string getEnumPrefix(const EnumConstantDecl *ECD);
+
+private:
+  ClangTidyContext *const Context;
+};
+
 } // namespace readability
 template <>
 struct OptionEnumMapping<readability::IdentifierNamingCheck::CaseType> {

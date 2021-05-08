@@ -51,14 +51,6 @@ ClangTidyCheck::OptionsView::OptionsView(
     : NamePrefix(CheckName.str() + "."), CheckOptions(CheckOptions),
       Context(Context) {}
 
-static constexpr llvm::StringLiteral
-    ConfigOptionWarning("invalid configuration option '%0'");
-
-void ClangTidyCheck::OptionsView::diagnoseInvalidConfigOption(
-    StringRef LocalName) const {
-  Context->configurationDiag(ConfigOptionWarning) << LocalName << 1;
-}
-
 llvm::Optional<std::string>
 ClangTidyCheck::OptionsView::get(StringRef LocalName) const {
   const auto &Iter = CheckOptions.find(NamePrefix + LocalName.str());
