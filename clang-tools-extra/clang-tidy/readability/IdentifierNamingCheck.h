@@ -18,6 +18,8 @@ class MacroInfo;
 namespace tidy {
 namespace readability {
 
+enum StyleKind : int;
+
 /// Checks for identifiers naming style mismatch.
 ///
 /// This check will try to enforce coding guidelines on the identifiers naming.
@@ -88,6 +90,37 @@ public:
     HungarianPrefixType HPType;
   };
 
+  struct HungarianNotation {
+  public:
+    bool checkOptionValid(int StyleKindIndex, StringRef StyleString) const;
+    bool isOptionEnabled(StringRef OptionKey,
+                         const llvm::StringMap<std::string> &StrMap) const;
+    void loadDefaultConfig(
+        IdentifierNamingCheck::HungarianNotationOption &HNOption) const;
+    void loadFileConfig(
+        const ClangTidyCheck::OptionsView &Options,
+        IdentifierNamingCheck::HungarianNotationOption &HNOption) const;
+
+    bool removeDuplicatedPrefix(
+        SmallVector<StringRef, 8> &Words,
+        const IdentifierNamingCheck::HungarianNotationOption &HNOption) const;
+
+    std::string getPrefix(
+        const Decl *D,
+        const IdentifierNamingCheck::HungarianNotationOption &HNOption) const;
+
+    const std::string getDataTypePrefix(
+        StringRef TypeName, const NamedDecl *ND,
+        const IdentifierNamingCheck::HungarianNotationOption &HNOption) const;
+
+    std::string getClassPrefix(
+        const CXXRecordDecl *CRD,
+        const IdentifierNamingCheck::HungarianNotationOption &HNOption) const;
+
+    std::string getEnumPrefix(const EnumConstantDecl *ECD) const;
+    std::string getDeclTypeName(const NamedDecl *ND) const;
+  };
+
   struct FileStyle {
     FileStyle() : IsActive(false), IgnoreMainLikeFunctions(false) {}
     FileStyle(SmallVectorImpl<Optional<NamingStyle>> &&Styles,
@@ -115,6 +148,42 @@ public:
     bool IgnoreMainLikeFunctions;
   };
 
+  IdentifierNamingCheck::FileStyle
+  getFileStyleFromOptions(const ClangTidyCheck::OptionsView &Options) const;
+
+  bool
+  matchesStyle(StringRef Type, StringRef Name,
+               const IdentifierNamingCheck::NamingStyle &Style,
+               const IdentifierNamingCheck::HungarianNotationOption &HNOption,
+               const NamedDecl *Decl) const;
+
+  std::string
+  fixupWithCase(StringRef Type, StringRef Name, const Decl *D,
+                const IdentifierNamingCheck::NamingStyle &Style,
+                const IdentifierNamingCheck::HungarianNotationOption &HNOption,
+                IdentifierNamingCheck::CaseType Case) const;
+
+  std::string
+  fixupWithStyle(StringRef Type, StringRef Name,
+                 const IdentifierNamingCheck::NamingStyle &Style,
+                 const IdentifierNamingCheck::HungarianNotationOption &HNOption,
+                 const Decl *D) const;
+
+  StyleKind findStyleKind(
+      const NamedDecl *D,
+      ArrayRef<llvm::Optional<IdentifierNamingCheck::NamingStyle>> NamingStyles,
+      bool IgnoreMainLikeFunctions) const;
+
+  llvm::Optional<RenamerClangTidyCheck::FailureInfo> getFailureInfo(
+      StringRef Type, StringRef Name, const NamedDecl *ND,
+      SourceLocation Location,
+      ArrayRef<llvm::Optional<IdentifierNamingCheck::NamingStyle>> NamingStyles,
+      const IdentifierNamingCheck::HungarianNotationOption &HNOption,
+      StyleKind SK, const SourceManager &SM, bool IgnoreFailedSplit) const;
+
+  bool isParamInMainLikeFunction(const ParmVarDecl &ParmDecl,
+                                 bool IncludeMainLike) const;
+
 private:
   llvm::Optional<FailureInfo>
   GetDeclFailureInfo(const NamedDecl *Decl,
@@ -131,45 +200,11 @@ private:
   /// StyleKind, for a given directory.
   mutable llvm::StringMap<FileStyle> NamingStylesCache;
   FileStyle *MainFileStyle;
-  ClangTidyContext *const Context;
+  ClangTidyContext *Context;
   const std::string CheckName;
   const bool GetConfigPerFile;
   const bool IgnoreFailedSplit;
-};
-
-struct HungarianNotation {
-public:
-  HungarianNotation(ClangTidyContext *Context = nullptr);
-
-  bool checkOptionValid(int StyleKindIndex, StringRef StyleString,
-                        bool HasValue);
-  bool isOptionEnabled(StringRef OptionKey,
-                       const llvm::StringMap<std::string> &StrMap);
-  void
-  loadDefaultConfig(IdentifierNamingCheck::HungarianNotationOption &HNOption);
-  void loadFileConfig(const ClangTidyCheck::OptionsView &Options,
-                      IdentifierNamingCheck::HungarianNotationOption &HNOption);
-
-  bool removeDuplicatedPrefix(
-      SmallVector<StringRef, 8> &Words,
-      const IdentifierNamingCheck::HungarianNotationOption &HNOption);
-
-  std::string
-  getPrefix(const Decl *D,
-            const IdentifierNamingCheck::HungarianNotationOption &HNOption);
-
-  const std::string getDataTypePrefix(
-      StringRef TypeName, const NamedDecl *ND,
-      const IdentifierNamingCheck::HungarianNotationOption &HNOption);
-
-  std::string getClassPrefix(
-      const CXXRecordDecl *CRD,
-      const IdentifierNamingCheck::HungarianNotationOption &HNOption);
-
-  std::string getEnumPrefix(const EnumConstantDecl *ECD);
-
-private:
-  ClangTidyContext *const Context;
+  HungarianNotation HungarianNotation;
 };
 
 } // namespace readability
