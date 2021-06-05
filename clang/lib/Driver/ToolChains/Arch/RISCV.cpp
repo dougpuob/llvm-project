@@ -572,6 +572,15 @@ void riscv::getRISCVTargetFeatures(const Driver &D, const llvm::Triple &Triple,
   // Now add any that the user explicitly requested on the command line,
   // which may override the defaults.
   handleTargetFeaturesGroup(Args, Features, options::OPT_m_riscv_Features_Group);
+
+  bool noDiv = Args.hasFlag(options::OPT_mno_div, options::OPT_mdiv, false);
+  for (auto &Feature : Features) {
+    if (noDiv && (Feature == "+m" || Feature == "-div")) {
+      Feature = "+experimental-zmmul";
+    } else if (Feature == "+div") {
+      Feature = "+m";
+    }
+  }
 }
 
 StringRef riscv::getRISCVABI(const ArgList &Args, const llvm::Triple &Triple) {

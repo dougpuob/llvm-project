@@ -3071,6 +3071,10 @@ def msave_restore : Flag<["-"], "msave-restore">, Group<m_riscv_Features_Group>,
   HelpText<"Enable using library calls for save and restore">;
 def mno_save_restore : Flag<["-"], "mno-save-restore">, Group<m_riscv_Features_Group>,
   HelpText<"Disable using library calls for save and restore">;
+def mno_div : Flag<["-"], "mno-div">, Group<m_riscv_Features_Group>,
+  HelpText<"Disable integer division instructions in M extension">;
+def mdiv : Flag<["-"], "mdiv">, Group<m_riscv_Features_Group>,
+  HelpText<"Enable integer division instructions in M extension">;
 def mcmodel_EQ_medlow : Flag<["-"], "mcmodel=medlow">, Group<m_riscv_Features_Group>,
   Flags<[CC1Option]>, Alias<mcmodel_EQ>, AliasArgs<["small"]>,
   HelpText<"Equivalent to -mcmodel=small, compatible with RISC-V gcc.">;
