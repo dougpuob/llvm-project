@@ -201,19 +201,26 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::USUBSAT, MVT::i32, Custom);
   }
 
-  if (!Subtarget.hasStdExtM()) {
+  if (!Subtarget.hasStdExtZmmul()) {
     setOperationAction(ISD::MUL, XLenVT, Expand);
     setOperationAction(ISD::MULHS, XLenVT, Expand);
     setOperationAction(ISD::MULHU, XLenVT, Expand);
+  } else {
+    if (Subtarget.is64Bit()) {
+      setOperationAction(ISD::MUL, MVT::i32, Custom);
+      setOperationAction(ISD::MUL, MVT::i128, Custom);
+    } else {
+      setOperationAction(ISD::MUL, MVT::i64, Custom);
+    }
+  }
+
+  if (!Subtarget.hasStdExtM()) {
     setOperationAction(ISD::SDIV, XLenVT, Expand);
     setOperationAction(ISD::UDIV, XLenVT, Expand);
     setOperationAction(ISD::SREM, XLenVT, Expand);
     setOperationAction(ISD::UREM, XLenVT, Expand);
   } else {
     if (Subtarget.is64Bit()) {
-      setOperationAction(ISD::MUL, MVT::i32, Custom);
-      setOperationAction(ISD::MUL, MVT::i128, Custom);
-
       setOperationAction(ISD::SDIV, MVT::i8, Custom);
       setOperationAction(ISD::UDIV, MVT::i8, Custom);
       setOperationAction(ISD::UREM, MVT::i8, Custom);
@@ -223,8 +230,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SDIV, MVT::i32, Custom);
       setOperationAction(ISD::UDIV, MVT::i32, Custom);
       setOperationAction(ISD::UREM, MVT::i32, Custom);
-    } else {
-      setOperationAction(ISD::MUL, MVT::i64, Custom);
     }
   }
 

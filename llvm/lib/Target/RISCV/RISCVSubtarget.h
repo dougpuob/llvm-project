@@ -35,6 +35,7 @@ class StringRef;
 class RISCVSubtarget : public RISCVGenSubtargetInfo {
   virtual void anchor();
   bool HasStdExtM = false;
+  bool HasStdExtZmmul = false;
   bool HasStdExtA = false;
   bool HasStdExtF = false;
   bool HasStdExtD = false;
@@ -102,6 +103,7 @@ public:
   }
   bool enableMachineScheduler() const override { return true; }
   bool hasStdExtM() const { return HasStdExtM; }
+  bool hasStdExtZmmul() const { return HasStdExtZmmul; }
   bool hasStdExtA() const { return HasStdExtA; }
   bool hasStdExtF() const { return HasStdExtF; }
   bool hasStdExtD() const { return HasStdExtD; }

@@ -12,9 +12,17 @@ include "llvm/Target/Target.td"
 // RISC-V subtarget features and instruction predicates.
 //===----------------------------------------------------------------------===//
 
+def FeatureStdExtZmmul
+    : SubtargetFeature<"experimental-zmmul", "HasStdExtZmmul", "true",
+                       "'Zmmul' (Integer Multiplication)">;
+def HasStdExtZmmul : Predicate<"Subtarget->hasStdExtZmmul()">,
+                               AssemblerPredicate<(all_of FeatureStdExtZmmul),
+                               "'Zmmul' (Integer Multiplication)">;
+
 def FeatureStdExtM
     : SubtargetFeature<"m", "HasStdExtM", "true",
-                       "'M' (Integer Multiplication and Division)">;
+                       "'M' (Integer Multiplication and Division)",
+                       [FeatureStdExtZmmul]>;
 def HasStdExtM : Predicate<"Subtarget->hasStdExtM()">,
                            AssemblerPredicate<(all_of FeatureStdExtM),
                            "'M' (Integer Multiplication and Division)">;

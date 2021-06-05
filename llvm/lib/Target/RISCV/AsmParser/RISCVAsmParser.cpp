@@ -2047,6 +2047,7 @@ bool RISCVAsmParser::parseDirectiveAttribute() {
     clearFeatureBits(RISCV::FeatureExtZbr, "experimental-zbr");
     clearFeatureBits(RISCV::FeatureExtZbs, "experimental-zbs");
     clearFeatureBits(RISCV::FeatureExtZbt, "experimental-zbt");
+    clearFeatureBits(RISCV::FeatureStdExtZmmul, "experimental-zmmul");
     clearFeatureBits(RISCV::FeatureExtZvamo, "experimental-zvamo");
     clearFeatureBits(RISCV::FeatureStdExtZvlsseg, "experimental-zvlsseg");
 
@@ -2105,6 +2106,8 @@ bool RISCVAsmParser::parseDirectiveAttribute() {
           setFeatureBits(RISCV::FeatureExtZbt, "experimental-zbt");
         else if (Ext == "zfh")
           setFeatureBits(RISCV::FeatureExtZfh, "experimental-zfh");
+        else if (Ext == "zmmul")
+          setFeatureBits(RISCV::FeatureStdExtZmmul, "experimental-zmmul");
         else if (Ext == "zvamo")
           setFeatureBits(RISCV::FeatureExtZvamo, "experimental-zvamo");
         else if (Ext == "zvlsseg")

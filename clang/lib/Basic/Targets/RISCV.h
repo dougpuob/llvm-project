@@ -44,6 +44,7 @@ protected:
   bool HasZbs = false;
   bool HasZbt = false;
   bool HasZfh = false;
+  bool HasZmmul = false;
   bool HasZvamo = false;
   bool HasZvlsseg = false;
 
