@@ -480,15 +480,16 @@ entry:
 define <vscale x 16 x i64> @mul_stepvector_nxv16i64() {
 ; CHECK-LABEL: mul_stepvector_nxv16i64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, zero, e64, m8, ta, mu
-; CHECK-NEXT:    vid.v v8
-; CHECK-NEXT:    addi a0, zero, 3
-; CHECK-NEXT:    vmul.vx v8, v8, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    addi a1, zero, 24
 ; CHECK-NEXT:    mul a0, a0, a1
-; CHECK-NEXT:    vadd.vx v16, v8, a0
+; CHECK-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
+; CHECK-NEXT:    vmv.v.x v16, a0
+; CHECK-NEXT:    vid.v v8
+; CHECK-NEXT:    addi a0, zero, 3
+; CHECK-NEXT:    vmacc.vx v16, a0, v8
+; CHECK-NEXT:    vmul.vx v8, v8, a0
 ; CHECK-NEXT:    ret
 entry:
   %0 = insertelement <vscale x 16 x i64> poison, i64 3, i32 0

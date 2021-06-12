@@ -472,6 +472,36 @@ defm : VPatBinarySDNode_VV_VX<sdiv, "PseudoVDIV">;
 defm : VPatBinarySDNode_VV_VX<urem, "PseudoVREMU">;
 defm : VPatBinarySDNode_VV_VX<srem, "PseudoVREM">;
 
+// 12.13 Vector Single-Width Integer Multiply-Add Instructions.
+foreach vti = AllIntegerVectors in {
+  // NOTE: We choose VMADD because it has the most commuting freedom. So it
+  // works best with how TwoAddressInstructionPass tries commuting.
+  defvar suffix = vti.LMul.MX # "_COMMUTABLE";
+  def : Pat<(vti.Vector (add vti.RegClass:$rs2,
+                              (mul vti.RegClass:$rs1, vti.RegClass:$rd))),
+            (!cast<Instruction>("PseudoVMADD_VV_"# suffix)
+                 vti.RegClass:$rd, vti.RegClass:$rs1, vti.RegClass:$rs2,
+                 vti.AVL, vti.Log2SEW)>;
+  def : Pat<(vti.Vector (sub vti.RegClass:$rs2,
+                              (mul vti.RegClass:$rs1, vti.RegClass:$rd))),
+            (!cast<Instruction>("PseudoVNMSUB_VV_"# suffix)
+                 vti.RegClass:$rd, vti.RegClass:$rs1, vti.RegClass:$rs2,
+                 vti.AVL, vti.Log2SEW)>;
+
+  // The choice of VMADD here is arbitrary, vfmadd.vf and vfmacc.vf are equally
+  // commutable.
+  def : Pat<(vti.Vector (add vti.RegClass:$rs2,
+                              (mul (SplatPat XLenVT:$rs1), vti.RegClass:$rd))),
+            (!cast<Instruction>("PseudoVMADD_VX_" # suffix)
+                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
+                 vti.AVL, vti.Log2SEW)>;
+  def : Pat<(vti.Vector (sub vti.RegClass:$rs2,
+                              (mul (SplatPat XLenVT:$rs1), vti.RegClass:$rd))),
+            (!cast<Instruction>("PseudoVNMSUB_VX_" # suffix)
+                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
+                 vti.AVL, vti.Log2SEW)>;
+}
+
 // 12.15. Vector Integer Merge Instructions
 foreach vti = AllIntegerVectors in {
   def : Pat<(vti.Vector (vselect (vti.Mask VMV0:$vm), vti.RegClass:$rs1,
