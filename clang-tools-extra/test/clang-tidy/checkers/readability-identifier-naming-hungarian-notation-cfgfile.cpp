@@ -1,141 +1,142 @@
-// RUN: %check_clang_tidy %s readability-identifier-naming %t -- \
-// RUN:   -config='{ CheckOptions: [ \
-// RUN:     { key: readability-identifier-naming.AbstractClassCase                                       , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ClassCase                                               , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ClassConstantCase                                       , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ClassMemberCase                                         , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ConstantCase                                            , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ConstantMemberCase                                      , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ConstantParameterCase                                   , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ConstantPointerParameterCase                            , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ConstexprVariableCase                                   , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.EnumConstantCase                                        , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.GlobalConstantCase                                      , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.GlobalConstantPointerCase                               , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.GlobalPointerCase                                       , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.GlobalVariableCase                                      , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.LocalConstantCase                                       , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.LocalConstantPointerCase                                , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.LocalPointerCase                                        , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.LocalVariableCase                                       , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.MemberCase                                              , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ParameterCase                                           , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.PointerParameterCase                                    , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.PrivateMemberCase                                       , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ProtectedMemberCase                                     , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.PublicMemberCase                                        , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.ScopedEnumConstantCase                                  , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.StaticConstantCase                                      , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.StaticVariableCase                                      , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.VariableCase                                            , value: CamelCase }, \
-// RUN:     { key: readability-identifier-naming.AbstractClassHungarianPrefix                            , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ClassHungarianPrefix                                    , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ClassConstantHungarianPrefix                            , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ClassMemberHungarianPrefix                              , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ConstantHungarianPrefix                                 , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ConstantMemberHungarianPrefix                           , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ConstantParameterHungarianPrefix                        , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ConstantPointerParameterHungarianPrefix                 , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ConstexprVariableHungarianPrefix                        , value: On        }, \
-// RUN:     { key: readability-identifier-naming.EnumConstantHungarianPrefix                             , value: On        }, \
-// RUN:     { key: readability-identifier-naming.GlobalConstantHungarianPrefix                           , value: On        }, \
-// RUN:     { key: readability-identifier-naming.GlobalConstantPointerHungarianPrefix                    , value: On        }, \
-// RUN:     { key: readability-identifier-naming.GlobalPointerHungarianPrefix                            , value: On        }, \
-// RUN:     { key: readability-identifier-naming.GlobalVariableHungarianPrefix                           , value: On        }, \
-// RUN:     { key: readability-identifier-naming.LocalConstantHungarianPrefix                            , value: On        }, \
-// RUN:     { key: readability-identifier-naming.LocalConstantPointerHungarianPrefix                     , value: On        }, \
-// RUN:     { key: readability-identifier-naming.LocalPointerHungarianPrefix                             , value: On        }, \
-// RUN:     { key: readability-identifier-naming.LocalVariableHungarianPrefix                            , value: On        }, \
-// RUN:     { key: readability-identifier-naming.MemberHungarianPrefix                                   , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ParameterHungarianPrefix                                , value: On        }, \
-// RUN:     { key: readability-identifier-naming.PointerParameterHungarianPrefix                         , value: On        }, \
-// RUN:     { key: readability-identifier-naming.PrivateMemberHungarianPrefix                            , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ProtectedMemberHungarianPrefix                          , value: On        }, \
-// RUN:     { key: readability-identifier-naming.PublicMemberHungarianPrefix                             , value: On        }, \
-// RUN:     { key: readability-identifier-naming.ScopedEnumConstantHungarianPrefix                       , value: On        }, \
-// RUN:     { key: readability-identifier-naming.StaticConstantHungarianPrefix                           , value: On        }, \
-// RUN:     { key: readability-identifier-naming.StaticVariableHungarianPrefix                           , value: On        }, \
-// RUN:     { key: readability-identifier-naming.VariableHungarianPrefix                                 , value: On        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.Options.TreatStructAsClass            , value: false     }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.DerivedType.Array                     , value: ary       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.DerivedType.Pointer                   , value: p         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.DerivedType.FunctionPointer           , value: fn        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.CString.CharPrinter                   , value: sz        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.CString.CharArray                     , value: sz        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.CString.WideCharPrinter               , value: wsz       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.CString.WideCharArray                 , value: wsz       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int8_t                  , value: i8        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int16_t                 , value: i16       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int32_t                 , value: i32       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int64_t                 , value: i64       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.uint8_t                 , value: u8        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.uint16_t                , value: u16       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.uint32_t                , value: u32       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.uint64_t                , value: u64       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.char8_t                 , value: c8        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.char16_t                , value: c16       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.char32_t                , value: c32       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.float                   , value: f         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.double                  , value: d         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.char                    , value: c         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.bool                    , value: b         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType._Bool                   , value: b         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int                     , value: i         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.size_t                  , value: n         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.wchar_t                 , value: wc        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.short-int               , value: si        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.short                   , value: s         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-int              , value: si        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-short            , value: ss        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-short-int        , value: ssi       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-long-long-int    , value: slli      }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-long-long        , value: sll       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-long-int         , value: sli       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-long             , value: sl        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed                  , value: s         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-long-long-int  , value: ulli      }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-long-long      , value: ull       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-long-int       , value: uli       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-long           , value: ul        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-short-int      , value: usi       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-short          , value: us        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-int            , value: ui        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned                , value: u         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long-long-int           , value: lli       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long-double             , value: ld        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long-long               , value: ll        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long-int                , value: li        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long                    , value: l         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.PrimitiveType.ptrdiff_t               , value: p         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.BOOL                  , value: b         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.BOOLEAN               , value: b         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.BYTE                  , value: by        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.CHAR                  , value: c         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UCHAR                 , value: uc        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.SHORT                 , value: s         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.USHORT                , value: us        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.WORD                  , value: w         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.DWORD                 , value: dw        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.DWORD32               , value: dw32      }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.DWORD64               , value: dw64      }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.LONG                  , value: l         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.ULONG                 , value: ul        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.ULONG32               , value: ul32      }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.ULONG64               , value: ul64      }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.ULONGLONG             , value: ull       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.HANDLE                , value: h         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT                   , value: i         }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT8                  , value: i8        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT16                 , value: i16       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT32                 , value: i32       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT64                 , value: i64       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT                  , value: ui        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT8                 , value: u8        }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT16                , value: u16       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT32                , value: u32       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT64                , value: u64       }, \
-// RUN:     { key: readability-identifier-naming.HungarianNotation.UserDefinedType.PVOID                 , value: p         }, \
-// RUN:   ]}'
+// RUN: echo "Checks: '-*,readability-identifier-naming'" > hncfg.txt
+// RUN: echo "CheckOptions:" >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.AbstractClassCase                                       , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ClassCase                                               , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ClassConstantCase                                       , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ClassMemberCase                                         , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstantCase                                            , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstantMemberCase                                      , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstantParameterCase                                   , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstantPointerParameterCase                            , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstexprVariableCase                                   , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.EnumConstantCase                                        , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.GlobalConstantCase                                      , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.GlobalConstantPointerCase                               , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.GlobalPointerCase                                       , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.GlobalVariableCase                                      , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.LocalConstantCase                                       , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.LocalConstantPointerCase                                , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.LocalPointerCase                                        , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.LocalVariableCase                                       , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.MemberCase                                              , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ParameterCase                                           , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.PointerParameterCase                                    , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.PrivateMemberCase                                       , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ProtectedMemberCase                                     , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.PublicMemberCase                                        , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ScopedEnumConstantCase                                  , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.StaticConstantCase                                      , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.StaticVariableCase                                      , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.VariableCase                                            , value: CamelCase } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.AbstractClassHungarianPrefix                            , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ClassHungarianPrefix                                    , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ClassConstantHungarianPrefix                            , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ClassMemberHungarianPrefix                              , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstantHungarianPrefix                                 , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstantMemberHungarianPrefix                           , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstantParameterHungarianPrefix                        , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstantPointerParameterHungarianPrefix                 , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ConstexprVariableHungarianPrefix                        , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.EnumConstantHungarianPrefix                             , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.GlobalConstantHungarianPrefix                           , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.GlobalConstantPointerHungarianPrefix                    , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.GlobalPointerHungarianPrefix                            , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.GlobalVariableHungarianPrefix                           , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.LocalConstantHungarianPrefix                            , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.LocalConstantPointerHungarianPrefix                     , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.LocalPointerHungarianPrefix                             , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.LocalVariableHungarianPrefix                            , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.MemberHungarianPrefix                                   , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ParameterHungarianPrefix                                , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.PointerParameterHungarianPrefix                         , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.PrivateMemberHungarianPrefix                            , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ProtectedMemberHungarianPrefix                          , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.PublicMemberHungarianPrefix                             , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.ScopedEnumConstantHungarianPrefix                       , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.StaticConstantHungarianPrefix                           , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.StaticVariableHungarianPrefix                           , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.VariableHungarianPrefix                                 , value: On        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.Options.TreatStructAsClass            , value: false     } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.DerivedType.Array                     , value: ary       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.DerivedType.Pointer                   , value: p         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.DerivedType.FunctionPointer           , value: fn        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.CString.CharPrinter                   , value: sz        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.CString.CharArray                     , value: sz        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.CString.WideCharPrinter               , value: wsz       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.CString.WideCharArray                 , value: wsz       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int8_t                  , value: i8        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int16_t                 , value: i16       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int32_t                 , value: i32       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int64_t                 , value: i64       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.uint8_t                 , value: u8        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.uint16_t                , value: u16       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.uint32_t                , value: u32       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.uint64_t                , value: u64       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.char8_t                 , value: c8        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.char16_t                , value: c16       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.char32_t                , value: c32       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.float                   , value: f         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.double                  , value: d         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.char                    , value: c         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.bool                    , value: b         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType._Bool                   , value: b         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.int                     , value: i         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.size_t                  , value: n         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.wchar_t                 , value: wc        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.short-int               , value: si        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.short                   , value: s         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-int              , value: si        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-short            , value: ss        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-short-int        , value: ssi       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-long-long-int    , value: slli      } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-long-long        , value: sll       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-long-int         , value: sli       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed-long             , value: sl        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.signed                  , value: s         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-long-long-int  , value: ulli      } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-long-long      , value: ull       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-long-int       , value: uli       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-long           , value: ul        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-short-int      , value: usi       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-short          , value: us        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned-int            , value: ui        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.unsigned                , value: u         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long-long-int           , value: lli       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long-double             , value: ld        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long-long               , value: ll        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long-int                , value: li        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.long                    , value: l         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.PrimitiveType.ptrdiff_t               , value: p         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.BOOL                  , value: b         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.BOOLEAN               , value: b         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.BYTE                  , value: by        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.CHAR                  , value: c         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UCHAR                 , value: uc        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.SHORT                 , value: s         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.USHORT                , value: us        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.WORD                  , value: w         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.DWORD                 , value: dw        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.DWORD32               , value: dw32      } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.DWORD64               , value: dw64      } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.LONG                  , value: l         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.ULONG                 , value: ul        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.ULONG32               , value: ul32      } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.ULONG64               , value: ul64      } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.ULONGLONG             , value: ull       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.HANDLE                , value: h         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT                   , value: i         } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT8                  , value: i8        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT16                 , value: i16       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT32                 , value: i32       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.INT64                 , value: i64       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT                  , value: ui        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT8                 , value: u8        } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT16                , value: u16       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT32                , value: u32       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.UINT64                , value: u64       } " >> hncfg.txt
+// RUN: echo " - { key: readability-identifier-naming.HungarianNotation.UserDefinedType.PVOID                 , value: p         } " >> hncfg.txt
+
+// RUN: clang-tidy %s --config-file=./hncfg.txt 2>&1 | FileCheck -check-prefixes=CHECK-MESSAGES %s
 
 // clang-format off
 typedef signed char         int8_t;     // NOLINT
