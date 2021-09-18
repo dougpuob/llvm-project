@@ -251,6 +251,11 @@ public:
     const MCObjectFileInfo *MOFI = Parser.getContext().getObjectFileInfo();
     ParserOptions.IsPicEnabled = MOFI->isPositionIndependent();
   }
+
+  void onBeginOfFile(bool NoFinalize) override {
+    if (!NoFinalize)
+      getTargetStreamer().emitTargetAttributes(*STI);
+  }
 };
 
 /// RISCVOperand - Instances of this class represent a parsed machine
