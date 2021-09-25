@@ -49,6 +49,45 @@ def HasStdExtZfh : Predicate<"Subtarget->hasStdExtZfh()">,
                              AssemblerPredicate<(all_of FeatureStdExtZfh),
                              "'Zfh' (Half-Precision Floating-Point)">;
 
+def FeatureExtZfinx
+    : SubtargetFeature<"experimental-zfinx", "HasStdExtZfinx", "true",
+                       "'Zfinx' (Float in Integer)">;
+def HasStdExtZfinx : Predicate<"Subtarget->hasStdExtZfinx()">,
+                               AssemblerPredicate<(all_of FeatureExtZfinx),
+                               "'Zfinx' (Float in Integer)">;
+
+def FeatureExtZdinx
+    : SubtargetFeature<"experimental-zdinx", "HasStdExtZdinx", "true",
+                       "'Zdinx' (Double in Integer)",
+                       [FeatureExtZfinx]>;
+def HasStdExtZdinx : Predicate<"Subtarget->hasStdExtZdinx()">,
+                               AssemblerPredicate<(all_of FeatureExtZdinx),
+                               "'Zdinx' (Double in Integer)">;
+
+def FeatureExtZhinx
+    : SubtargetFeature<"experimental-zhinx", "HasStdExtZhinx", "true",
+                       "'Zhinx' (Half Float in Integer)",
+                       [FeatureExtZfinx]>;
+def HasStdExtZhinx : Predicate<"Subtarget->hasStdExtZhinx()">,
+                               AssemblerPredicate<(all_of FeatureExtZhinx),
+                               "'Zhinx' (Half Float in Integer)">;
+
+def FeatureExtZhinxmin
+    : SubtargetFeature<"experimental-zhinxmin", "HasStdExtZhinxmin", "true",
+                       "'Zhinxmin' (Half Float in Integer Minimal)",
+                       [FeatureExtZfinx]>;
+def HasStdExtZhinxmin : Predicate<"Subtarget->hasStdExtZhinxmin()">,
+                                  AssemblerPredicate<(all_of FeatureExtZhinxmin),
+                                  "'Zhinxmin' (Half Float in Integer Minimal)">;
+
+// Some instructions belong to both the Zhinx and Zfinxmin.
+// They should be enabled if either has been specified.
+def HasStdExtZhinxOrZhinxmin
+    : Predicate<"Subtarget->hasStdExtZhinx() || Subtarget->hasStdExtZhinxmin()">,
+                AssemblerPredicate<(any_of FeatureExtZhinx, FeatureExtZhinxmin),
+                                   "'Zhinx' (Half Float in Integer) or "
+                                   "'Zhinxmin' (Half Float in Integer Minimal)">;
+
 def FeatureStdExtC
     : SubtargetFeature<"c", "HasStdExtC", "true",
                        "'C' (Compressed Instructions)">;
