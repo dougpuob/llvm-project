@@ -34,6 +34,8 @@ def err_drv_invalid_riscv_ext_arch_name : Error<
 def warn_drv_invalid_arch_name_with_suggestion : Warning<
   "ignoring invalid /arch: argument '%0'; for %select{64|32}1-bit expected one of %2">,
   InGroup<UnusedCommandLineArgument>;
+def err_drv_invalid_riscv_abi_moverlay : Error<
+  "invalid ABI '%0' when using '-moverlay'">;
 def warn_drv_avr_mcu_not_specified : Warning<
   "no target microcontroller specified on command line, cannot "
   "link standard libraries, please pass -mmcu=<mcu name>">,

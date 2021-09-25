@@ -2039,6 +2039,29 @@ static void handleCmseNSEntryAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   D->addAttr(::new (S.Context) CmseNSEntryAttr(S.Context, AL));
 }
 
+static void handleRISCVOverlayAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
+  if (!S.getLangOpts().Overlay) {
+    S.Diag(AL.getRange().getBegin(), diag::warn_attribute_ignored) << AL;
+    return;
+  }
+
+  if (isFunctionOrMethod(D)) {
+    const auto *FD = cast<FunctionDecl>(D);
+    if (!FD->isExternallyVisible()) {
+      S.Diag(AL.getLoc(), diag::err_overlay_func_external_linkage);
+      AL.setInvalid();
+      return;
+    }
+
+    // 'overlay' on a function implies 'noinline'
+    Attr *A = ::new (S.Context) NoInlineAttr(S.Context, AL);
+    A->setImplicit(true);
+    D->addAttr(A);
+  }
+
+  handleSimpleAttribute<RISCVOverlayAttr>(S, D, AL);
+}
+
 static void handleNakedAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   if (AL.isDeclspecAttribute()) {
     const auto &Triple = S.getASTContext().getTargetInfo().getTriple();
@@ -8262,6 +8285,9 @@ static void ProcessDeclAttribute(Sema &S, Scope *scope, Decl *D,
     break;
   case ParsedAttr::AT_CmseNSEntry:
     handleCmseNSEntryAttr(S, D, AL);
+    break;
+  case ParsedAttr::AT_RISCVOverlay:
+    handleRISCVOverlayAttr(S, D, AL);
     break;
   case ParsedAttr::AT_StdCall:
   case ParsedAttr::AT_CDecl:

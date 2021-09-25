@@ -309,6 +309,10 @@ def warn_riscv_repeated_interrupt_attribute : Warning<
   "repeated RISC-V 'interrupt' attribute">, InGroup<IgnoredAttributes>;
 def note_riscv_repeated_interrupt_attribute : Note<
   "repeated RISC-V 'interrupt' attribute is here">;
+def err_overlay_func_external_linkage : Error<
+  "functions marked with 'overlay' attribute must have external linkage">;
+def err_overlay_mismatch : Error<
+  "redeclaration of %0 must %select{not |}1have the 'overlay' attribute">;
 def warn_unused_parameter : Warning<"unused parameter %0">,
   InGroup<UnusedParameter>, DefaultIgnore;
 def warn_unused_but_set_parameter : Warning<"parameter %0 set but not used">,

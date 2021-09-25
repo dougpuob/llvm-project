@@ -2146,6 +2146,16 @@ Version 1.10.
   }];
 }
 
+def RISCVOverlayDocs : Documentation {
+  let Category = DocCatVariable;
+  let Heading = "overlay (RISCV)";
+  let Content = [{
+``__attribute__((overlay))`` indicates that a function or data exists in an
+overlay. Calls to functions, and accessing data will generate indirect accesses
+through the overlay engine.
+  }];
+}
+
 def AVRInterruptDocs : Documentation {
   let Category = DocCatFunction;
   let Heading = "interrupt (AVR)";

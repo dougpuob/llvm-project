@@ -1880,6 +1880,10 @@ void CodeGenModule::SetLLVMFunctionAttributesForDefinition(const Decl *D,
     if (LangOpts.FunctionAlignment)
       F->setAlignment(llvm::Align(1ull << LangOpts.FunctionAlignment));
 
+  // Overlay functions must have a minimum 4-byte alignment.
+  if (F->getAlignment() < 4 && D->hasAttr<RISCVOverlayAttr>())
+    F->setAlignment(llvm::Align(4));
+
   // Some C++ ABIs require 2-byte alignment for member functions, in order to
   // reserve a bit for differentiating between virtual and non-virtual member
   // functions. If the current target's C++ ABI requires this and this is a
@@ -4539,6 +4543,9 @@ void CodeGenModule::EmitGlobalVarDefinition(const VarDecl *D,
   if (CGDebugInfo *DI = getModuleDebugInfo())
     if (getCodeGenOpts().hasReducedDebugInfo())
       DI->EmitGlobalVariable(GV, D);
+
+  if (D->hasAttr<RISCVOverlayAttr>())
+    GV->addAttribute("overlay");
 }
 
 void CodeGenModule::EmitExternalVarDeclaration(const VarDecl *D) {

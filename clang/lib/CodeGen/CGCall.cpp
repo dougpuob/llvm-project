@@ -2181,8 +2181,12 @@ void CodeGenModule::ConstructAttributeList(StringRef Name,
   // Collect non-call-site function IR attributes from declaration-specific
   // information.
   if (!AttrOnCallSite) {
-    if (TargetDecl && TargetDecl->hasAttr<CmseNSEntryAttr>())
-      FuncAttrs.addAttribute("cmse_nonsecure_entry");
+    if (TargetDecl) {
+      if (TargetDecl->hasAttr<RISCVOverlayAttr>())
+        FuncAttrs.addAttribute("overlay");
+      if (TargetDecl->hasAttr<CmseNSEntryAttr>())
+        FuncAttrs.addAttribute("cmse_nonsecure_entry");
+    }
 
     // Whether tail calls are enabled.
     auto shouldDisableTailCalls = [&] {
