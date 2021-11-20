@@ -42,8 +42,9 @@ public:
     CheckFactories.registerCheck<NoRecursionCheck>("misc-no-recursion");
     CheckFactories.registerCheck<NonCopyableObjectsCheck>(
         "misc-non-copyable-objects");
-    CheckFactories.registerCheck<NonPrivateMemberVariablesInClassesCheck>(
-        "misc-non-private-member-variables-in-classes");
+    CLANG_TIDY_REGISTER_CHECK(CheckFactories,
+                              NonPrivateMemberVariablesInClassesCheck,
+                              "misc-non-private-member-variables-in-classes");
     CheckFactories.registerCheck<RedundantExpressionCheck>(
         "misc-redundant-expression");
     CheckFactories.registerCheck<StaticAssertCheck>("misc-static-assert");

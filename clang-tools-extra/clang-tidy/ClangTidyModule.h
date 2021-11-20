@@ -9,6 +9,7 @@
 #ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_CLANGTIDYMODULE_H
 #define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_CLANGTIDYMODULE_H
 
+#include "ClangTidyDiagnosticConsumer.h"
 #include "ClangTidyOptions.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/ADT/StringRef.h"
@@ -20,6 +21,9 @@ namespace tidy {
 
 class ClangTidyCheck;
 class ClangTidyContext;
+
+#define CLANG_TIDY_REGISTER_CHECK(Factory, CheckType, CheckName)               \
+  Factory.registerCheck<CheckType>(CheckName, #CheckType)
 
 /// A collection of \c ClangTidyCheckFactory instances.
 ///
@@ -34,6 +38,9 @@ public:
   ///
   /// For all checks that have default constructors, use \c registerCheck.
   void registerCheckFactory(llvm::StringRef Name, CheckFactory Factory);
+
+  void registerCheckFactory(llvm::StringRef Name, llvm::StringRef Type,
+                            CheckFactory Factory);
 
   /// Registers the \c CheckType with the name \p Name.
   ///
@@ -61,6 +68,38 @@ public:
                          [](llvm::StringRef Name, ClangTidyContext *Context) {
                            return std::make_unique<CheckType>(Name, Context);
                          });
+  }
+
+  template <typename CheckType>
+  void registerCheck(llvm::StringRef CheckName, llvm::StringRef CheckTypeStr) {
+    registerCheckFactory(
+        CheckName, [CheckName, CheckTypeStr](llvm::StringRef Name,
+                                             ClangTidyContext *Context) {
+          StringRef CheckTypeStrUnqualified = CheckTypeStr;
+          bool isAliasCheck = false;
+          if (CheckTypeStr.contains("::")) {
+            isAliasCheck = true;
+            CheckTypeStrUnqualified =
+                CheckTypeStr.substr(CheckTypeStr.rfind("::") + 2);
+          }
+
+          Context->MapCheckToCheckType[CheckName] = CheckTypeStrUnqualified;
+
+          // If the check is an alias, we push it to the end of the list of
+          // checks associated with the check name
+          if (isAliasCheck) {
+            Context->MapCheckTypeToChecks[CheckTypeStrUnqualified].push_back(
+                CheckName);
+          }
+          // Otherwise, if we found a primary check, put it first in the list
+          else {
+            Context->MapCheckTypeToChecks[CheckTypeStrUnqualified].insert(
+                Context->MapCheckTypeToChecks[CheckTypeStrUnqualified].begin(),
+                CheckName);
+          }
+
+          return std::make_unique<CheckType>(Name, Context);
+        });
   }
 
   /// Create instances of checks that are enabled.

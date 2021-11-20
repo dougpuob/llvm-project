@@ -51,7 +51,8 @@ class ModernizeModule : public ClangTidyModule {
 public:
   void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
     CheckFactories.registerCheck<AvoidBindCheck>("modernize-avoid-bind");
-    CheckFactories.registerCheck<AvoidCArraysCheck>("modernize-avoid-c-arrays");
+    CLANG_TIDY_REGISTER_CHECK(CheckFactories, AvoidCArraysCheck,
+                              "modernize-avoid-c-arrays");
     CheckFactories.registerCheck<ConcatNestedNamespacesCheck>(
         "modernize-concat-nested-namespaces");
     CheckFactories.registerCheck<DeprecatedHeadersCheck>(

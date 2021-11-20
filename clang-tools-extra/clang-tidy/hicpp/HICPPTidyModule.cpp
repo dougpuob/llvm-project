@@ -48,8 +48,8 @@ namespace hicpp {
 class HICPPModule : public ClangTidyModule {
 public:
   void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<modernize::AvoidCArraysCheck>(
-        "hicpp-avoid-c-arrays");
+    CLANG_TIDY_REGISTER_CHECK(CheckFactories, modernize::AvoidCArraysCheck,
+                              "hicpp-avoid-c-arrays");
     CheckFactories.registerCheck<cppcoreguidelines::AvoidGotoCheck>(
         "hicpp-avoid-goto");
     CheckFactories.registerCheck<readability::BracesAroundStatementsCheck>(

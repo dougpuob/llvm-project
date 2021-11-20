@@ -45,8 +45,8 @@ namespace cppcoreguidelines {
 class CppCoreGuidelinesModule : public ClangTidyModule {
 public:
   void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<modernize::AvoidCArraysCheck>(
-        "cppcoreguidelines-avoid-c-arrays");
+    CLANG_TIDY_REGISTER_CHECK(CheckFactories, modernize::AvoidCArraysCheck,
+                              "cppcoreguidelines-avoid-c-arrays");
     CheckFactories.registerCheck<AvoidGotoCheck>(
         "cppcoreguidelines-avoid-goto");
     CheckFactories.registerCheck<readability::MagicNumbersCheck>(
@@ -64,7 +64,8 @@ public:
     CheckFactories.registerCheck<NarrowingConversionsCheck>(
         "cppcoreguidelines-narrowing-conversions");
     CheckFactories.registerCheck<NoMallocCheck>("cppcoreguidelines-no-malloc");
-    CheckFactories.registerCheck<misc::NonPrivateMemberVariablesInClassesCheck>(
+    CLANG_TIDY_REGISTER_CHECK(
+        CheckFactories, misc::NonPrivateMemberVariablesInClassesCheck,
         "cppcoreguidelines-non-private-member-variables-in-classes");
     CheckFactories.registerCheck<OwningMemoryCheck>(
         "cppcoreguidelines-owning-memory");

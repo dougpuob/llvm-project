@@ -182,6 +182,13 @@ public:
             DiagEngine->getDiagnosticIDs()->getDescription(DiagnosticID)));
   }
 
+  // { "cppcoreguidelines-avoid-c-arrays": "AvoidCArraysCheck" }
+  std::map<StringRef, StringRef> MapCheckToCheckType;
+
+  // { "AvoidCArraysCheck": ["modernize-avoid-c-arrays",
+  // "cppcoreguidelines-avoid-c-arrays"]}
+  std::map<StringRef, std::vector<StringRef>> MapCheckTypeToChecks;
+
 private:
   // Writes to Stats.
   friend class ClangTidyDiagnosticConsumer;
