@@ -324,12 +324,10 @@ bool M68kDAGToDAGISel::IsProfitableToFold(SDValue N, SDNode *U,
     case M68kISD::SUB:
     case ISD::SUB: {
       SDNode *Dividend = U->getOperand(0).getNode();
-      if (ConstantSDNode *CSDN = dyn_cast<ConstantSDNode>(Dividend)) {
-        if (const uint64_t *RawData = CSDN->getAPIntValue().getRawData()) {
+      if (ConstantSDNode *CSDN = dyn_cast<ConstantSDNode>(Dividend))
+        if (const uint64_t *RawData = CSDN->getAPIntValue().getRawData())
           if (0 == *RawData)
             return false;
-        }
-      }
     }
     }
   }
