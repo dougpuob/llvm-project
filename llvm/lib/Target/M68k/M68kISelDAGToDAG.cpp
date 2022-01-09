@@ -181,6 +181,7 @@ public:
   }
 
   bool runOnMachineFunction(MachineFunction &MF) override;
+  bool IsProfitableToFold(SDValue N, SDNode *U, SDNode *Root) const override;
 
 private:
   /// Keep a pointer to the M68kSubtarget around so that we can
@@ -310,6 +311,24 @@ private:
   SDNode *getGlobalBaseReg();
 };
 } // namespace
+
+bool M68kDAGToDAGISel::IsProfitableToFold(SDValue N, SDNode *U,
+                                          SDNode *Root) const {
+  if (OptLevel == CodeGenOpt::None)
+    return false;
+
+  if (U == Root) {
+    switch (U->getOpcode()) {
+    default:
+      return true;
+    case M68kISD::SUB:
+    case ISD::SUB:
+      return false;
+    }
+  }
+
+  return true;
+}
 
 bool M68kDAGToDAGISel::runOnMachineFunction(MachineFunction &MF) {
   Subtarget = &static_cast<const M68kSubtarget &>(MF.getSubtarget());

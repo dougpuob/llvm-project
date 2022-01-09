@@ -230,17 +230,23 @@ define zeroext i1 @test15(i32 %bf.load, i32 %n) {
 ; CHECK-LABEL: test15:
 ; CHECK:         .cfi_startproc
 ; CHECK-NEXT:  ; %bb.0:
-; CHECK-NEXT:    move.l #16, %d0
-; CHECK-NEXT:    move.l (4,%sp), %d1
-; CHECK-NEXT:    lsr.l %d0, %d1
-; CHECK-NEXT:    move.l %d1, %d0
-; CHECK-NEXT:    sub.l (8,%sp), %d0
+; CHECK-NEXT:    suba.l	#4, %sp
+; CHECK-NEXT:    .cfi_def_cfa_offset -8
+; CHECK-NEXT:    movem.l	%d2, (0,%sp)
+; CHECK-NEXT:    move.l	#16, %d0
+; CHECK-NEXT:    move.l	(8,%sp), %d1
+; CHECK-NEXT:    lsr.l	%d0, %d1
+; CHECK-NEXT:    move.l	(12,%sp), %d0
+; CHECK-NEXT:    move.l	%d1, %d2
+; CHECK-NEXT:    sub.l	%d0, %d2
 ; CHECK-NEXT:    scc %d0
 ; CHECK-NEXT:    cmpi.l #0, %d1
 ; CHECK-NEXT:    seq %d1
 ; CHECK-NEXT:    or.b %d0, %d1
 ; CHECK-NEXT:    move.l %d1, %d0
 ; CHECK-NEXT:    and.l #255, %d0
+; CHECK-NEXT:    movem.l	(0,%sp), %d2
+; CHECK-NEXT:    adda.l	#4, %sp
 ; CHECK-NEXT:    rts
   %bf.lshr = lshr i32 %bf.load, 16
   %cmp2 = icmp eq i32 %bf.lshr, 0
