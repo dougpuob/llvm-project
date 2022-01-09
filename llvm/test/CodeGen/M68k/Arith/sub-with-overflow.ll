@@ -12,9 +12,8 @@ define i1 @func1(i32 %v1, i32 %v2) nounwind {
 ; CHECK-LABEL: func1:
 ; CHECK:       ; %bb.0: ; %entry
 ; CHECK-NEXT:    suba.l #12, %sp
-; CHECK-NEXT:    move.l	(20,%sp), %d1
 ; CHECK-NEXT:    move.l (16,%sp), %d0
-; CHECK-NEXT:    sub.l	%d1, %d0
+; CHECK-NEXT:    sub.l (20,%sp), %d0
 ; CHECK-NEXT:    bvc .LBB0_1
 ; CHECK-NEXT:  ; %bb.2: ; %overflow
 ; CHECK-NEXT:    lea (no,%pc), %a0
@@ -50,9 +49,8 @@ define i1 @func2(i32 %v1, i32 %v2) nounwind {
 ; CHECK-LABEL: func2:
 ; CHECK:       ; %bb.0: ; %entry
 ; CHECK-NEXT:    suba.l #12, %sp
-; CHECK-NEXT:    move.l	(20,%sp), %d1
-; CHECK-NEXT:    move.l	(16,%sp), %d0
-; CHECK-NEXT:    sub.l	%d1, %d0
+; CHECK-NEXT:    move.l (16,%sp), %d0
+; CHECK-NEXT:    sub.l (20,%sp), %d0
 ; CHECK-NEXT:    bcc .LBB1_1
 ; CHECK-NEXT:  ; %bb.2: ; %carry
 ; CHECK-NEXT:    lea (no,%pc), %a0
