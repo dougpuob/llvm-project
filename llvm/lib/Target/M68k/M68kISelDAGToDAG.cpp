@@ -325,6 +325,7 @@ bool M68kDAGToDAGISel::IsProfitableToFold(SDValue N, SDNode *U,
     case ISD::SUB:
       if (llvm::isNullConstant(U->getOperand(0)))
         return false;
+      break;
     }
   }
 
