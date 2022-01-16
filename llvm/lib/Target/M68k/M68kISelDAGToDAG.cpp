@@ -323,6 +323,13 @@ bool M68kDAGToDAGISel::IsProfitableToFold(SDValue N, SDNode *U,
       return true;
     case M68kISD::SUB:
     case ISD::SUB:
+      // Prefer NEG instruction when zero subtracts a value.
+      // e.g.
+      //   move.l	#0, %d0
+      //   sub.l	(4,%sp), %d0
+      // vs.
+      //   move.l	(4,%sp), %d0
+      //   neg.l	%d0
       if (llvm::isNullConstant(U->getOperand(0)))
         return false;
       break;
