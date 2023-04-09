@@ -291,6 +291,10 @@ Changes in existing checks
   <clang-tidy/checks/performance/no-automatic-move>` when warning would be
   emitted for a const local variable to which NRVO is applied.
 
+- Fix hungarian notation issue in :doc:`readability-identifier-naming
+  <clang-tidy/checks/readability/identifier-naming>` which failed to indicate
+  the number of asterisks.
+
 Removed checks
 ^^^^^^^^^^^^^^
 

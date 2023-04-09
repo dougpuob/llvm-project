@@ -339,6 +339,12 @@ std::string IdentifierNamingCheck::HungarianNotation::getDeclTypeName(
     }
     TypeName = Type.erase(0, Type.find_first_not_of(" "));
 
+    // Remove template parameters
+    const size_t Pos = Type.find("<");
+    if (Pos != std::string::npos) {
+      TypeName = Type.erase(Pos, Type.size() - Pos);
+    }
+
     // Replace spaces with single space.
     for (size_t Pos = 0; (Pos = Type.find("  ", Pos)) != std::string::npos;
          Pos += strlen(" ")) {
