@@ -703,7 +703,7 @@ size_t IdentifierNamingCheck::HungarianNotation::getAsteriskCount(
 }
 
 size_t IdentifierNamingCheck::HungarianNotation::getAsteriskCount(
-    std::string &TypeName, const NamedDecl *ND) const {
+    const std::string &TypeName, const NamedDecl *ND) const {
   size_t PtrCount = 0;
   if (const auto *TD = dyn_cast<ValueDecl>(ND)) {
     QualType QT = TD->getType();

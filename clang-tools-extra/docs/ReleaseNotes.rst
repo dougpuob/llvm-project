@@ -240,6 +240,10 @@ Changes in existing checks
   behavior of using `i` as the prefix for enum tags, set the `EnumConstantPrefix`
   option to `i` instead of using `EnumConstantHungarianPrefix`.
 
+- Fixed a hungarian notation issue in :doc:`readability-identifier-naming
+  <clang-tidy/checks/readability/identifier-naming>` which failed to indicate
+  the number of asterisks.
+
 - Fixed a false positive in :doc:`readability-implicit-bool-conversion
   <clang-tidy/checks/readability/implicit-bool-conversion>` check warning would
   be unnecessarily emitted for explicit cast using direct list initialization.
@@ -290,10 +294,6 @@ Changes in existing checks
 - Fixed a false positive in :doc:`performance-no-automatic-move
   <clang-tidy/checks/performance/no-automatic-move>` when warning would be
   emitted for a const local variable to which NRVO is applied.
-
-- Fix hungarian notation issue in :doc:`readability-identifier-naming
-  <clang-tidy/checks/readability/identifier-naming>` which failed to indicate
-  the number of asterisks.
 
 Removed checks
 ^^^^^^^^^^^^^^
