@@ -364,20 +364,13 @@ std::string IdentifierNamingCheck::HungarianNotation::getDeclTypeName(
     for (auto Kw : TailsOfMultiWordType) {
       size_t Pos = Type.rfind(Kw.data());
       if (Pos != std::string::npos) {
-        if (const auto *TD = dyn_cast<ValueDecl>(ND)) {
-          QualType QT = TD->getType();
-
-          size_t PtrCount = 0;
-          if (QT->isPointerType()) {
-            PtrCount = getAsteriskCount(Type);
-          }
-
-          Type = Type.substr(0, Pos + Kw.size() + PtrCount);
-          RedundantRemoved = true;
-          break;
-        }
+        const size_t PtrCount = getAsteriskCount(Type, ND);
+        Type = Type.substr(0, Pos + Kw.size() + PtrCount);
+        RedundantRemoved = true;
+        break;
       }
     }
+
     TypeName = Type.erase(0, Type.find_first_not_of(" "));
     if (!RedundantRemoved) {
       std::size_t FoundSpace = Type.find(" ");
@@ -701,6 +694,17 @@ size_t IdentifierNamingCheck::HungarianNotation::getAsteriskCount(
       break;
   }
   return Count;
+}
+
+size_t IdentifierNamingCheck::HungarianNotation::getAsteriskCount(
+    std::string &TypeName, const NamedDecl *ND) const {
+  size_t PtrCount = 0;
+  if (const auto *TD = dyn_cast<ValueDecl>(ND)) {
+    QualType QT = TD->getType();
+    if (QT->isPointerType())
+      PtrCount = getAsteriskCount(TypeName);
+  }
+  return PtrCount;
 }
 
 void IdentifierNamingCheck::HungarianNotation::loadDefaultConfig(

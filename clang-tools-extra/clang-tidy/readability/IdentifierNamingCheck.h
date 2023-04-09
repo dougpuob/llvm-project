@@ -93,6 +93,7 @@ public:
                          const llvm::StringMap<std::string> &StrMap) const;
 
     size_t getAsteriskCount(const std::string &TypeName) const;
+    size_t getAsteriskCount(std::string &TypeName, const NamedDecl *ND) const;
 
     void loadDefaultConfig(
         IdentifierNamingCheck::HungarianNotationOption &HNOption) const;
